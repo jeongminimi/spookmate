@@ -1,0 +1,59 @@
+#프로젝트 루트 디렉터리에 .gitignore 파일을 생성하고 
+#아래 내용을 저장합니다. 가상환경(.venv), 파이썬 컴파일 캐시, 
+#IDE 설정 파일 및 데이터베이스 비밀번호가 포함된 민감한 설정 파일이 깃허브에 커밋되지 않도록 제
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environments
+.venv/
+venv/
+ENV/
+env/
+env.bak/
+venv.bak/
+
+# Environment Variables & Secrets (민감 정보 보호)
+.env
+.env.*
+secrets.json
+
+# IDE & Editor Specifics
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Operating System Files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs & Databases
+*.log
+*.sqlite3

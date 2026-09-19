@@ -1,0 +1,289 @@
+{
+  "name": "요괴모으기",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -704,
+        0
+      ],
+      "id": "86ecd05e-9d01-4974-9e63-e4af8569167e",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "jsCode": "const inputItem = $input.first().json;\nlet rawText = inputItem.output || inputItem.text || '';\n\n// 1. 마크다운 백틱 제거\nrawText = rawText.replace(/```(?:json)?/gi, '').replace(/```/g, '').trim();\n\nlet parsedData = null;\n\n// 2. 표준 JSON 배열 ([ ... ]) 추출 시도\nconst arrayMatch = rawText.match(/\\[\\s*\\{[\\s\\S]*\\}\\s*\\]/);\nif (arrayMatch) {\n  try {\n    parsedData = JSON.parse(arrayMatch[0]);\n  } catch (e) {}\n}\n\n// 3. 배열 실패 시 개별 JSON 객체({ ... })들을 모두 추출\nif (!parsedData || !Array.isArray(parsedData) || parsedData.length === 0) {\n  const objectMatches = rawText.match(/\\{[\\s\\S]*?\\}(?=\\s*(?:,|\\{|\\]|$))/g);\n  if (objectMatches) {\n    parsedData = [];\n    for (const objStr of objectMatches) {\n      try {\n        parsedData.push(JSON.parse(objStr));\n      } catch (e) {}\n    }\n  }\n}\n\n// 4. 추출 실패 시 AI 원본 텍스트를 에러 메시지에 함께 출력하여 확인 가능하게 처리\nif (!parsedData || parsedData.length === 0) {\n  throw new Error(\"JSON 파싱 실패. AI 출력 원본 내용:\\n\" + rawText);\n}\n\n// 5. 다음 노드(Append row)로 전달\nreturn parsedData.map(item => ({ json: item }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        0
+      ],
+      "id": "c872acf1-c106-4488-b2f1-7a943077c8e9",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1ExNyJyRv1Z3RIwFafKhAJ5GCwlwe_4bEHlGFzqVQ03Q",
+          "mode": "list",
+          "cachedResultName": "아시아 요괴 도감",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ExNyJyRv1Z3RIwFafKhAJ5GCwlwe_4bEHlGFzqVQ03Q/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "시트1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ExNyJyRv1Z3RIwFafKhAJ5GCwlwe_4bEHlGFzqVQ03Q/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [
+            "요괴 이름"
+          ],
+          "schema": [
+            {
+              "id": "요괴 이름",
+              "displayName": "요괴 이름",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        416,
+        0
+      ],
+      "id": "ec72c515-2b13-4e77-a154-09fadab9c915",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "THfLz4oygHzHrVKr",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=한국, 일본, 태국의 흥미로운 요괴 5가지를 검색 도구를 사용해 찾아줘.\n\n[중복 제외 목록]:\n{{ $json.existing_monsters }}\n\n주의사항:\n1. 위 [중복 제외 목록]에 적힌 요괴는 절대로 포함하지 말고, 아직 언급되지 않은 새로운 요괴를 찾아줘.\n2. 위키피디아(wikipedia.org) 및 나무위키(namu.wiki)는 검색 및 출처에서 완전히 제외해.\n3. 민속학 아카이브, 지역 신화/괴담 전문 블로그, 박물관 사이트, 민담 도감 웹페이지를 적극 검색해서 그 웹페이지의 URL을 '출처URL'로 남겨줘.\n4. 서론, 결론, 인사말 없이 반드시 아래 JSON 배열 형식만 출력해:\n\n[\n  {\n    \"요괴이름\": \"요괴명\",\n    \"국가\": \"국가명\",\n    \"괴담내용\": \"설명 내용\",\n    \"출처URL\": \"https://...\"\n  }\n]",
+        "options": {
+          "maxIterations": 15
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -64,
+        0
+      ],
+      "id": "52dcaffa-e039-4275-9327-98595d42db8c",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-5-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -64,
+        208
+      ],
+      "id": "99061c8b-a2de-4dcc-a737-e7e55f6e2436",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "e9ejuvm3AEXiFHi9",
+          "name": "OpenAI account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "query": "={{ $fromAI('Query', ``, 'string') }}",
+        "options": {
+          "exclude_domains": [
+            "wikipedia.org, namu.wiki"
+          ]
+        }
+      },
+      "type": "@tavily/n8n-nodes-tavily.tavilyTool",
+      "typeVersion": 1,
+      "position": [
+        80,
+        208
+      ],
+      "id": "540dd28d-234d-4309-baaf-9e4067ee8e92",
+      "name": "Search in Tavily",
+      "credentials": {
+        "tavilyApi": {
+          "id": "MsEWF0V6OnoF7uPn",
+          "name": "Tavily account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1ExNyJyRv1Z3RIwFafKhAJ5GCwlwe_4bEHlGFzqVQ03Q",
+          "mode": "list",
+          "cachedResultName": "아시아 요괴 도감",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ExNyJyRv1Z3RIwFafKhAJ5GCwlwe_4bEHlGFzqVQ03Q/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "시트1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ExNyJyRv1Z3RIwFafKhAJ5GCwlwe_4bEHlGFzqVQ03Q/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -496,
+        0
+      ],
+      "id": "67bf561d-1ccb-4478-ad2a-72d2ff54cc10",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "THfLz4oygHzHrVKr",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// 구글 시트의 A열 컬럼명(헤더)에 맞게 지정하세요. (예: '요괴이름' 또는 '이름')\n// 첫 번째 행이 헤더가 아니라면 A열 키 이름을 확인해 주세요.\nconst existingNames = $input.all()\n  .map(item => item.json['요괴이름'] || item.json['A'] || item.json['요괴 이름'])\n  .filter(Boolean); // 빈 값 제거\n\n// 중복 제거 후 쉼표로 연결된 문자열 생성\nconst uniqueNames = [...new Set(existingNames)].join(', ');\n\nreturn [\n  {\n    json: {\n      existing_monsters: uniqueNames\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -288,
+        0
+      ],
+      "id": "dfd5d618-d3e4-420d-bab9-17b8d83719bb",
+      "name": "Code in JavaScript1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search in Tavily": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "f969bacc-a329-472b-a3f9-19ad5fe98441",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "64f6e0c2c63ff3d153e4e2b999eecda3c0d29a2093efedfe8fac670a1b65222d"
+  },
+  "nodeGroups": [],
+  "id": "wx8SlbtqvV9SGVts",
+  "tags": []
+}
