@@ -13,7 +13,7 @@ DB_CONFIG = {
 
 CSV_FILE = "Spooksheet.csv"
 
-# 2. 69종 요괴 심리학·사주 매핑 데이터 (CSV output 열이 비어있어도 자동 적용)
+# 2. 요괴 심리학 기본 매핑 데이터
 YOKAI_METRICS = [
     (
         "목(木)",
@@ -923,52 +923,63 @@ print(f"CSV 로드 완료: 총 {len(df)}개 요괴 데이터")
 conn = mysql.connector.connect(**DB_CONFIG)
 cursor = conn.cursor()
 
+# 요괴 ID를 1번부터 73번까지 깔끔하게 유지하기 위한 초기화
+cursor.execute("SET FOREIGN_KEY_CHECKS = 0;")
+cursor.execute("TRUNCATE TABLE yokai_compendium;")
+cursor.execute("SET FOREIGN_KEY_CHECKS = 1;")
+
 insert_sql = """
 INSERT INTO yokai_compendium (
-    name, country, saju_element, plutchik_dyad, plutchik_ko,
+    id, name, country, plutchik_dyad, plutchik_ko,
     valence, arousal, narrative_dialogue, micro_action, story, source_url
 ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
 """
 
 success_count = 0
 for idx, row in df.iterrows():
-  name = row["요괴이름"]
-  country = row["국가"]
-  story = row["괴담내용"]
-  source_url = row["출처URL"] if pd.notna(row["출처URL"]) else None
+    # 1부터 시작하는 ID 부여 (이미지 파일명 1.png~73.png와 매칭)
+    y_id = int(row.get("id")) if "id" in row and pd.notna(row["id"]) else (idx + 1)
+    name = row["요괴이름"]
+    country = row["국가"]
+    story = row["괴담내용"]
+    source_url = row["출처URL"] if "출처URL" in row and pd.notna(row["출처URL"]) else None
 
-  # 인덱스 기준 매핑 데이터 추출
-  m = YOKAI_METRICS[idx]
-  saju_element = m[0]
-  plutchik_dyad = m[1]
-  plutchik_ko = m[2]
-  valence = m[3]
-  arousal = m[4]
-  narrative_dialogue = m[5]
-  micro_action = m[6]
+    # YOKAI_METRICS 범위를 벗어난 70~73번은 CSV 컬럼 또는 기본값 적용
+    if idx < len(YOKAI_METRICS):
+        m = YOKAI_METRICS[idx]
+        plutchik_dyad = m[1]
+        plutchik_ko = m[2]
+        valence = m[3]
+        arousal = m[4]
+        narrative_dialogue = m[5]
+        micro_action = m[6]
+    else:
+        plutchik_dyad = str(row["plutchik_dyad"]) if "plutchik_dyad" in row and pd.notna(row["plutchik_dyad"]) else "OPTIMISM"
+        plutchik_ko = str(row["plutchik_ko"]) if "plutchik_ko" in row and pd.notna(row["plutchik_ko"]) else "낙관"
+        valence = float(row["valence"]) if "valence" in row and pd.notna(row["valence"]) else 5.0
+        arousal = float(row["arousal"]) if "arousal" in row and pd.notna(row["arousal"]) else 5.0
+        narrative_dialogue = str(row["narrative_dialogue"]) if "narrative_dialogue" in row and pd.notna(row["narrative_dialogue"]) else "오늘도 무사히 버텨냈구나. 푹 쉬어라."
+        micro_action = str(row["micro_action"]) if "micro_action" in row and pd.notna(row["micro_action"]) else "가볍게 심호흡 3회 하기"
 
-  values = (
-      name,
-      country,
-      saju_element,
-      plutchik_dyad,
-      plutchik_ko,
-      valence,
-      arousal,
-      narrative_dialogue,
-      micro_action,
-      story,
-      source_url,
-  )
+    values = (
+        y_id,
+        name,
+        country,
+        plutchik_dyad,
+        plutchik_ko,
+        valence,
+        arousal,
+        narrative_dialogue,
+        micro_action,
+        story,
+        source_url,
+    )
 
-  cursor.execute(insert_sql, values)
-  success_count += 1
+    cursor.execute(insert_sql, values)
+    success_count += 1
 
 conn.commit()
 cursor.close()
 conn.close()
 
-print(
-    f"\nDB 적재 완료: 총 {success_count}건의 요괴 데이터가 성공적으로"
-    " 저장되었습니다!"
-)
+print(f"\nDB 적재 완료: 총 {success_count}건의 요괴 데이터가 성공적으로 저장되었습니다!")

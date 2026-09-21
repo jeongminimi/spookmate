@@ -6,12 +6,39 @@ from fastapi.middleware.cors import CORSMiddleware
 import mysql.connector
 from pydantic import BaseModel, Field
 from analyzer import analyze_entry
+import traceback
+import math
+import re
+from datetime import datetime, date
+
 
 app = FastAPI(
     title="SpookMate API",
     description="플루치크 24대 혼합정서 모델 & 동서양 69종 요괴 설화 매칭 엔진",
     version="1.1.1",
 )
+
+from fastapi import FastAPI
+# 1. CORSMiddleware import 확인
+from fastapi.middleware.cors import CORSMiddleware
+
+app = FastAPI(title="SpookMate API")
+
+# 2. CORS 미들웨어 등록 (모든 포트/도메인에서의 요청 허용)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://127.0.0.1:5500",
+        "http://localhost:5500",
+        "http://127.0.0.1:8000",
+        "http://localhost:8000",
+        "*"  # 개발 단계에서는 모든 도메인 허용
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],  # GET, POST 등 모든 HTTP 메서드 허용
+    allow_headers=["*"],  # 모든 헤더 허용
+)
+
 
 app.add_middleware(
     CORSMiddleware,
@@ -143,81 +170,255 @@ class DiaryInput(BaseModel):
 
 
 # ==============================================================================
-# 일기 작성 및 매칭 API
+# 0. 다차원 정밀 감정 어휘 사전 (7대 정서군 / 어간 및 구어체 최적화)
+# ==============================================================================
+EMOTION_THESAURUS = {
+    # 1. 분노 및 적개심 (High Arousal, Low Valence)
+    "분노/격분": {
+        "화", "분노", "빡침", "개빡", "열받", "짜증", "억울", "극대노", "킹받", "폭발",
+        "미쳐", "욕나", "지랄", "답답", "속뒤집", "천불", "울화", "적개심", "배신", "예민",
+        "성질", "열불", "치밀"
+    },
+
+    # 2. 우울 및 자기 비하 (Low Arousal, Very Low Valence)
+    "우울/절망": {
+        "우울", "슬픔", "슬퍼", "눈물", "현타", "무기력", "번아웃", "암담", "막막", "허무",
+        "공허", "비관", "한숨", "좌절", "의욕없", "축처", "비참", "자책", "죽고싶", "살기싫",
+        "낙담", "비통", "괴롭"
+    },
+
+    # 3. 불안 및 공포 (High Arousal, Tension/Panic)
+    "불안/초조": {
+        "불안", "초조", "걱정", "긴장", "무섭", "공포", "떨림", "두려움", "패닉",
+        "조마조마", "안절부절", "어쩌지", "망했", "압박", "식은땀", "심장", "가슴이",
+        "악몽", "겁나", "사시나무"
+    },
+
+    # 4. 사회적 고립 및 소외감 (Mid-Low Arousal, Interpersonal Negative)
+    "고립/외로움": {
+        "외롭", "혼자", "소외", "왕따", "버려짐", "단절", "서러움", "눈치", "위축",
+        "내편", "쓸쓸", "낙오", "자괴감", "따돌림", "고독"
+    },
+
+    # 5. 신체적·에너지 방전 (Extremely Low Arousal, Physical Depletion)
+    "피로/탈진": {
+        "힘들다", "힘들어", "힘듦", "피곤", "피곤해", "졸려", "잠와", "방전", "탈진",
+        "녹초", "버겁", "쉼", "쉬고싶", "지쳐", "지침", "지친다", "골병", "헤롱",
+        "기절", "몸살", "기운없", "나른", "하품", "자고싶", "눈감겨"
+    },
+
+    # 6. 신체적 허기 및 갈망 (Mid-High Arousal, Physiological Craving)
+    "갈망/결핍": {
+        "배고픔", "배고파", "배고파서", "허기", "출출", "밥", "야식", "굶주림", "당떨어",
+        "먹고싶", "입심심", "식탐", "폭식", "목말라", "갈증", "결핍", "허전", "군침", "먹방"
+    },
+
+    # 7. 긍정 정서 및 성취/안도 (High Valence)
+    "기쁨/환희": {
+        "기쁨", "행복", "신남", "즐겁", "쾌감", "뿌듯", "보람", "짜릿", "최고", "감사",
+        "힐링", "웃음", "만족", "설렘", "축하", "환호", "해냈다", "맛있다", "꿀맛", "개운"
+    }
+}
+
+# 러셀 원형 모델 기반 정서 좌표 (Valence, Arousal)
+DEFAULT_COORDINATES = {
+    "분노/격분": (1.6, 4.6),
+    "불안/초조": (2.0, 4.2),
+    "우울/절망": (1.4, 1.6),
+    "고립/외로움": (1.8, 2.0),
+    "피로/탈진": (2.4, 1.2),   # 극저각성(1.2): 불안(4.2)과 확연히 분리됨
+    "갈망/결핍": (2.7, 3.4),
+    "기쁨/환희": (4.6, 3.8)
+}
+
+# 2차 의미적 브릿지 맵핑 (DB에 특정 태그가 적을 때 유사 정서군 보너스 부여)
+EMOTION_BRIDGE = {
+    "피로/탈진": {"우울/절망", "슬픔", "무기력", "탈진"},
+    "갈망/결핍": {"욕망", "탐욕", "집착", "결핍"},
+    "고립/외로움": {"우울/절망", "슬픔", "소외"},
+    "불안/초조": {"공포", "긴장", "경계"},
+    "분노/격분": {"적개심", "억울", "짜증"}
+}
+
+STOPWORDS = {
+    "오늘", "어제", "내일", "진짜", "너무", "정말", "그냥", "내", "나", "내가", "나를",
+    "때문에", "하다", "있다", "되다", "사람", "생각", "뭔가", "약간", "조금", "완전",
+    "다시", "계속", "지금", "보고", "해서", "하는", "하고"
+}
+
+
+# ==============================================================================
+# 일기 작성 및 지능형 요괴 매칭 API
 # ==============================================================================
 @app.post("/api/diary/submit")
 def submit_diary(data: DiaryInput):
-  analysis = analyze_entry(data.raw_entry)
-  target_dyad = analysis["plutchik_dyad"]
-  target_v = analysis["valence"]
-  target_a = analysis["arousal"]
-  user_tokens = analysis["tokens"]
+    raw_text = (data.raw_entry or "").strip()
 
-  conn = get_db()
-  cursor = conn.cursor(dictionary=True)
+    # 1. 텍스트 직접 스캔: 가장 강하게 검출된 정서군 판별
+    family_scores = {fam: 0 for fam in EMOTION_THESAURUS}
+    for fam, keywords in EMOTION_THESAURUS.items():
+        for kw in keywords:
+            if kw in raw_text:
+                family_scores[fam] += (2 if kw == raw_text else 1)
 
-  try:
-    # 당월 이미 소환된 요괴 ID 추출 (월간 중복 쿨다운)
-    query_month_yokais = """
+    detected_family = None
+    sorted_families = sorted(family_scores.items(), key=lambda x: x[1], reverse=True)
+    if sorted_families[0][1] > 0:
+        detected_family = sorted_families[0][0]
+
+    # 2. 감정 분석 엔진 구동 및 안전 폴백
+    try:
+        analysis = analyze_entry(raw_text)
+        if not isinstance(analysis, dict):
+            raise ValueError("분석 결과 포맷 오류")
+    except Exception as e:
+        print(f"⚠️ 감정 분석기 Fallback 가동 (입력 기반 자동 태깅): {e}")
+        fallback_family = detected_family or "피로/탈진"
+        def_v, def_a = DEFAULT_COORDINATES.get(fallback_family, (2.5, 2.0))
+
+        if fallback_family == "피로/탈진":
+            alt_thought = "에너지가 고갈된 상태입니다. 오늘은 나를 다그치지 말고 완전히 전원을 꺼두세요."
+        elif fallback_family == "갈망/결핍":
+            alt_thought = "마음의 허기는 몸의 영양 결핍에서 올 때가 많습니다. 따뜻한 음식을 챙기세요."
+        elif fallback_family == "분노/격분":
+            alt_thought = "분노는 나의 소중한 가치가 침해당했다는 신호입니다. 심호흡으로 뇌를 식혀주세요."
+        else:
+            alt_thought = "지금 느끼는 상태는 잠시 머물렀다 지나가는 마음의 파도일 뿐입니다."
+
+        analysis = {
+            "situation": raw_text,
+            "automatic_thought": f"{fallback_family} 상태에서 일어나는 자연스러운 신체·심리 신호",
+            "alternative_thought": alt_thought,
+            "emotion_tag": fallback_family.split("/")[0],
+            "plutchik_dyad": fallback_family,
+            "valence": def_v,
+            "arousal": def_a,
+            "tokens": [raw_text]
+        }
+
+    # 단문(25자 이하)이거나 명확한 키워드가 있을 경우 분석기 오분류 강제 교정
+    if detected_family and (len(raw_text) <= 25 or analysis.get("plutchik_dyad") == "불안/초조"):
+        analysis["plutchik_dyad"] = detected_family
+        def_v, def_a = DEFAULT_COORDINATES.get(detected_family, (2.5, 2.0))
+        analysis["valence"], analysis["arousal"] = def_v, def_a
+        analysis["emotion_tag"] = detected_family.split("/")[0]
+
+    target_dyad = analysis.get("plutchik_dyad", "피로/탈진")
+    target_v = float(analysis.get("valence", 2.5))
+    target_a = float(analysis.get("arousal", 2.0))
+
+    # 날짜 데이터 정규화
+    if hasattr(data.diary_date, "year"):
+        d_year, d_month, d_date = data.diary_date.year, data.diary_date.month, data.diary_date
+    else:
+        parts = str(data.diary_date).split("-")
+        d_year, d_month, d_date = int(parts[0]), int(parts[1]), str(data.diary_date)
+
+    conn = get_db()
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+        # 3. 당월 쿨다운 조회
+        query_month_yokais = """
             SELECT matched_yokai_id FROM emotion_diary 
             WHERE user_id = %s 
               AND YEAR(diary_date) = %s 
               AND MONTH(diary_date) = %s 
               AND diary_date != %s
         """
-    cursor.execute(
-        query_month_yokais,
-        (
-            data.user_id,
-            data.diary_date.year,
-            data.diary_date.month,
-            data.diary_date,
-        ),
-    )
-    encountered_ids = {row["matched_yokai_id"] for row in cursor.fetchall()}
+        cursor.execute(query_month_yokais, (data.user_id, d_year, d_month, d_date))
+        encountered_ids = {row["matched_yokai_id"] for row in cursor.fetchall()}
 
-    # 69종 요괴 도감 조회 (saju_element 제거)
-    cursor.execute("""
+        # 4. 요괴 도감 조회
+        cursor.execute("""
             SELECT id, name, country, plutchik_dyad, plutchik_ko,
                    valence, arousal, narrative_dialogue, micro_action, story
             FROM yokai_compendium
         """)
-    all_yokai = cursor.fetchall()
-    if not all_yokai:
-      raise HTTPException(
-          status_code=500, detail="요괴 도감 데이터가 비어 있습니다."
-      )
+        all_yokai = cursor.fetchall()
+        if not all_yokai:
+            raise HTTPException(status_code=500, detail="요괴 도감 데이터가 비어 있습니다.")
 
-    # 3중 다차원 스코어링 (Dyad 50점 + Story 유사도 30점 + 정서 거리 20점)
-    scored_yokai = []
-    for y in all_yokai:
-      score = 0.0
-      if y["plutchik_dyad"] == target_dyad:
-        score += 50.0
+        # 5. [정밀 4단계 다차원 스코어링]
+        scored_yokai = []
+        target_tokens = set(target_dyad.replace("/", " ").split())
+        raw_words = set(re.findall(r'[가-힣a-zA-Z]{2,}', raw_text)) - STOPWORDS
 
-      story_text = (y["story"] or "") + " " + (y["narrative_dialogue"] or "")
-      kw_matches = sum(1 for t in user_tokens if t in story_text)
-      score += min(kw_matches * 6.0, 30.0)
+        for y in all_yokai:
+            score = 0.0
+            y_dyad = y.get("plutchik_dyad") or ""
+            y_ko = y.get("plutchik_ko") or ""
+            y_tokens = set(y_dyad.replace("/", " ").split()) | set(y_ko.replace("/", " ").split())
 
-      dist = math.sqrt(
-          (float(target_v) - float(y["valence"])) ** 2
-          + (float(target_a) - float(y["arousal"])) ** 2
-      )
-      score += max(0.0, 20.0 - (dist * 3.5))
-      scored_yokai.append((score, y))
+            # [점수 1: 정서 다이애드 일치도 - 최대 40점]
+            if target_dyad == y_dyad:
+                score += 40.0
+            elif target_tokens & y_tokens:
+                score += 32.0  # 교집합 일치 (예: '무기력', '탈진')
+            elif any(br in y_dyad for br in EMOTION_BRIDGE.get(target_dyad, set())):
+                score += 24.0  # 브릿지 유사 정서 일치
 
-    scored_yokai.sort(key=lambda x: x[0], reverse=True)
+            # [점수 2: 러셀 원형 모델 정서 거리 - 최대 35점]
+            # 각성도 차이가 크면 점수가 급격히 하락 (불안 <-> 피로 완벽 차단)
+            y_v = float(y.get("valence") or 3.0)
+            y_a = float(y.get("arousal") or 3.0)
+            dist = math.sqrt((target_v - y_v) ** 2 + ((target_a - y_a) * 1.2) ** 2)
+            coord_score = max(0.0, 35.0 - (dist * 7.5))
+            score += coord_score
 
-    # 당월 미소환 요괴 우선 선별
-    fresh_candidates = [
-        y for (sc, y) in scored_yokai if y["id"] not in encountered_ids
-    ]
-    matched_yokai = (
-        fresh_candidates[0] if fresh_candidates else scored_yokai[0][1]
-    )
+            # [점수 3: 생리적 갈망 및 신체 상태 특화 가산점 - 최대 15점]
+            story_text = f"{y.get('story', '')} {y.get('narrative_dialogue', '')}"
+            if target_dyad == "갈망/결핍" and any(k in story_text for k in ["먹", "음식", "밥", "식탐", "삼키"]):
+                score += 15.0
+            elif target_dyad == "피로/탈진" and any(k in story_text for k in ["잠", "피로", "지친", "방전", "쉬", "눕"]):
+                score += 15.0
 
-    # 일기 저장 (당일 수정 시 덮어쓰기)
-    insert_sql = """
+            # [점수 4: 문맥 키워드 일치 및 다양성 난수 - 최대 10점]
+            kw_hits = sum(1 for w in raw_words if w in story_text)
+            score += min(kw_hits * 3.5, 8.0)
+            # 동점일 때 매번 같은 요괴만 나오는 것을 막는 미세 보정치 (0.00 ~ 1.99)
+            score += (hash(f"{y['id']}_{raw_text}") % 200) * 0.01
+
+            scored_yokai.append((score, y))
+
+        scored_yokai.sort(key=lambda x: x[0], reverse=True)
+
+        # 미소환 요괴 우선 선별 (점수 차 20점 이내)
+        fresh_candidates = [
+            (sc, y) for (sc, y) in scored_yokai if y["id"] not in encountered_ids
+        ]
+        top_score = scored_yokai[0][0]
+        if fresh_candidates and (top_score - fresh_candidates[0][0] < 20.0):
+            matched_yokai = fresh_candidates[0][1]
+            final_score = fresh_candidates[0][0]
+        else:
+            matched_yokai = scored_yokai[0][1]
+            final_score = top_score
+
+        # 입맛 싱크로율 계산 (75% ~ 98%)
+        match_rate = int(min(max(final_score, 75.0), 98.0))
+
+        # 요괴 맞장구 대사 정제 (튜플 기호 ('...', ) 완전 제거)
+        comfort_quote = matched_yokai.get("narrative_dialogue") or ""
+        if isinstance(comfort_quote, (tuple, list)):
+            comfort_quote = comfort_quote[0] if comfort_quote else ""
+        comfort_quote = str(comfort_quote).strip("()',\" ")
+
+        try:
+            if "get_clean_spookmate_dialogue" in globals():
+                comfort_quote = get_clean_spookmate_dialogue(target_dyad, matched_yokai["name"])
+                comfort_quote = str(comfort_quote).strip("()',\" ")
+        except Exception:
+            pass
+
+        comfort_quote = re.sub(r"^\[.*?\]\s*", f"[입맛 싱크로율 {match_rate}%] ", comfort_quote.strip())
+        if not comfort_quote.startswith("[입맛 싱크로율"):
+            comfort_quote = f"[입맛 싱크로율 {match_rate}%] {comfort_quote}"
+
+        print(f"🎯 [매칭 판정] 입력:'{raw_text}' -> 판별정서:{target_dyad} (V:{target_v}, A:{target_a}) => 요괴:{matched_yokai['name']} ({matched_yokai['plutchik_dyad']}) 싱크로율:{match_rate}%")
+
+        # 6. 일기 저장
+        insert_sql = """
             INSERT INTO emotion_diary (
                 user_id, diary_date, raw_entry,
                 cbt_situation, cbt_automatic_thought, cbt_alternative_thought,
@@ -234,46 +435,50 @@ def submit_diary(data: DiaryInput):
                 analyzed_valence = VALUES(analyzed_valence),
                 analyzed_arousal = VALUES(analyzed_arousal),
                 matched_yokai_id = VALUES(matched_yokai_id),
-                is_stamped = 1,
-                created_at = CURRENT_TIMESTAMP
+                is_stamped = 1
         """
-    cursor.execute(
-        insert_sql,
-        (
-            data.user_id,
-            data.diary_date,
-            data.raw_entry,
-            analysis["situation"],
-            analysis["automatic_thought"],
-            analysis["alternative_thought"],
-            analysis["emotion_tag"],
-            analysis["plutchik_dyad"],
-            analysis["valence"],
-            analysis["arousal"],
-            matched_yokai["id"],
-        ),
-    )
-    conn.commit()
-
-    # 프론트엔드 응답 반환 (saju_element 제거)
-    return {
-        "status": "success",
-        "date": data.diary_date,
-        "analysis": analysis,
-        "eaten_by_yokai": {
-            "id": matched_yokai["id"],
-            "name": matched_yokai["name"],
-            "country": matched_yokai["country"],
-            "comfort_quote": get_clean_spookmate_dialogue(
-                analysis["plutchik_dyad"], matched_yokai["name"]
+        cursor.execute(
+            insert_sql,
+            (
+                data.user_id,
+                d_date,
+                raw_text,
+                analysis.get("situation", raw_text),
+                analysis.get("automatic_thought", ""),
+                analysis.get("alternative_thought", ""),
+                analysis.get("emotion_tag", "정서 안정"),
+                target_dyad,
+                target_v,
+                target_a,
+                matched_yokai["id"],
             ),
-            "micro_action": matched_yokai["micro_action"],
-            "story": matched_yokai["story"],
-        },
-    }
-  finally:
-    cursor.close()
-    conn.close()
+        )
+        conn.commit()
+
+        # 7. 프론트엔드 응답 반환
+        return {
+            "status": "success",
+            "date": d_date,
+            "analysis": analysis,
+            "eaten_by_yokai": {
+                "id": matched_yokai["id"],
+                "name": matched_yokai["name"],
+                "country": matched_yokai["country"],
+                "comfort_quote": comfort_quote,
+                "micro_action": matched_yokai.get("micro_action", "잠시 눈을 감고 심호흡을 3회 해보세요."),
+                "story": matched_yokai.get("story", ""),
+                "match_rate": match_rate,
+            },
+        }
+
+    except Exception as err:
+        conn.rollback()
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=str(err))
+    finally:
+        cursor.close()
+        conn.close()
+
 
 
 # ==============================================================================

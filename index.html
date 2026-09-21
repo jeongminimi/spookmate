@@ -5,26 +5,35 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>SpookMate - 요괴 감정 일기 & 도감 수집</title>
+
     <style>
+        /* ==========================================================================
+           1. CSS 전역 변수 및 테마 색상 설정
+           ========================================================================== */
         :root {
             --bg-color: #0d1117;
+            /* 메인 배경 */
             --card-bg: #161b22;
+            /* 카드 및 모달 배경 */
             --card-border: #30363d;
+            /* 테두리선 */
             --accent-color: #ff4757;
+            /* 메인 포인트 레드 */
             --accent-gold: #ffa502;
+            /* 포인트 골드 */
             --accent-cyan: #2ed573;
+            /* 포인트 민트 */
             --text-main: #f0f6fc;
+            /* 기본 폰트 */
             --text-muted: #8b949e;
-            --particle-glow: rgba(255, 71, 87, 0.4);
+            /* 보조 폰트 */
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family:
-                -apple-system, BlinkMacSystemFont, "Pretendard",
-                "Apple SD Gothic Neo", sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Pretendard", "Apple SD Gothic Neo", sans-serif;
         }
 
         body {
@@ -45,7 +54,9 @@
             gap: 20px;
         }
 
-        /* 헤더 */
+        /* ==========================================================================
+           2. 상단 헤더 & 사용자 프로필
+           ========================================================================== */
         header {
             display: flex;
             justify-content: space-between;
@@ -55,7 +66,7 @@
         }
 
         header h1 {
-            font-size: 1.5rem;
+            font-size: 1.45rem;
             color: var(--accent-gold);
             display: flex;
             align-items: center;
@@ -68,6 +79,14 @@
             gap: 8px;
             font-size: 0.9rem;
             color: var(--text-muted);
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+
+        .user-box:hover {
+            background: rgba(255, 255, 255, 0.05);
         }
 
         .user-box input {
@@ -76,10 +95,16 @@
             color: #fff;
             padding: 6px 12px;
             border-radius: 6px;
-            width: 100px;
+            width: 110px;
+            outline: none;
+            cursor: pointer;
+            text-align: center;
+            font-weight: 600;
         }
 
-        /* 탭 */
+        /* ==========================================================================
+           3. 상단 네비게이션 탭
+           ========================================================================== */
         .tabs {
             display: flex;
             gap: 8px;
@@ -88,15 +113,14 @@
         .tab-btn {
             flex: 1;
             padding: 12px;
-            border: none;
+            border: 1px solid transparent;
             background: var(--card-bg);
             color: var(--text-muted);
             font-size: 0.95rem;
             font-weight: 600;
             border-radius: 8px;
             cursor: pointer;
-            transition: 0.2s;
-            border: 1px solid transparent;
+            transition: all 0.2s ease;
         }
 
         .tab-btn.active {
@@ -119,7 +143,9 @@
             display: block;
         }
 
-        /* 일기 폼 */
+        /* ==========================================================================
+           4. 탭 1: 감정 일기 작성 폼
+           ========================================================================== */
         .form-group {
             display: flex;
             flex-direction: column;
@@ -143,6 +169,7 @@
             color: #fff;
             font-size: 0.95rem;
             outline: none;
+            transition: border-color 0.2s;
         }
 
         textarea {
@@ -166,7 +193,7 @@
             font-size: 1.05rem;
             font-weight: 700;
             cursor: pointer;
-            transition: 0.2s;
+            transition: all 0.2s ease;
         }
 
         .submit-btn:hover {
@@ -174,7 +201,9 @@
             transform: translateY(-1px);
         }
 
-        /* 캘린더 */
+        /* ==========================================================================
+           5. 탭 2: 스탬프 캘린더
+           ========================================================================== */
         .calendar-header {
             display: flex;
             justify-content: space-between;
@@ -189,6 +218,7 @@
             padding: 6px 14px;
             border-radius: 6px;
             cursor: pointer;
+            transition: background 0.2s;
         }
 
         .calendar-grid {
@@ -206,7 +236,7 @@
         }
 
         .day-cell {
-            min-height: 80px;
+            min-height: 85px;
             background: #0d1117;
             border: 1px solid var(--card-border);
             border-radius: 8px;
@@ -235,43 +265,14 @@
             margin-top: 4px;
         }
 
-        .stamp-tag {
-            font-size: 0.68rem;
-            color: var(--accent-color);
-        }
-
-        /* 오늘 날짜 셀 테두리 및 은은한 붉은 글로우 효과 */
         .day-cell.today {
             border: 1.5px solid #ff4b4b !important;
             background-color: rgba(255, 75, 75, 0.08) !important;
-            box-shadow: 0 0 10px rgba(255, 75, 75, 0.25);
         }
 
-        /* 오늘 날짜 헤더 정렬 */
-        .day-cell.today .date-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            width: 100%;
-        }
-
-        .day-cell.today .day-number {
-            color: #ff6b6b;
-            font-weight: bold;
-        }
-
-        /* 오늘 뱃지 스타일 */
-        .today-badge {
-            font-size: 10px;
-            background-color: #ff4b4b;
-            color: #ffffff;
-            padding: 1px 5px;
-            border-radius: 4px;
-            font-weight: 600;
-            line-height: 1.2;
-        }
-
-        /* 도감 */
+        /* ==========================================================================
+           6. 탭 3: 73종 요괴 도감
+           ========================================================================== */
         .compendium-header {
             margin-bottom: 16px;
             display: flex;
@@ -291,9 +292,7 @@
         .progress-bar {
             height: 100%;
             width: 0%;
-            background: linear-gradient(90deg,
-                    var(--accent-cyan),
-                    var(--accent-gold));
+            background: linear-gradient(90deg, var(--accent-cyan), var(--accent-gold));
             transition: width 0.4s ease;
         }
 
@@ -304,6 +303,7 @@
             max-height: 550px;
             overflow-y: auto;
             padding-right: 4px;
+            margin-top: 16px;
         }
 
         .yokai-card {
@@ -317,14 +317,12 @@
             text-align: center;
             gap: 6px;
             cursor: pointer;
-            transition: 0.2s;
-            position: relative;
+            transition: all 0.2s ease;
         }
 
         .yokai-card:not(.locked):hover {
             border-color: var(--accent-gold);
             transform: translateY(-2px);
-            box-shadow: 0 4px 14px rgba(254, 202, 87, 0.2);
         }
 
         .yokai-card.locked {
@@ -334,14 +332,20 @@
         }
 
         .yokai-avatar {
-            width: 44px;
-            height: 44px;
+            width: 52px;
+            height: 52px;
             border-radius: 50%;
             background: #21262d;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.4rem;
+            overflow: hidden;
+        }
+
+        .yokai-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
         }
 
         .yokai-name {
@@ -349,12 +353,9 @@
             font-weight: 600;
         }
 
-        .yokai-element {
-            font-size: 0.72rem;
-            color: var(--accent-cyan);
-        }
-
-        /* =================== 모달 공통 & 먹방 파티클 =================== */
+        /* ==========================================================================
+           7. 모달 공통 및 요괴 확대/글리치 애니메이션
+           ========================================================================== */
         .modal-overlay {
             display: none;
             position: fixed;
@@ -385,81 +386,18 @@
             flex-direction: column;
             gap: 12px;
             text-align: center;
-            overflow: hidden;
+            overflow: visible !important;
             box-shadow: 0 16px 40px rgba(0, 0, 0, 0.8);
+            animation: modalQuake 0.4s ease-out;
         }
 
-        .eating-stage {
-            position: relative;
-            width: 100%;
-            height: 210px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .vortex-aura {
-            position: absolute;
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            background: radial-gradient(circle,
-                    rgba(255, 71, 87, 0.25) 0%,
-                    rgba(255, 165, 2, 0.08) 50%,
-                    transparent 75%);
-            animation: vortexSpin 1.2s linear infinite;
-            pointer-events: none;
-            z-index: 1;
-        }
-
-        @keyframes vortexSpin {
-            from {
-                transform: rotate(0deg) scale(0.9);
-            }
-
-            to {
-                transform: rotate(360deg) scale(1.15);
-            }
-        }
-
-        .yokai-mouth {
-            font-size: 4.5rem;
-            position: relative;
-            z-index: 3;
-            transition: transform 0.2s ease;
-            user-select: none;
-        }
-
-        .yokai-mouth.suction {
-            animation: suctionMouth 0.25s infinite alternate ease-in-out;
-        }
-
-        .yokai-mouth.chomp {
-            animation: chompSequence 0.55s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-        }
-
-        @keyframes suctionMouth {
+        @keyframes modalQuake {
             0% {
-                transform: scale(1.15) translateY(-2px);
+                transform: scale(0.95);
             }
 
-            100% {
-                transform: scale(1.35) translateY(2px);
-            }
-        }
-
-        @keyframes chompSequence {
-            0% {
-                transform: scale(1.4);
-            }
-
-            30% {
-                transform: scale(0.7) rotate(-8deg);
-            }
-
-            60% {
-                transform: scale(1.3) rotate(8deg);
+            50% {
+                transform: scale(1.02);
             }
 
             100% {
@@ -467,120 +405,99 @@
             }
         }
 
-        .particle-field {
+        .close-btn {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 2;
+            top: 14px;
+            right: 16px;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.3rem;
+            cursor: pointer;
+            z-index: 50;
         }
 
-        .text-shard {
-            position: absolute;
-            font-size: 0.78rem;
-            font-weight: 700;
-            color: #ff9ff3;
-            background: rgba(255, 71, 87, 0.15);
-            border: 1px solid rgba(255, 107, 129, 0.6);
-            box-shadow: 0 0 10px var(--particle-glow);
-            padding: 3px 7px;
-            border-radius: 6px;
-            white-space: nowrap;
-            left: 50%;
-            top: 50%;
-            opacity: 0;
-            animation: vortexSuck var(--speed) cubic-bezier(0.4, 0, 0.2, 1) var(--delay) forwards;
+        /* 요괴 이미지 래퍼 */
+        .modal-hero-img-wrap {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 10px auto;
+            min-height: 230px;
+            position: relative;
+            overflow: visible;
         }
 
-        @keyframes vortexSuck {
-            0% {
-                opacity: 0;
-                transform: translate(calc(-50% + var(--start-x)),
-                        calc(-50% + var(--start-y))) scale(0.6);
-            }
-
-            20% {
-                opacity: 1;
-                transform: translate(calc(-50% + var(--start-x) * 0.85),
-                        calc(-50% + var(--start-y) * 0.85)) rotate(var(--rot-start)) scale(1.05);
-            }
-
-            65% {
-                opacity: 0.85;
-                transform: translate(calc(-50% + var(--mid-x)),
-                        calc(-50% + var(--mid-y))) rotate(var(--rot-mid)) scale(0.65);
-            }
-
-            100% {
-                opacity: 0;
-                transform: translate(-50%, -50%) rotate(calc(var(--rot-mid) * 2.5)) scale(0.05);
-                filter: blur(3px);
-            }
+        /* 요괴 메인 이미지 (215px 대형화) */
+        .modal-yokai-img {
+            width: 215px;
+            height: 215px;
+            object-fit: cover;
+            border-radius: 24px;
+            border: 3px solid var(--accent-gold, #ffa502);
+            box-shadow: 0 0 24px rgba(255, 165, 2, 0.45);
+            transform-origin: center center !important;
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+                filter 0.35s ease,
+                box-shadow 0.35s ease;
+            will-change: transform, filter;
         }
 
-        .shockwave {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 10px;
-            height: 10px;
-            transform: translate(-50%, -50%);
-            border-radius: 50%;
-            border: 3px solid var(--accent-gold);
-            opacity: 0;
-            pointer-events: none;
-            z-index: 2;
+        .modal-yokai-img.glitch-summon {
+            transform: scale(1.4);
+            filter: contrast(150%) brightness(120%) drop-shadow(0 0 30px #a855f7);
+            box-shadow: 0 0 40px rgba(168, 85, 247, 0.85);
+            animation: ghostVibration 0.08s infinite alternate ease-in-out;
+            z-index: 30;
         }
 
-        .shockwave.fire {
-            animation: pulseWave 0.6s ease-out forwards;
-        }
-
-        @keyframes pulseWave {
-            0% {
-                width: 10px;
-                height: 10px;
-                opacity: 1;
-                border-color: var(--accent-color);
-            }
-
-            100% {
-                width: 280px;
-                height: 280px;
-                opacity: 0;
-                border-color: var(--accent-gold);
-            }
-        }
-
-        .gulp-badge {
-            position: absolute;
-            bottom: 6px;
-            background: var(--accent-color);
-            color: #fff;
-            font-weight: 800;
-            font-size: 0.85rem;
-            padding: 4px 14px;
-            border-radius: 14px;
-            opacity: 0;
-            transform: scale(0.4);
-            transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            z-index: 4;
-        }
-
-        .gulp-badge.pop {
-            opacity: 1;
+        .modal-yokai-img.glitch-settled {
             transform: scale(1);
+            filter: contrast(100%) brightness(100%);
+            animation: none;
+            z-index: 1;
+            cursor: zoom-in;
+        }
+
+        .modal-yokai-img.glitch-settled:hover {
+            filter: brightness(112%);
+            box-shadow: 0 0 35px rgba(255, 165, 2, 0.75);
+        }
+
+        .modal-yokai-img.zoomed {
+            transform: scale(1.55) !important;
+            cursor: zoom-out !important;
+            z-index: 99 !important;
+            box-shadow: 0 0 60px rgba(0, 0, 0, 0.95), 0 0 40px var(--accent-gold) !important;
+        }
+
+        @keyframes ghostVibration {
+            0% {
+                transform: scale(1.4) translate(-3px, 2px);
+            }
+
+            50% {
+                transform: scale(1.38) translate(3px, -2px);
+            }
+
+            100% {
+                transform: scale(1.4) translate(1px, -2px);
+            }
+        }
+
+        .modal-fallback-emoji {
+            font-size: 4.5rem;
+            line-height: 1;
+            display: none;
         }
 
         .modal-details {
             opacity: 0;
-            transform: translateY(14px);
-            transition: 0.4s ease;
+            transform: translateY(18px);
+            transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 12px;
         }
 
         .modal-details.reveal {
@@ -603,34 +520,21 @@
             background: rgba(46, 213, 115, 0.08);
             border: 1px solid rgba(46, 213, 115, 0.25);
             border-radius: 8px;
-            padding: 10px;
+            padding: 10px 12px;
             font-size: 0.82rem;
             text-align: left;
             color: #c8d6e5;
-            line-height: 1.4;
+            line-height: 1.45;
         }
 
-        .cbt-box b {
-            color: var(--accent-cyan);
-        }
-
-        /* =================== 요괴 상세 도감 전용 모달 스타일 =================== */
+        /* 도감 상세 모달 */
         .detail-modal-box {
             max-width: 520px;
             max-height: 85vh;
             text-align: left;
             gap: 16px;
-            overflow-y: auto;
-            padding-right: 18px;
-        }
-
-        .detail-modal-box::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .detail-modal-box::-webkit-scrollbar-thumb {
-            background: var(--card-border);
-            border-radius: 3px;
+            overflow-y: auto !important;
+            padding-right: 14px;
         }
 
         .detail-header {
@@ -642,37 +546,22 @@
         }
 
         .detail-avatar {
-            width: 64px;
-            height: 64px;
+            width: 68px;
+            height: 68px;
             border-radius: 16px;
             background: #21262d;
             border: 2px solid var(--accent-gold);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 2.2rem;
+            overflow: hidden;
             flex-shrink: 0;
         }
 
-        .detail-title-group h2 {
-            font-size: 1.35rem;
-            color: #fff;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .detail-title-group p {
-            font-size: 0.82rem;
-            color: var(--text-muted);
-            margin-top: 4px;
-        }
-
-        .badge-wrap {
-            display: flex;
-            gap: 6px;
-            margin-top: 6px;
-            flex-wrap: wrap;
+        .detail-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
         }
 
         .tag-badge {
@@ -680,35 +569,9 @@
             padding: 2px 8px;
             border-radius: 10px;
             font-weight: 600;
-        }
-
-        .badge-elem {
-            background: rgba(46, 213, 115, 0.15);
-            border: 1px solid var(--accent-cyan);
-            color: var(--accent-cyan);
-        }
-
-        .badge-emotion {
             background: rgba(255, 165, 2, 0.15);
             border: 1px solid var(--accent-gold);
             color: var(--accent-gold);
-        }
-
-        .detail-section {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-
-        .section-label {
-            font-size: 0.82rem;
-            font-weight: 700;
-            color: var(--accent-gold);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            display: flex;
-            align-items: center;
-            gap: 4px;
         }
 
         .story-desc {
@@ -727,7 +590,6 @@
             padding: 12px;
             border-radius: 6px;
             font-size: 0.9rem;
-            line-height: 1.5;
             color: #fff;
         }
 
@@ -738,211 +600,180 @@
             border-radius: 8px;
             font-size: 0.85rem;
             color: #feca57;
-            line-height: 1.4;
+        }
+
+        .btn-secondary {
+            background: #21262d;
+            border: 1px solid var(--card-border);
+            color: #c9d1d9;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
         }
     </style>
 </head>
 
 <body>
     <div class="container">
+        <!-- 1. 상단 글로벌 헤더 -->
         <header>
             <h1>👻 SpookMate 요괴 감정 일기</h1>
-            <div class="user-box">
-                <span>사용자:</span>
-                <input type="text" id="userIdInput" value="user_01" />
+            <div class="user-box" onclick="openLoginModal()" title="클릭하여 닉네임 변경">
+                <span>👻 사용자:</span>
+                <input type="text" id="userIdInput" readonly placeholder="입주자 등록">
             </div>
         </header>
 
-        <div class="tabs">
+        <!-- 2. 네비게이션 탭 메뉴 -->
+        <nav class="tabs">
             <button class="tab-btn active" onclick="switchTab('write')">
                 🛋️ SpookMate랑 방구석 넋두리
             </button>
             <button class="tab-btn" onclick="switchTab('calendar')">
-                📅 Stemp 달력
+                📅 스탬프 달력
             </button>
             <button class="tab-btn" onclick="switchTab('compendium')">
-                📜 Spook
+                📜 요괴 도감
             </button>
-        </div>
+        </nav>
 
-        <!-- 탭 1: 일기 작성 -->
-        <div id="tab-write" class="tab-content active">
+        <!-- 탭 1: 감정 일기 작성 폼 -->
+        <section id="tab-write" class="tab-content active">
             <form id="diaryForm" onsubmit="handleDiarySubmit(event)">
                 <div class="form-group">
                     <label for="diaryDate">기록 날짜</label>
                     <input type="date" id="diaryDate" required />
                 </div>
                 <div class="form-group">
-                    <label for="rawEntry">세상 살기 참 팍팍하죠? 누워 있는 SpookMate 멱살 잡고 오늘 속
-                        뒤집어진 일 와다다 털어놓으세요."</label>
-                    <textarea id="rawEntry" placeholder="예: 팀 회의 때 내 의견 다 무시당함. 내 잘못인가 싶어서 너무 우울해." required></textarea>
+                    <label for="rawEntry">
+                        세상 살기 참 팍팍하죠? 누워 있는 SpookMate 멱살 잡고 오늘 속 뒤집어진 일 와다다 털어놓으세요.
+                    </label>
+                    <textarea id="rawEntry" placeholder="예: 오늘 너무 피곤하고 힘들다. 방전됐어." required></textarea>
                 </div>
                 <button type="submit" class="submit-btn" id="submitBtn">
                     SpookMate에게 하소연 폭격하기
                 </button>
             </form>
-        </div>
+        </section>
 
-        <!-- 탭 2: 캘린더 -->
-        <div id="tab-calendar" class="tab-content">
+        <!-- 탭 2: 월별 감정 캘린더 -->
+        <section id="tab-calendar" class="tab-content">
             <div class="calendar-header">
-                <button onclick="changeMonth(-1)">◀ 이전 달</button>
+                <button type="button" onclick="changeMonth(-1)">◀ 이전 달</button>
                 <h3 id="calendarTitle">2026년 9월</h3>
-                <button onclick="changeMonth(1)">다음 달 ▶</button>
+                <button type="button" onclick="changeMonth(1)">다음 달 ▶</button>
             </div>
             <div class="calendar-grid" id="calendarGrid"></div>
-        </div>
+        </section>
 
-        <!-- 탭 3: 요괴 도감 -->
-        <div id="tab-compendium" class="tab-content">
+        <!-- 탭 3: 73종 요괴 도감 -->
+        <section id="tab-compendium" class="tab-content">
             <div class="compendium-header">
                 <div>
                     <h3>요괴 도감 수집 현황</h3>
-                    <p style="
-                font-size: 0.85rem;
-                color: var(--text-muted);
-                margin-top: 4px;
-              ">
-                        수집 완료:
-                        <span id="unlockCount" style="color: var(--accent-gold); font-weight: bold">0</span>
-                        / 69 (<span id="collectPercent">0%</span>)
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 4px;">
+                        수집 완료: <span id="unlockCount" style="color: var(--accent-gold); font-weight: bold">0</span> /
+                        <span id="totalCount">73</span> (<span id="collectPercent">0%</span>)
                     </p>
                 </div>
             </div>
             <div class="progress-bar-container">
                 <div class="progress-bar" id="progressBar"></div>
             </div>
-            <div class="compendium-grid" id="compendiumGrid" style="margin-top: 16px"></div>
-        </div>
+            <div class="compendium-grid" id="compendiumGrid"></div>
+        </section>
     </div>
 
-    <!-- 1. 감정 먹방 파티클 모달 -->
+    <!-- 모달 1: 요괴 소환 결과 모달 -->
     <div class="modal-overlay" id="resultModal">
         <div class="modal-box">
-            <button class="close-btn" onclick="closeModal('resultModal')" style="
-            position: absolute;
-            top: 12px;
-            right: 14px;
-            background: none;
-            border: none;
-            color: #fff;
-            font-size: 1.2rem;
-            cursor: pointer;
-            z-index: 10;
-          ">
-                ✕
-            </button>
-
-            <div class="eating-stage">
-                <div class="vortex-aura"></div>
-                <div class="particle-field" id="particleField"></div>
-                <div class="shockwave" id="shockwave"></div>
-                <div class="yokai-mouth" id="yokaiMouth">👹</div>
-                <div class="gulp-badge" id="gulpBadge">
-                    과자 씹듯 와작와작! 소화 완료 💨
-                </div>
+            <button type="button" class="close-btn" onclick="closeModal('resultModal')">✕</button>
+            <div class="modal-hero-img-wrap">
+                <img id="modalYokaiImg" src="" alt="소환된 요괴" class="modal-yokai-img"
+                    onerror="this.style.display='none'; document.getElementById('modalFallbackEmoji').style.display='block';">
+                <div id="modalFallbackEmoji" class="modal-fallback-emoji">👻</div>
             </div>
-
             <div class="modal-details" id="modalDetails">
                 <div>
-                    <h3 id="modalYokaiName" style="color: var(--accent-gold); font-size: 1.2rem">
-                        불가사리
-                    </h3>
-                    <p id="modalEmotionTag" style="
-                color: var(--accent-color);
-                font-size: 0.85rem;
-                font-weight: 600;
-                margin-top: 2px;
-              ">
-                        SpookMate가 과자 씹듯 감정을 씹어삼키며 귀를 털어냅니다!
+                    <h3 id="modalYokaiName" style="color: var(--accent-gold); font-size: 1.3rem">요괴 이름</h3>
+                    <p id="modalEmotionTag"
+                        style="color: var(--accent-color); font-size: 0.85rem; font-weight: 600; margin-top: 4px;">
+                        SpookMate가 감정을 깔끔하게 삼켜 소화했습니다!
                     </p>
                 </div>
-
                 <div class="dialogue-bubble">
-                    <p style="
-                font-size: 0.78rem;
-                color: var(--accent-gold);
-                font-weight: 600;
-                margin-bottom: 2px;
-              ">
+                    <p style="font-size: 0.78rem; color: var(--accent-gold); font-weight: 600; margin-bottom: 4px;">
                         괴물 룸메의 뼈 때리는 맞장구:
                     </p>
-                    <p id="modalDialogue">
-                        "야, 방금 네 속에서 나온 울화통 씹어봤는데 녹슨 볼트 맛 난다. 아주
-                        별미네? 주먹 쥐지 말고 치킨이나 시켜라."
-                    </p>
+                    <p id="modalDialogue">대사 출력 영역</p>
                 </div>
-
                 <div class="cbt-box">
-                    <p>
-                        <b style="color: var(--accent-green, #2ed573)">[찌든 멘탈 강제 세척]</b>
-                        <span id="modalAlternative"></span>
-                    </p>
-                    <p style="margin-top: 6px">
-                        <b style="color: #feca57">[인간 재부팅 1분 처방]</b>
-                        <span id="modalAction" style="color: #feca57"></span>
-                    </p>
+                    <p><b style="color: var(--accent-cyan);">[찌든 멘탈 강제 세척]</b> <span id="modalAlternative"></span></p>
+                    <p style="margin-top: 6px"><b style="color: #feca57">[인간 재부팅 1분 처방]</b> <span id="modalAction"
+                            style="color: #feca57"></span></p>
                 </div>
-
-                <!-- index.html 모달 하단 버튼 -->
-                <button class="submit-btn" style="margin-top: 15px; background: #333" onclick="
-              switchTab('calendar');
-              closeModal('resultModal');
-            ">
+                <button type="button" class="btn-secondary" onclick="switchTab('calendar'); closeModal('resultModal');">
                     🛋️ 룸메 사육 일지(달력) 확인하러 가기
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- 2. 요괴 상세 정보 전용 모달 (도감 카드 클릭 시 오픈) -->
+    <!-- 모달 2: 73종 도감 상세 정보 팝업 -->
     <div class="modal-overlay" id="detailModal">
         <div class="modal-box detail-modal-box">
-            <button onclick="closeModal('detailModal')" style="
-            position: absolute;
-            top: 14px;
-            right: 16px;
-            background: none;
-            border: none;
-            color: #8b949e;
-            font-size: 1.3rem;
-            cursor: pointer;
-            z-index: 10;
-          ">
-                ✕
-            </button>
-
+            <button type="button" class="close-btn" onclick="closeModal('detailModal')">✕</button>
             <div class="detail-header">
-                <div class="detail-avatar">👹</div>
-                <div class="detail-title-group">
-                    <h2 id="detName">불가사리</h2>
-                    <p id="detOrigin">한국 전설의 신수</p>
-                    <div class="badge-wrap">
-                        <span class="tag-badge badge-elem" id="detElement">금(金)</span>
-                        <span class="tag-badge badge-emotion" id="detEmotion">격분 (놀람 + 분노)</span>
-                    </div>
+                <div class="detail-avatar">
+                    <img id="detAvatarImg" src="" alt="요괴 이미지"
+                        onerror="this.style.display='none'; document.getElementById('detFallbackEmoji').style.display='block';">
+                    <span id="detFallbackEmoji" style="display: none; font-size: 2rem;">👹</span>
+                </div>
+                <div>
+                    <h2 id="detName">요괴 이름</h2>
+                    <p id="detOrigin" style="font-size: 0.82rem; color: var(--text-muted); margin: 4px 0;">출처</p>
+                    <span class="tag-badge" id="detEmotion">감정</span>
+                    <span id="detElement" style="display: none;"></span>
                 </div>
             </div>
-
-            <div class="detail-section">
-                <span class="section-label">📜 배경 설화 및 전승</span>
-                <p class="story-desc" id="detStory">설화 내용이 표시됩니다.</p>
-            </div>
-
-            <div class="detail-section">
-                <span class="section-label">💬 외재화 위로의 말</span>
-                <div class="quote-box" id="detDialogue">
-                    요괴의 대사가 표시됩니다.
+            <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 10px;">
+                <div>
+                    <span style="font-size: 0.82rem; font-weight: 700; color: var(--accent-gold);">📜 배경 설화 및 전승</span>
+                    <p class="story-desc" id="detStory"></p>
                 </div>
-            </div>
-
-            <div class="detail-section">
-                <span class="section-label">🧘 1~3분 마이크로 행동 처방</span>
-                <div class="action-box" id="detAction">행동 과제가 표시됩니다.</div>
+                <div>
+                    <span style="font-size: 0.82rem; font-weight: 700; color: var(--accent-gold);">💬 외재화 위로의 말</span>
+                    <div class="quote-box" id="detDialogue"></div>
+                </div>
+                <div>
+                    <span style="font-size: 0.82rem; font-weight: 700; color: var(--accent-gold);">🧘 1분 마이크로 행동
+                        처방</span>
+                    <div class="action-box" id="detAction"></div>
+                </div>
             </div>
         </div>
     </div>
 
+    <!-- 모달 3: 최초 접속자 닉네임 입력 모달 (스크립트 태그보다 위에 배치) -->
+    <div id="loginModal" class="modal-overlay">
+        <div class="modal-box" style="max-width: 380px; gap: 14px;">
+            <h2 style="color: var(--accent-gold); font-size: 1.35rem;">👹스푹이 룸매 등록</h2>
+            <p style="color: var(--text-muted); font-size: 0.88rem; line-height: 1.5;">
+                "스푹이가 나를 부를 닉네임을 정해주세요!".<br>
+                등록한 닉네임은 다음 방문 시 자동으로 불러와지며, 상단 프로필을 눌러 언제든 다른 닉네임으로 변경할 수 있습니다.
+            </p>
+            <input type="text" id="modalNicknameInput" placeholder="닉네임 입력 (예: 마포구불주먹)" maxlength="12"
+                style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--card-border); background: #0d1117; color: #fff; font-size: 1rem; text-align: center; outline: none;">
+            <button type="button" class="submit-btn" onclick="confirmNickname()"
+                style="padding: 12px; font-size: 1rem;">
+                스푹이 밥 챙겨주는 집사 되기
+            </button>
+        </div>
+    </div>
+
+    <!-- 비동기 인터랙션 엔진 스크립트 (모든 HTML 로드 후 맨 마지막에 실행) -->
     <script src="app.js"></script>
 </body>
 
