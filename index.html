@@ -1,780 +1,1562 @@
-<!doctype html>
-<html lang="ko">
+<!DOCTYPE html>
+<html lang="ko" class="scroll-smooth">
 
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>SpookMate - 요괴 감정 일기 & 도감 수집</title>
+    <title>SPOOKMATE — 초자연적 감정 외재화 & 룸메이트 동거 일기</title>
+
+    <!-- 1. 영문 디스플레이 폰트 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800;900&family=Courier+Prime:wght@400;700&family=Permanent+Marker&display=swap"
+        rel="stylesheet">
+
+    <!-- 2. 한글 단일 표준 폰트 (Pretendard 공식 CDN) -->
+    <link rel="stylesheet" as="style" crossorigin
+        href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        cinzel: ['Cinzel', 'Pretendard', 'sans-serif'],
+                        marker: ['Permanent Marker', 'Pretendard', 'cursive'],
+                        mono: ['Courier Prime', 'Pretendard', 'monospace'],
+                        sans: ['Pretendard', '-apple-system', 'BlinkMacSystemFont', 'system-ui', 'sans-serif'],
+                    },
+                    colors: {
+                        spook: {
+                            black: '#070809',
+                            dark: '#0e1013',
+                            card: '#14171c',
+                            border: '#232730',
+                            red: '#b91c1c',
+                            blood: '#e11d48',
+                            crimson: '#dc2626',
+                            fog: '#94a3b8',
+                            gold: '#d4a359'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
 
     <style>
-        /* ==========================================================================
-           1. CSS 전역 변수 및 테마 색상 설정
-           ========================================================================== */
-        :root {
-            --bg-color: #0d1117;
-            /* 메인 배경 */
-            --card-bg: #161b22;
-            /* 카드 및 모달 배경 */
-            --card-border: #30363d;
-            /* 테두리선 */
-            --accent-color: #ff4757;
-            /* 메인 포인트 레드 */
-            --accent-gold: #ffa502;
-            /* 포인트 골드 */
-            --accent-cyan: #2ed573;
-            /* 포인트 민트 */
-            --text-main: #f0f6fc;
-            /* 기본 폰트 */
-            --text-muted: #8b949e;
-            /* 보조 폰트 */
-        }
-
         * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Pretendard", "Apple SD Gothic Neo", sans-serif;
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
 
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            min-height: 100vh;
-            padding: 24px 16px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+        .font-cinzel {
+            font-family: 'Cinzel', 'Pretendard', sans-serif !important;
         }
 
-        .container {
-            width: 100%;
-            max-width: 900px;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
+        .font-marker {
+            font-family: 'Permanent Marker', 'Pretendard', cursive !important;
         }
 
-        /* ==========================================================================
-           2. 상단 헤더 & 사용자 프로필
-           ========================================================================== */
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding-bottom: 12px;
-            border-bottom: 1px solid var(--card-border);
+        .font-mono {
+            font-family: 'Courier Prime', 'Pretendard', monospace !important;
         }
 
-        header h1 {
-            font-size: 1.45rem;
-            color: var(--accent-gold);
-            display: flex;
-            align-items: center;
-            gap: 8px;
+        .font-sans {
+            font-family: 'Pretendard', -apple-system, sans-serif !important;
         }
 
-        .user-box {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.9rem;
-            color: var(--text-muted);
-            cursor: pointer;
-            padding: 4px 8px;
-            border-radius: 6px;
-            transition: background 0.2s;
-        }
-
-        .user-box:hover {
-            background: rgba(255, 255, 255, 0.05);
-        }
-
-        .user-box input {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            color: #fff;
-            padding: 6px 12px;
-            border-radius: 6px;
-            width: 110px;
-            outline: none;
-            cursor: pointer;
-            text-align: center;
-            font-weight: 600;
-        }
-
-        /* ==========================================================================
-           3. 상단 네비게이션 탭
-           ========================================================================== */
-        .tabs {
-            display: flex;
-            gap: 8px;
-        }
-
-        .tab-btn {
-            flex: 1;
-            padding: 12px;
-            border: 1px solid transparent;
-            background: var(--card-bg);
-            color: var(--text-muted);
-            font-size: 0.95rem;
-            font-weight: 600;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .tab-btn.active {
-            background: var(--accent-color);
-            color: #fff;
-            border-color: var(--accent-color);
-            box-shadow: 0 4px 12px rgba(255, 71, 87, 0.3);
-        }
-
-        .tab-content {
-            display: none;
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 12px;
-            padding: 24px;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        /* ==========================================================================
-           4. 탭 1: 감정 일기 작성 폼
-           ========================================================================== */
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            margin-bottom: 18px;
-        }
-
-        label {
-            font-size: 0.88rem;
-            color: var(--text-muted);
-            font-weight: 600;
-        }
-
-        input[type="date"],
-        textarea {
-            width: 100%;
-            background: #0d1117;
-            border: 1px solid var(--card-border);
-            border-radius: 8px;
-            padding: 12px;
-            color: #fff;
-            font-size: 0.95rem;
-            outline: none;
-            transition: border-color 0.2s;
-        }
-
-        textarea {
-            height: 110px;
-            resize: none;
-            line-height: 1.5;
-        }
-
-        textarea:focus,
-        input[type="date"]:focus {
-            border-color: var(--accent-gold);
-        }
-
-        .submit-btn {
-            width: 100%;
-            padding: 14px;
-            background: linear-gradient(135deg, #ff4757, #ff6b81);
-            border: none;
-            border-radius: 8px;
-            color: #fff;
-            font-size: 1.05rem;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .submit-btn:hover {
-            opacity: 0.9;
-            transform: translateY(-1px);
-        }
-
-        /* ==========================================================================
-           5. 탭 2: 스탬프 캘린더
-           ========================================================================== */
-        .calendar-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 16px;
-        }
-
-        .calendar-header button {
-            background: none;
-            border: 1px solid var(--card-border);
-            color: #fff;
-            padding: 6px 14px;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-
-        .calendar-grid {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 6px;
-            text-align: center;
-        }
-
-        .day-name {
-            font-size: 0.8rem;
-            color: var(--text-muted);
-            padding: 8px 0;
-            font-weight: 600;
-        }
-
-        .day-cell {
-            min-height: 85px;
-            background: #0d1117;
-            border: 1px solid var(--card-border);
-            border-radius: 8px;
-            padding: 6px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: flex-start;
-            gap: 4px;
-            font-size: 0.85rem;
-        }
-
-        .day-cell.empty {
-            background: transparent;
-            border: none;
-        }
-
-        .stamp-badge {
-            background: rgba(255, 165, 2, 0.15);
-            border: 1px solid var(--accent-gold);
-            color: var(--accent-gold);
-            font-size: 0.72rem;
-            padding: 3px 6px;
-            border-radius: 12px;
-            font-weight: 600;
-            margin-top: 4px;
-        }
-
-        .day-cell.today {
-            border: 1.5px solid #ff4b4b !important;
-            background-color: rgba(255, 75, 75, 0.08) !important;
-        }
-
-        /* ==========================================================================
-           6. 탭 3: 73종 요괴 도감
-           ========================================================================== */
-        .compendium-header {
-            margin-bottom: 16px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .progress-bar-container {
-            width: 100%;
-            background: #0d1117;
-            height: 10px;
-            border-radius: 5px;
-            overflow: hidden;
-            margin-top: 6px;
-        }
-
-        .progress-bar {
-            height: 100%;
-            width: 0%;
-            background: linear-gradient(90deg, var(--accent-cyan), var(--accent-gold));
-            transition: width 0.4s ease;
-        }
-
-        .compendium-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-            gap: 12px;
-            max-height: 550px;
-            overflow-y: auto;
-            padding-right: 4px;
-            margin-top: 16px;
-        }
-
-        .yokai-card {
-            background: #0d1117;
-            border: 1px solid var(--card-border);
-            border-radius: 8px;
-            padding: 12px 8px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-            gap: 6px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .yokai-card:not(.locked):hover {
-            border-color: var(--accent-gold);
-            transform: translateY(-2px);
-        }
-
-        .yokai-card.locked {
-            opacity: 0.35;
-            filter: grayscale(1);
-            cursor: default;
-        }
-
-        .yokai-avatar {
-            width: 52px;
-            height: 52px;
-            border-radius: 50%;
-            background: #21262d;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-        }
-
-        .yokai-avatar img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-        }
-
-        .yokai-name {
-            font-size: 0.85rem;
-            font-weight: 600;
-        }
-
-        /* ==========================================================================
-           7. 모달 공통 및 요괴 확대/글리치 애니메이션
-           ========================================================================== */
-        .modal-overlay {
-            display: none;
+        /* 손전등 비네팅 효과 */
+        #torch-overlay {
+            pointer-events: none;
             position: fixed;
+            inset: 0;
+            z-index: 40;
+            background: radial-gradient(circle 220px at var(--mouse-x, 50vw) var(--mouse-y, 50vh),
+                    rgba(0, 0, 0, 0.05) 0%,
+                    rgba(3, 4, 6, 0.55) 40%,
+                    rgba(3, 4, 6, 0.92) 80%,
+                    rgba(2, 2, 3, 0.98) 100%);
+            transition: opacity 0.8s ease;
+        }
+
+        #torch-overlay.disabled {
+            opacity: 0;
+        }
+
+        /* CRT 스캔라인 */
+        .crt::after {
+            content: " ";
+            display: block;
+            position: absolute;
             top: 0;
             left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: rgba(0, 0, 0, 0.88);
-            backdrop-filter: blur(8px);
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
+            bottom: 0;
+            right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.45) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 255, 0, 0.03));
+            z-index: 20;
+            background-size: 100% 4px, 6px 100%;
+            pointer-events: none;
         }
 
-        .modal-overlay.active {
-            display: flex;
+        @keyframes textFlicker {
+
+            0%,
+            19%,
+            21%,
+            23%,
+            25%,
+            54%,
+            56%,
+            100% {
+                opacity: 0.96;
+                text-shadow: 0 0 10px rgba(225, 29, 72, 0.6), 0 0 25px rgba(185, 28, 28, 0.4);
+            }
+
+            20%,
+            24%,
+            55% {
+                opacity: 0.3;
+                text-shadow: none;
+            }
         }
 
-        .modal-box {
-            background: var(--card-bg);
-            border: 2px solid var(--accent-gold);
-            border-radius: 20px;
-            width: 92%;
-            max-width: 480px;
-            padding: 24px;
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            text-align: center;
-            overflow: visible !important;
-            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.8);
-            animation: modalQuake 0.4s ease-out;
+        .flicker-blood {
+            animation: textFlicker 4s infinite alternate;
         }
 
-        @keyframes modalQuake {
+        @keyframes summonGlitch {
             0% {
-                transform: scale(0.95);
+                transform: scale(1.15) translate(-3px, 2px) rotate(-1.5deg);
+                filter: contrast(180%) brightness(130%) drop-shadow(0 0 40px #e11d48);
             }
 
             50% {
-                transform: scale(1.02);
+                transform: scale(1.22) translate(3px, -2px) rotate(1.5deg);
+                filter: contrast(220%) brightness(160%) drop-shadow(0 0 60px #d4a359);
             }
 
             100% {
-                transform: scale(1);
+                transform: scale(1.15) translate(-2px, -3px) rotate(0deg);
+                filter: contrast(170%) brightness(120%) drop-shadow(0 0 45px #b91c1c);
             }
         }
 
-        .close-btn {
-            position: absolute;
-            top: 14px;
-            right: 16px;
-            background: none;
-            border: none;
-            color: var(--text-muted);
-            font-size: 1.3rem;
-            cursor: pointer;
-            z-index: 50;
+        .animate-summon-glitch {
+            animation: summonGlitch 0.12s infinite alternate ease-in-out;
         }
 
-        /* 요괴 이미지 래퍼 */
-        .modal-hero-img-wrap {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin: 10px auto;
-            min-height: 230px;
-            position: relative;
-            overflow: visible;
-        }
-
-        /* 요괴 메인 이미지 (215px 대형화) */
-        .modal-yokai-img {
-            width: 215px;
-            height: 215px;
-            object-fit: cover;
-            border-radius: 24px;
-            border: 3px solid var(--accent-gold, #ffa502);
-            box-shadow: 0 0 24px rgba(255, 165, 2, 0.45);
-            transform-origin: center center !important;
-            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275),
-                filter 0.35s ease,
-                box-shadow 0.35s ease;
-            will-change: transform, filter;
-        }
-
-        .modal-yokai-img.glitch-summon {
-            transform: scale(1.4);
-            filter: contrast(150%) brightness(120%) drop-shadow(0 0 30px #a855f7);
-            box-shadow: 0 0 40px rgba(168, 85, 247, 0.85);
-            animation: ghostVibration 0.08s infinite alternate ease-in-out;
-            z-index: 30;
-        }
-
-        .modal-yokai-img.glitch-settled {
-            transform: scale(1);
-            filter: contrast(100%) brightness(100%);
-            animation: none;
-            z-index: 1;
-            cursor: zoom-in;
-        }
-
-        .modal-yokai-img.glitch-settled:hover {
-            filter: brightness(112%);
-            box-shadow: 0 0 35px rgba(255, 165, 2, 0.75);
-        }
-
-        .modal-yokai-img.zoomed {
-            transform: scale(1.55) !important;
-            cursor: zoom-out !important;
-            z-index: 99 !important;
-            box-shadow: 0 0 60px rgba(0, 0, 0, 0.95), 0 0 40px var(--accent-gold) !important;
-        }
-
-        @keyframes ghostVibration {
-            0% {
-                transform: scale(1.4) translate(-3px, 2px);
-            }
-
-            50% {
-                transform: scale(1.38) translate(3px, -2px);
-            }
-
-            100% {
-                transform: scale(1.4) translate(1px, -2px);
-            }
-        }
-
-        .modal-fallback-emoji {
-            font-size: 4.5rem;
-            line-height: 1;
-            display: none;
-        }
-
-        .modal-details {
-            opacity: 0;
-            transform: translateY(18px);
-            transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        /* 요괴 소환 모달 레이아웃 */
+        .sin-modal-body {
             display: flex;
             flex-direction: column;
-            gap: 12px;
-        }
-
-        .modal-details.reveal {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        .dialogue-bubble {
-            background: #0d1117;
-            border-left: 4px solid var(--accent-color);
-            padding: 12px;
-            border-radius: 6px;
-            text-align: left;
-            font-size: 0.9rem;
-            line-height: 1.5;
-            color: #f0f6fc;
-        }
-
-        .cbt-box {
-            background: rgba(46, 213, 115, 0.08);
-            border: 1px solid rgba(46, 213, 115, 0.25);
-            border-radius: 8px;
-            padding: 10px 12px;
-            font-size: 0.82rem;
-            text-align: left;
-            color: #c8d6e5;
-            line-height: 1.45;
-        }
-
-        /* 도감 상세 모달 */
-        .detail-modal-box {
-            max-width: 520px;
-            max-height: 85vh;
-            text-align: left;
-            gap: 16px;
-            overflow-y: auto !important;
-            padding-right: 14px;
-        }
-
-        .detail-header {
-            display: flex;
             align-items: center;
-            gap: 16px;
-            border-bottom: 1px solid var(--card-border);
-            padding-bottom: 14px;
+            position: relative;
+            min-height: 480px;
         }
 
-        .detail-avatar {
-            width: 68px;
-            height: 68px;
-            border-radius: 16px;
-            background: #21262d;
-            border: 2px solid var(--accent-gold);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            flex-shrink: 0;
+        @media (min-width: 768px) {
+            .sin-modal-body {
+                flex-direction: row;
+                align-items: stretch;
+            }
         }
 
-        .detail-avatar img {
+        .sin-image-slot {
             width: 100%;
-            height: 100%;
-            object-fit: contain;
-        }
-
-        .tag-badge {
-            font-size: 0.72rem;
-            padding: 2px 8px;
-            border-radius: 10px;
-            font-weight: 600;
-            background: rgba(255, 165, 2, 0.15);
-            border: 1px solid var(--accent-gold);
-            color: var(--accent-gold);
-        }
-
-        .story-desc {
-            font-size: 0.88rem;
-            line-height: 1.6;
-            color: #c8d6e5;
-            background: #0d1117;
-            padding: 12px;
-            border-radius: 8px;
-            border: 1px solid var(--card-border);
-        }
-
-        .quote-box {
-            background: rgba(255, 71, 87, 0.08);
-            border-left: 4px solid var(--accent-color);
-            padding: 12px;
-            border-radius: 6px;
-            font-size: 0.9rem;
-            color: #fff;
-        }
-
-        .action-box {
-            background: rgba(254, 202, 87, 0.08);
-            border: 1px dashed var(--accent-gold);
-            padding: 10px 12px;
-            border-radius: 8px;
-            font-size: 0.85rem;
-            color: #feca57;
-        }
-
-        .btn-secondary {
-            background: #21262d;
-            border: 1px solid var(--card-border);
-            color: #c9d1d9;
-            padding: 12px;
-            border-radius: 8px;
-            font-weight: 600;
+            max-width: 310px;
+            height: 430px;
+            border-radius: 16px;
+            overflow: hidden;
+            position: relative;
+            background: #090a0d;
+            border: 2px solid var(--spook-gold, #d4a359);
+            box-shadow: 0 0 30px rgba(212, 163, 89, 0.35);
+            flex-shrink: 0;
+            transition: all 0.7s cubic-bezier(0.16, 1, 0.3, 1);
             cursor: pointer;
-            margin-top: 10px;
+        }
+
+        .sin-modal-stage.summoning .sin-image-slot {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(1.08);
+            z-index: 30;
+            box-shadow: 0 0 60px rgba(225, 29, 72, 0.7);
+        }
+
+        .sin-modal-stage.settled .sin-image-slot {
+            position: relative;
+            top: 0;
+            left: 0;
+            transform: translate(0, 0) scale(1);
+            z-index: 10;
+        }
+
+        .sin-text-slot {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            opacity: 0;
+            transform: translateX(25px);
+            transition: opacity 0.55s ease 0.15s, transform 0.55s ease 0.15s;
+            pointer-events: none;
+        }
+
+        .sin-modal-stage.settled .sin-text-slot {
+            opacity: 1;
+            transform: translateX(0);
+            pointer-events: auto;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #070809;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #232730;
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #b91c1c;
         }
     </style>
 </head>
 
-<body>
-    <div class="container">
-        <!-- 1. 상단 글로벌 헤더 -->
-        <header>
-            <h1>👻 SpookMate 요괴 감정 일기</h1>
-            <div class="user-box" onclick="openLoginModal()" title="클릭하여 닉네임 변경">
-                <span>👻 사용자:</span>
-                <input type="text" id="userIdInput" readonly placeholder="입주자 등록">
-            </div>
-        </header>
+<body
+    class="bg-spook-black text-gray-200 font-sans selection:bg-spook-red selection:text-white relative overflow-x-hidden">
 
-        <!-- 2. 네비게이션 탭 메뉴 -->
-        <nav class="tabs">
-            <button class="tab-btn active" onclick="switchTab('write')">
-                🛋️ SpookMate랑 방구석 넋두리
-            </button>
-            <button class="tab-btn" onclick="switchTab('calendar')">
-                📅 스탬프 달력
-            </button>
-            <button class="tab-btn" onclick="switchTab('compendium')">
-                📜 요괴 도감
-            </button>
-        </nav>
+    <!-- 1. 손전등 오버레이 (8초 후 자동 꺼짐) -->
+    <div id="torch-overlay"></div>
 
-        <!-- 탭 1: 감정 일기 작성 폼 -->
-        <section id="tab-write" class="tab-content active">
-            <form id="diaryForm" onsubmit="handleDiarySubmit(event)">
-                <div class="form-group">
-                    <label for="diaryDate">기록 날짜</label>
-                    <input type="date" id="diaryDate" required />
+    <!-- 2. GNB 헤더 -->
+    <header
+        class="fixed top-0 left-0 right-0 z-50 bg-spook-black/80 backdrop-blur-md border-b border-spook-border/60 transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between gap-4">
+            <a href="#" class="flex items-center gap-3 group shrink-0">
+                <div
+                    class="w-9 h-9 rounded border border-spook-red/60 flex items-center justify-center bg-spook-red/10 group-hover:bg-spook-red/20 transition-colors">
+                    <i data-lucide="skull" class="w-5 h-5 text-spook-blood"></i>
                 </div>
-                <div class="form-group">
-                    <label for="rawEntry">
-                        세상 살기 참 팍팍하죠? 누워 있는 SpookMate 멱살 잡고 오늘 속 뒤집어진 일 와다다 털어놓으세요.
+                <div>
+                    <span
+                        class="font-cinzel text-lg sm:text-xl font-black tracking-widest text-white group-hover:text-spook-blood transition-colors">SPOOKMATE</span>
+                    <span class="block text-[9px] tracking-widest text-gray-500 uppercase -mt-1 font-mono">Roommate Cam
+                        & Vent</span>
+                </div>
+            </a>
+
+            <!-- 네비게이션 메뉴 (도감 링크 추가) -->
+            <nav
+                class="hidden lg:flex items-center gap-6 text-xs font-semibold tracking-widest uppercase text-gray-400 font-mono">
+                <a href="#who-eats-sins" class="hover:text-spook-blood text-white transition-colors">Who Eats Sins</a>
+                <a href="#feelings" class="hover:text-spook-blood transition-colors">Spook of Feelings</a>
+                <a href="#wrong-place" class="hover:text-spook-blood transition-colors">Spook-Cam</a>
+                <a href="#compendium-section"
+                    class="hover:text-spook-gold text-spook-gold transition-colors font-bold">월간 요괴도감</a>
+                <a href="javascript:void(0)" onclick="openContractModal()"
+                    class="hover:text-spook-gold text-spook-blood font-bold transition-colors">동거 계약서</a>
+            </nav>
+
+            <div class="flex items-center gap-3 shrink-0">
+                <button onclick="openContractModal()"
+                    class="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-spook-border hover:border-spook-gold bg-spook-card/80 text-xs font-mono transition-colors group"
+                    title="클릭하여 동거 계약서 다시 열기">
+                    <i data-lucide="scroll" class="w-3.5 h-3.5 text-spook-gold"></i>
+                    <span class="text-gray-500 hidden sm:inline">방 주인:</span>
+                    <span id="header-user-name" class="text-spook-gold font-bold">마포구 보안관</span>
+                </button>
+
+                <button id="torch-toggle"
+                    class="p-2.5 rounded-lg border border-spook-border hover:border-gray-500 text-gray-400 hover:text-white transition-colors"
+                    title="손전등 (8초 후 자동 꺼짐)">
+                    <i data-lucide="flashlight" class="w-4 h-4"></i>
+                </button>
+
+                <button onclick="openQuizModal()"
+                    class="px-4 py-2 rounded-lg bg-spook-red/20 border border-spook-red text-spook-blood hover:bg-spook-red hover:text-white text-xs font-bold tracking-wider uppercase transition-all duration-300">
+                    Find My Spookmate
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="relative z-10 pt-20">
+
+        <!-- 3. 히어로 섹션 -->
+        <section class="relative min-h-[90vh] flex items-center justify-center text-center px-6 overflow-hidden">
+            <div class="absolute inset-0 z-0">
+                <img src="img/web_2.png"
+                    onerror="this.src='https://images.unsplash.com/photo-1509114397022-ed747cca3f65?auto=format&fit=crop&w=2000&q=80'"
+                    alt="Dark Haunted Doorway"
+                    class="w-full h-full object-cover object-center filter brightness-[0.25] contrast-125 scale-105" />
+                <div class="absolute inset-0 bg-gradient-to-t from-spook-black via-spook-black/60 to-transparent"></div>
+                <div class="absolute inset-0 bg-gradient-to-r from-spook-black/90 via-transparent to-spook-black/90">
+                </div>
+            </div>
+
+            <div class="relative z-10 max-w-4xl mx-auto py-24 flex flex-col items-center">
+                <div
+                    class="font-marker text-spook-blood text-2xl sm:text-3xl md:text-4xl tracking-wider mb-3 flicker-blood transform -rotate-2 select-none">
+                    hello! I'm your spookmate
+                </div>
+
+                <h1
+                    class="font-cinzel text-5xl sm:text-7xl md:text-8xl font-black tracking-widest text-white mb-6 uppercase drop-shadow-2xl">
+                    SPOOKMATE
+                </h1>
+
+                <p
+                    class="font-mono text-xs sm:text-sm md:text-base text-gray-400 max-w-2xl leading-relaxed mb-10 tracking-wide">
+                    "오늘 당신의 머릿속을 갉아먹는 감정은 무엇입니까?<br class="hidden sm:block" />
+                    문틈 너머에 웅크린 괴물 룸메이트에게 그 썩은 감정 찌꺼기를 야식으로 던져주세요."
+                </p>
+
+                <div class="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
+                    <a href="#who-eats-sins"
+                        class="w-full sm:w-auto px-8 py-4 bg-spook-red hover:bg-red-700 text-white font-cinzel font-bold text-sm tracking-widest uppercase transition-all duration-300 shadow-[0_0_30px_rgba(185,28,28,0.4)]">
+                        오늘의 감정 털어놓기
+                    </a>
+                    <a href="#compendium-section"
+                        class="w-full sm:w-auto px-8 py-4 border border-spook-gold hover:bg-spook-gold/10 text-spook-gold font-cinzel font-bold text-sm tracking-widest uppercase transition-all duration-300">
+                        월간 요괴도감 확인
+                    </a>
+                </div>
+            </div>
+
+            <a href="#who-eats-sins"
+                class="absolute bottom-8 left-1/2 -translate-x-1/2 text-gray-600 hover:text-spook-blood transition-colors flex flex-col items-center gap-2">
+                <span class="text-[10px] uppercase font-mono tracking-widest">Feed Your Monster</span>
+                <i data-lucide="chevron-down" class="w-4 h-4 animate-bounce"></i>
+            </a>
+        </section>
+
+        <!-- 4. WHO EATS YOUR SINS? -->
+        <section id="who-eats-sins" class="py-24 px-6 max-w-4xl mx-auto border-t border-spook-border/40">
+            <div class="text-center mb-12">
+                <div
+                    class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full border border-spook-blood/40 bg-spook-red/10 text-spook-blood font-mono text-xs tracking-widest uppercase mb-3">
+                    <i data-lucide="utensils" class="w-3.5 h-3.5"></i>
+                    <span>EMOTION VENT & 73 YOKAI COMPENDIUM</span>
+                </div>
+                <h2 class="font-cinzel text-3xl sm:text-5xl font-black tracking-widest text-white uppercase mb-4">
+                    WHO EATS YOUR SINS?
+                </h2>
+                <p class="font-mono text-xs sm:text-sm text-gray-400 max-w-xl mx-auto leading-relaxed">
+                    오늘 회사에서 겪은 부당한 일, 속 터지는 분노, 막막한 불안을 가감 없이 적어 문틈으로 밀어 넣으세요.<br>
+                    감정을 심리학적으로 분석해 <b>73종의 고유 요괴</b>가 대신 씹어먹고 서늘한 위로와 신체 처방을 건넵니다.
+                </p>
+            </div>
+
+            <div
+                class="bg-spook-dark/95 border-2 border-spook-border hover:border-spook-red/60 rounded-2xl p-6 sm:p-8 shadow-2xl transition-all">
+                <form id="sin-vent-form" onsubmit="handleSinVentSubmit(event)" class="space-y-5">
+                    <div class="flex items-center justify-between pb-3 border-b border-gray-800 text-xs font-mono">
+                        <span class="text-spook-gold font-bold flex items-center gap-2">
+                            <i data-lucide="pen-tool" class="w-4 h-4"></i>
+                            <span>감정 야식 배달 주문서</span>
+                        </span>
+                        <span class="text-gray-500">배달 일자: <b id="vent-today-date"
+                                class="text-white">2026-09-22</b></span>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-mono uppercase text-gray-300 mb-2">
+                            오늘 속을 썩혀 문드러지게 한 사건 / 감정 찌꺼기
+                        </label>
+                        <textarea id="sin-entry-text" required rows="4"
+                            placeholder="예: 오늘 기획서 열심히 써갔는데 팀장이 제대로 보지도 않고 트집만 잡았다. 억울해서 미칠 것 같고 손이 부들부들 떨린다."
+                            class="w-full bg-spook-black border border-spook-border focus:border-spook-blood rounded-xl p-4 text-sm text-gray-200 focus:outline-none font-mono resize-none leading-relaxed transition-colors"></textarea>
+                    </div>
+
+                    <div
+                        class="h-2.5 bg-black rounded-full border border-spook-red/40 shadow-[inset_0_2px_6px_#000,0_0_10px_rgba(185,28,28,0.3)]">
+                    </div>
+
+                    <button type="submit" id="vent-submit-btn"
+                        class="w-full py-4 bg-gradient-to-r from-red-950 via-spook-red to-red-950 hover:brightness-125 text-white font-cinzel font-bold text-sm tracking-widest uppercase rounded-xl transition-all shadow-[0_0_25px_rgba(185,28,28,0.5)] flex items-center justify-center gap-2">
+                        <i data-lucide="flame" class="w-4 h-4"></i>
+                        <span>문틈 너머로 감정 찌꺼기 던져넣기 (요괴 소환)</span>
+                    </button>
+                </form>
+            </div>
+        </section>
+
+        <!-- 5. SPOOK OF FEELINGS -->
+        <section id="feelings" class="py-24 px-6 max-w-7xl mx-auto border-t border-spook-border/40">
+            <div class="text-center mb-16">
+                <div
+                    class="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-spook-red/40 bg-spook-red/10 text-spook-blood font-mono text-xs tracking-widest uppercase mb-3">
+                    <i data-lucide="flame" class="w-3.5 h-3.5"></i>
+                    <span>Psychological Polar Opposites</span>
+                </div>
+                <h2 class="font-cinzel text-3xl sm:text-5xl font-black tracking-widest text-white uppercase mb-4">
+                    Spook of Feelings
+                </h2>
+                <p class="font-mono text-xs sm:text-sm text-gray-400 tracking-wide max-w-xl mx-auto">
+                    플루치크 감정 원환 모델의 가장 극단적인 상극 감정을 품은 4대 요괴입니다.<br />
+                    카드를 선택해 1:1로 직접 대화하며 속마음을 털어놓으세요.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- CARD 1: 화차 -->
+                <div onclick="openYokaiChatModal('kasha')"
+                    class="group cursor-pointer relative h-[500px] rounded-xl overflow-hidden border border-spook-border bg-spook-card hover:border-spook-red transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_15px_35px_rgba(185,28,28,0.4)] flex flex-col justify-end p-6">
+                    <img src="img/1.png"
+                        onerror="this.src='https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=800&q=80'"
+                        alt="화차"
+                        class="absolute inset-0 w-full h-full object-cover filter brightness-50 contrast-125 group-hover:scale-110 group-hover:brightness-75 transition-all duration-700" />
+                    <div class="absolute inset-0 bg-gradient-to-t from-spook-black via-spook-black/70 to-transparent">
+                    </div>
+
+                    <div class="relative z-10 space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span
+                                class="text-[10px] font-mono tracking-widest text-white uppercase bg-red-900/60 px-2.5 py-1 rounded border border-red-500/50">
+                                🔥 분노 / 격분
+                            </span>
+                            <span class="text-[10px] font-mono text-gray-400">상극 ⚡ 공포</span>
+                        </div>
+                        <h3
+                            class="font-cinzel text-2xl font-bold text-white group-hover:text-spook-blood transition-colors">
+                            화차 (Kasha)</h3>
+                        <p class="text-xs font-mono text-spook-gold">일본 전승 | 화염 포식자</p>
+                        <p class="text-[11px] text-gray-400 line-clamp-2 font-mono leading-relaxed">
+                            참을 수 없는 억울함과 극대노의 열기를 우걱우걱 씹어 먹는 맹렬한 불꽃의 룸메이트.
+                        </p>
+                        <div class="pt-3">
+                            <button
+                                class="w-full py-2.5 bg-spook-red/80 group-hover:bg-spook-red text-white text-xs font-bold font-mono tracking-wider rounded transition-colors flex items-center justify-center gap-2">
+                                <i data-lucide="message-square" class="w-3.5 h-3.5"></i>
+                                <span>1:1 감정 대화 시작</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CARD 2: 백목귀 -->
+                <div onclick="openYokaiChatModal('hyakume')"
+                    class="group cursor-pointer relative h-[500px] rounded-xl overflow-hidden border border-spook-border bg-spook-card hover:border-spook-red transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_15px_35px_rgba(185,28,28,0.4)] flex flex-col justify-end p-6">
+                    <img src="img/2.png"
+                        onerror="this.src='https://images.unsplash.com/photo-1548625361-12f5a6064f26?auto=format&fit=crop&w=800&q=80'"
+                        alt="백목귀"
+                        class="absolute inset-0 w-full h-full object-cover filter brightness-50 contrast-125 group-hover:scale-110 group-hover:brightness-75 transition-all duration-700" />
+                    <div class="absolute inset-0 bg-gradient-to-t from-spook-black via-spook-black/70 to-transparent">
+                    </div>
+
+                    <div class="relative z-10 space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span
+                                class="text-[10px] font-mono tracking-widest text-white uppercase bg-blue-950/70 px-2.5 py-1 rounded border border-blue-500/50">
+                                ⚡ 공포 / 불안
+                            </span>
+                            <span class="text-[10px] font-mono text-gray-400">상극 🔥 분노</span>
+                        </div>
+                        <h3
+                            class="font-cinzel text-2xl font-bold text-white group-hover:text-spook-blood transition-colors">
+                            백목귀 (Hyakume)</h3>
+                        <p class="text-xs font-mono text-spook-gold">동아시아 설화 | 다안 관찰자</p>
+                        <p class="text-[11px] text-gray-400 line-clamp-2 font-mono leading-relaxed">
+                            사시나무처럼 떨리는 예기불안과 머릿속 공포 영화를 강제로 셧다운 시키는 감시자.
+                        </p>
+                        <div class="pt-3">
+                            <button
+                                class="w-full py-2.5 bg-spook-red/80 group-hover:bg-spook-red text-white text-xs font-bold font-mono tracking-wider rounded transition-colors flex items-center justify-center gap-2">
+                                <i data-lucide="message-square" class="w-3.5 h-3.5"></i>
+                                <span>1:1 감정 대화 시작</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CARD 3: 금와 도깨비 -->
+                <div onclick="openYokaiChatModal('dokkaebi')"
+                    class="group cursor-pointer relative h-[500px] rounded-xl overflow-hidden border border-spook-border bg-spook-card hover:border-spook-red transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_15px_35px_rgba(212,163,89,0.3)] flex flex-col justify-end p-6">
+                    <img src="img/3.png"
+                        onerror="this.src='https://images.unsplash.com/photo-1511497584788-87676104235f?auto=format&fit=crop&w=800&q=80'"
+                        alt="도깨비"
+                        class="absolute inset-0 w-full h-full object-cover filter brightness-50 contrast-125 group-hover:scale-110 group-hover:brightness-75 transition-all duration-700" />
+                    <div class="absolute inset-0 bg-gradient-to-t from-spook-black via-spook-black/70 to-transparent">
+                    </div>
+
+                    <div class="relative z-10 space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span
+                                class="text-[10px] font-mono tracking-widest text-black font-bold uppercase bg-amber-400 px-2.5 py-1 rounded border border-amber-300">
+                                ✨ 환희 / 도취
+                            </span>
+                            <span class="text-[10px] font-mono text-gray-400">상극 🌧️ 우울</span>
+                        </div>
+                        <h3
+                            class="font-cinzel text-2xl font-bold text-white group-hover:text-amber-400 transition-colors">
+                            금와 도깨비</h3>
+                        <p class="text-xs font-mono text-spook-gold">한국 설화 | 신명과 풍요</p>
+                        <p class="text-[11px] text-gray-400 line-clamp-2 font-mono leading-relaxed">
+                            우울의 늪을 부수고 넘쳐흐르는 도파민과 성취감을 증폭시키는 야생의 도깨비.
+                        </p>
+                        <div class="pt-3">
+                            <button
+                                class="w-full py-2.5 bg-amber-600/80 group-hover:bg-amber-600 text-white text-xs font-bold font-mono tracking-wider rounded transition-colors flex items-center justify-center gap-2">
+                                <i data-lucide="message-square" class="w-3.5 h-3.5"></i>
+                                <span>1:1 감정 대화 시작</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CARD 4: 비련의 손각시 -->
+                <div onclick="openYokaiChatModal('songakshi')"
+                    class="group cursor-pointer relative h-[500px] rounded-xl overflow-hidden border border-spook-border bg-spook-card hover:border-spook-red transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_15px_35px_rgba(185,28,28,0.4)] flex flex-col justify-end p-6">
+                    <img src="img/4.png"
+                        onerror="this.src='https://images.unsplash.com/photo-1517457373958-b7bdd4587205?auto=format&fit=crop&w=800&q=80'"
+                        alt="손각시"
+                        class="absolute inset-0 w-full h-full object-cover filter brightness-50 contrast-125 group-hover:scale-110 group-hover:brightness-75 transition-all duration-700" />
+                    <div class="absolute inset-0 bg-gradient-to-t from-spook-black via-spook-black/70 to-transparent">
+                    </div>
+
+                    <div class="relative z-10 space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span
+                                class="text-[10px] font-mono tracking-widest text-white uppercase bg-purple-950/70 px-2.5 py-1 rounded border border-purple-500/50">
+                                🌧️ 우울 / 비통
+                            </span>
+                            <span class="text-[10px] font-mono text-gray-400">상극 ✨ 환희</span>
+                        </div>
+                        <h3
+                            class="font-cinzel text-2xl font-bold text-white group-hover:text-spook-blood transition-colors">
+                            비련의 손각시</h3>
+                        <p class="text-xs font-mono text-spook-gold">한국 전승 | 한의 화신</p>
+                        <p class="text-[11px] text-gray-400 line-clamp-2 font-mono leading-relaxed">
+                            방전된 영혼의 한숨과 무기력의 찌꺼기를 대신 짊어지고 가슴 속 돌덩이를 치워주는 그림자.
+                        </p>
+                        <div class="pt-3">
+                            <button
+                                class="w-full py-2.5 bg-spook-red/80 group-hover:bg-spook-red text-white text-xs font-bold font-mono tracking-wider rounded transition-colors flex items-center justify-center gap-2">
+                                <i data-lucide="message-square" class="w-3.5 h-3.5"></i>
+                                <span>1:1 감정 대화 시작</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 6. SPOOK-CAM : 펫캠 섹션 ('WHAT IS YOUR SPOOKMATE DOING') -->
+        <section id="wrong-place" class="py-24 px-6 max-w-7xl mx-auto border-t border-spook-border/40">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+                <div class="lg:col-span-5 space-y-6">
+                    <span class="font-mono text-xs text-spook-blood uppercase tracking-widest flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-spook-blood animate-ping"></span>
+                        🔴 SPOOK-CAM LIVE // 방구석 룸메 전용 홈캠
+                    </span>
+
+                    <h2
+                        class="font-cinzel text-3xl sm:text-5xl font-black text-white leading-tight tracking-wider uppercase">
+                        WHAT IS YOUR<br />
+                        SPOOKMATE DOING<br />
+                        <span class="text-spook-blood underline decoration-spook-border">WHILE YOU'RE AWAY?</span>
+                    </h2>
+
+                    <p class="font-mono text-xs sm:text-sm text-gray-300 leading-relaxed">
+                        출근하고 학교 간 사이, 빈 방에 혼자 남겨진 괴물 룸메이트는 대체 뭘 하고 있을까요?<br><br>
+                        주인 수면 잠옷 몰래 입어보기, 바닥에 흘린 멘탈 부스러기 핥아먹기, 거울 보며 귀신 표정 연습하기까지!
+                        실시간 홈캠 피드로 룸메이트의 기괴한 방구석 일탈을 훔쳐보세요.<br>
+                        <span class="text-[11px] text-gray-500">※ 주의: 엿보다가 들키면 화면 렌즈를 혀로 핥을 수 있습니다.</span>
+                    </p>
+
+                    <div class="pt-2 flex flex-wrap gap-3">
+                        <button onclick="openSpookCamModal('CAM-01 [주방 냉장고 앞] : 유통기한 지난 우유 냄새 맡기')"
+                            class="inline-flex items-center gap-2.5 px-6 py-3.5 bg-spook-red/20 border border-spook-red hover:bg-spook-red text-white text-xs font-mono uppercase tracking-wider rounded transition-all shadow-[0_0_20px_rgba(185,28,28,0.3)]">
+                            <i data-lucide="cctv" class="w-4 h-4 text-spook-blood"></i>
+                            <span>실시간 룸메캠 엿보기 (LIVE)</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-7 relative h-[420px] sm:h-[480px]">
+                    <div onclick="openSpookCamModal('CAM-01 [주방 냉장고 앞] : 유통기한 지난 우유 냄새 맡기')"
+                        class="cursor-pointer group absolute top-0 left-0 w-3/4 h-64 rounded-xl overflow-hidden border border-spook-border hover:border-spook-red transition-all duration-300 shadow-2xl">
+                        <img src="img/web_2.png"
+                            onerror="this.src='https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=800&q=80'"
+                            alt="Spook-Cam Kitchen"
+                            class="w-full h-full object-cover filter brightness-60 group-hover:scale-105 transition-transform duration-500" />
+                        <div class="absolute inset-0 bg-black/40 flex items-center justify-center">
+                            <div
+                                class="w-12 h-12 rounded-full bg-spook-red/80 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                <i data-lucide="play" class="w-5 h-5 text-white fill-white ml-0.5"></i>
+                            </div>
+                        </div>
+                        <div
+                            class="absolute top-3 left-3 text-[10px] font-mono text-emerald-400 bg-black/80 px-2 py-0.5 rounded border border-emerald-900/60 flex items-center gap-1.5">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                            <span>CAM 01 // KITCHEN</span>
+                        </div>
+                        <div
+                            class="absolute bottom-2 left-3 right-3 text-[10px] font-mono text-gray-200 bg-black/80 px-2.5 py-1 rounded flex justify-between">
+                            <span>REC ● 14:22:08 [냉장고 털기]</span>
+                            <span class="text-amber-400">장판 긁는 중</span>
+                        </div>
+                    </div>
+
+                    <div onclick="openSpookCamModal('CAM-02 [침대 위] : 주인 수면잠옷 머리에 뒤집어쓰고 멍때리기')"
+                        class="cursor-pointer group absolute top-12 right-0 w-1/2 h-44 rounded-xl overflow-hidden border border-spook-border hover:border-spook-red transition-all duration-300 shadow-2xl z-20">
+                        <img src="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=800&q=80'"
+                            alt="Spook-Cam Bed"
+                            class="w-full h-full object-cover filter brightness-50 group-hover:scale-105 transition-transform duration-500" />
+                        <div class="absolute inset-0 bg-black/40 flex items-center justify-center">
+                            <div
+                                class="w-10 h-10 rounded-full bg-spook-red/80 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                <i data-lucide="play" class="w-4 h-4 text-white fill-white ml-0.5"></i>
+                            </div>
+                        </div>
+                        <div
+                            class="absolute top-2 left-2 text-[9px] font-mono text-emerald-400 bg-black/80 px-2 py-0.5 rounded">
+                            CAM 02 // BEDROOM
+                        </div>
+                    </div>
+
+                    <div onclick="openSpookCamModal('CAM-03 [현관 문틈] : 도어락 소리 날까 봐 귀 쫑긋', 'https://images.unsplash.com/photo-1509114397022-ed747cca3f65?auto=format&fit=crop&w=800&q=80', '문틈에서 주인 발소리 기다리는 중', 'when are you coming?')"
+                        class="cursor-pointer group absolute bottom-0 left-12 w-2/3 h-52 rounded-xl overflow-hidden border border-spook-border hover:border-spook-red transition-all duration-300 shadow-2xl z-30">
+                        <img src="https://images.unsplash.com/photo-1509114397022-ed747cca3f65?auto=format&fit=crop&w=800&q=80'"
+                            alt="Spook-Cam Door"
+                            class="w-full h-full object-cover filter brightness-50 group-hover:scale-105 transition-transform duration-500" />
+                        <div class="absolute inset-0 bg-black/40 flex items-center justify-center">
+                            <div
+                                class="w-10 h-10 rounded-full bg-spook-red/80 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                <i data-lucide="play" class="w-4 h-4 text-white fill-white ml-0.5"></i>
+                            </div>
+                        </div>
+                        <div
+                            class="absolute top-2 left-2 text-[9px] font-mono text-emerald-400 bg-black/80 px-2 py-0.5 rounded">
+                            CAM 03 // FRONT DOOR
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- =====================================================================
+             7. [신규 삽입] 73종 월간 요괴도감 섹션 (매달 1일 자동 리셋)
+             ===================================================================== -->
+        <section id="compendium-section" class="py-24 px-6 max-w-7xl mx-auto border-t border-spook-border/40">
+            <!-- 도감 헤더 및 매월 1일 리셋 인포 배지 -->
+            <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+                <div>
+                    <div
+                        class="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-spook-gold/40 bg-amber-950/20 text-spook-gold font-mono text-xs tracking-widest uppercase mb-3">
+                        <i data-lucide="book-open" class="w-3.5 h-3.5"></i>
+                        <span>MONTHLY SPOOK COMPENDIUM</span>
+                    </div>
+                    <h2 class="font-cinzel text-3xl sm:text-5xl font-black text-white uppercase">
+                        73 SPOOKS ARCHIVE
+                    </h2>
+                    <p class="font-mono text-xs sm:text-sm text-gray-400 mt-2 max-w-xl leading-relaxed">
+                        문틈 너머 룸메이트들이 내 감정을 씹어먹고 남긴 73종의 전승 원혼 도감입니다.<br>
+                        이 기록은 <b>매월 1일 00:00(자정)에 새롭게 초기화(리셋)</b>되어 다시 수집할 수 있습니다.
+                    </p>
+                </div>
+
+                <!-- 수집 현황 & 리셋 D-Day 위젯 -->
+                <div
+                    class="bg-spook-dark/95 border border-spook-border p-4 rounded-xl min-w-[280px] space-y-2.5 font-mono text-xs">
+                    <div class="flex items-center justify-between text-gray-300">
+                        <span>이번 달 수집 진행도</span>
+                        <span class="text-spook-gold font-bold">
+                            <span id="compendium-unlocked-count">4</span> / 73 (<span id="compendium-percent">5%</span>)
+                        </span>
+                    </div>
+                    <!-- 진행률 바 -->
+                    <div class="w-full bg-black h-2 rounded-full overflow-hidden border border-gray-800">
+                        <div id="compendium-progress-bar"
+                            class="h-full bg-gradient-to-r from-red-800 to-spook-gold transition-all duration-500"
+                            style="width: 5%;"></div>
+                    </div>
+                    <div class="flex items-center justify-between pt-1 border-t border-gray-800/80 text-[11px]">
+                        <span class="text-gray-500">리셋 주기: 매월 1일</span>
+                        <span id="compendium-reset-dday" class="text-spook-blood font-bold flex items-center gap-1">
+                            <i data-lucide="refresh-cw" class="w-3 h-3"></i> D-8일 후 초기화
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 73종 요괴 카드 그리드 (8열 배치) -->
+            <div id="compendium-cards-grid"
+                class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3.5">
+                <!-- JS로 73종 카드 동적 렌더링 -->
+            </div>
+        </section>
+
+    </main>
+
+    <!-- 푸터 -->
+    <footer class="bg-spook-dark border-t border-spook-border py-12 px-6 font-mono text-xs text-gray-500">
+        <div class="max-w-7xl mx-auto text-center space-y-3">
+            <div class="font-cinzel text-white text-base font-bold">SPOOKMATE HQ</div>
+            <p>© 2026 SPOOKMATE EMOTION RESCUE. 73 KINDS OF ASIAN YOKAI DIALOGUE ENGINE.</p>
+        </div>
+    </footer>
+
+    <!-- ================= 73종 요괴 소환 & 좌우 분할 및 확대 모달 ================= -->
+    <div id="sin-eater-modal"
+        class="fixed inset-0 z-50 bg-black/95 backdrop-blur-md hidden items-center justify-center p-4">
+        <div id="sin-modal-container"
+            class="sin-modal-stage summoning relative w-full max-w-4xl bg-spook-dark border-2 border-spook-red rounded-2xl p-6 sm:p-8 shadow-[0_0_70px_rgba(225,29,72,0.45)]">
+
+            <button onclick="closeSinEaterModal()"
+                class="absolute top-4 right-4 text-gray-400 hover:text-white p-1 z-40">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+
+            <div class="sin-modal-body">
+                <div id="sin-image-frame" class="sin-image-slot group"
+                    onclick="openZoomImage(document.getElementById('sin-yokai-img').src)">
+                    <img id="sin-yokai-img" src="" alt="소환된 요괴"
+                        class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        onerror="this.src='img/web_2.png'" />
+
+                    <div
+                        class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-1.5 text-white font-mono text-xs select-none">
+                        <i data-lucide="maximize-2" class="w-6 h-6 text-spook-gold"></i>
+                        <span>클릭하여 크게 보기</span>
+                    </div>
+                </div>
+
+                <div class="sin-text-slot mt-6 md:mt-0 md:pl-8 space-y-4 text-left">
+                    <div>
+                        <span id="sin-yokai-meta"
+                            class="text-[10px] font-mono tracking-widest text-spook-blood uppercase bg-red-950 px-2.5 py-1 rounded border border-red-800">
+                            #분노 찌꺼기 포식 완료
+                        </span>
+                        <h3 id="sin-yokai-name" class="font-cinzel text-3xl font-black text-spook-gold mt-2">
+                            인면조 (INMYEONJO)
+                        </h3>
+                    </div>
+
+                    <div class="bg-black/80 border-l-4 border-spook-blood rounded-r-xl p-4 shadow">
+                        <p class="text-[10px] font-mono text-spook-gold font-bold mb-1">방구석 룸메이트의 맞장구 위로:</p>
+                        <p id="sin-yokai-quote"
+                            class="text-xs sm:text-sm font-mono text-gray-200 leading-relaxed italic">
+                            "대사 출력 영역"
+                        </p>
+                    </div>
+
+                    <div class="bg-emerald-950/30 border border-emerald-500/40 rounded-xl p-4 space-y-2 shadow">
+                        <div class="flex items-center gap-2 text-emerald-400 font-mono text-xs font-bold">
+                            <i data-lucide="activity" class="w-4 h-4"></i>
+                            <span>심리학적 1분 신체 미션 (SOMATIC MISSION)</span>
+                        </div>
+                        <p id="sin-yokai-action" class="text-xs font-mono text-emerald-200 leading-relaxed">
+                            미션 출력 영역
+                        </p>
+                        <div class="pt-2 border-t border-emerald-900/40 text-[11px] font-mono text-gray-400">
+                            <span class="text-spook-gold font-bold">[생각 세척]</span> <span id="sin-yokai-alt">생각 환기</span>
+                        </div>
+                    </div>
+
+                    <button onclick="closeSinEaterModal()"
+                        class="w-full py-3.5 bg-spook-red hover:bg-red-700 text-white font-cinzel font-bold text-xs uppercase tracking-wider rounded-xl transition-all shadow-[0_0_20px_rgba(185,28,28,0.4)]">
+                        감정 찌꺼기를 요괴에게 넘겨주고 방으로 돌아가기
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= 요괴 사진 확대 뷰어 (Lightbox) ================= -->
+    <div id="image-zoom-modal"
+        class="fixed inset-0 z-[60] bg-black/95 backdrop-blur-lg hidden items-center justify-center p-4 cursor-zoom-out"
+        onclick="closeZoomImage()">
+        <div class="relative max-w-4xl max-h-[90vh] flex flex-col items-center">
+            <img id="zoomed-image" src="" alt="확대된 요괴 일러스트"
+                class="max-w-full max-h-[85vh] object-contain rounded-2xl border-2 border-spook-gold shadow-[0_0_60px_rgba(212,163,89,0.5)]">
+            <span class="text-gray-400 font-mono text-xs mt-3 select-none flex items-center gap-1.5">
+                <i data-lucide="x" class="w-4 h-4"></i> 화면 아무 곳이나 누르면 닫힙니다.
+            </span>
+        </div>
+    </div>
+
+    <!-- ================= 동거 계약서 모달 (입장 시 자동 팝업) ================= -->
+    <div id="contract-modal"
+        class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md hidden items-center justify-center p-4">
+        <div
+            class="relative w-full max-w-lg bg-spook-dark border-2 border-spook-gold rounded-xl p-6 sm:p-7 shadow-[0_0_50px_rgba(212,163,89,0.3)] text-left">
+            <button onclick="closeContractModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white p-1">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+
+            <div class="text-center pb-4 border-b border-dashed border-gray-700 mb-5">
+                <div class="font-marker text-spook-blood text-sm sm:text-base mb-1">COHABITATION CONTRACT</div>
+                <h3 class="font-cinzel text-xl sm:text-2xl font-black tracking-wider text-white">요괴와의 룸메이트 동거 계약</h3>
+                <p class="font-mono text-xs text-gray-300 mt-1.5">
+                    요괴와의 룸메이트 동거를 원하시면 서명하고 입주 일자를 선택하세요.
+                </p>
+            </div>
+
+            <form id="contract-form" onsubmit="handleContractSubmit(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-mono uppercase text-spook-gold mb-1.5 font-bold">
+                        입주자 닉네임 (OPERATIVE NAME)
                     </label>
-                    <textarea id="rawEntry" placeholder="예: 오늘 너무 피곤하고 힘들다. 방전됐어." required></textarea>
+                    <input type="text" id="contract-name" required placeholder="예: 마포구 보안관, 방구석괴물" maxlength="12"
+                        class="w-full bg-spook-black border border-spook-border focus:border-spook-gold rounded px-4 py-2.5 text-sm text-white focus:outline-none font-mono" />
                 </div>
-                <button type="submit" class="submit-btn" id="submitBtn">
-                    SpookMate에게 하소연 폭격하기
-                </button>
+
+                <div>
+                    <label class="block text-xs font-mono uppercase text-spook-gold mb-1.5 font-bold">
+                        선택된 계약 일자 (CONTRACT DATE)
+                    </label>
+                    <input type="text" id="contract-date-display" readonly
+                        class="w-full bg-spook-black/80 border border-spook-border rounded px-4 py-2 text-xs text-spook-blood font-mono font-bold focus:outline-none cursor-default" />
+                </div>
+
+                <div class="bg-spook-black/90 border border-spook-border rounded-lg p-3">
+                    <div class="flex items-center justify-between pb-2 mb-2 border-b border-gray-800 font-mono text-xs">
+                        <button type="button" onclick="changeContractCalMonth(-1)"
+                            class="p-1 hover:text-spook-gold text-gray-400 transition-colors">
+                            ◀ 이전달
+                        </button>
+                        <span id="contract-cal-title" class="text-white font-bold font-cinzel text-sm">2026년 9월</span>
+                        <button type="button" onclick="changeContractCalMonth(1)"
+                            class="p-1 hover:text-spook-gold text-gray-400 transition-colors">
+                            다음달 ▶
+                        </button>
+                    </div>
+                    <div class="grid grid-cols-7 gap-1 text-center font-mono text-[10px] text-gray-500 mb-1">
+                        <span
+                            class="text-red-400">일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span
+                            class="text-blue-400">토</span>
+                    </div>
+                    <div id="contract-cal-grid" class="grid grid-cols-7 gap-1 text-center font-mono text-xs"></div>
+                </div>
+
+                <div class="pt-2">
+                    <button type="submit"
+                        class="w-full py-3.5 bg-gradient-to-r from-red-900 via-spook-red to-red-900 hover:brightness-125 text-white font-cinzel font-bold text-xs sm:text-sm tracking-widest uppercase rounded transition-all shadow-[0_0_20px_rgba(185,28,28,0.5)]">
+                        동거 계약 서명하고 입장하기
+                    </button>
+                </div>
             </form>
-        </section>
-
-        <!-- 탭 2: 월별 감정 캘린더 -->
-        <section id="tab-calendar" class="tab-content">
-            <div class="calendar-header">
-                <button type="button" onclick="changeMonth(-1)">◀ 이전 달</button>
-                <h3 id="calendarTitle">2026년 9월</h3>
-                <button type="button" onclick="changeMonth(1)">다음 달 ▶</button>
-            </div>
-            <div class="calendar-grid" id="calendarGrid"></div>
-        </section>
-
-        <!-- 탭 3: 73종 요괴 도감 -->
-        <section id="tab-compendium" class="tab-content">
-            <div class="compendium-header">
-                <div>
-                    <h3>요괴 도감 수집 현황</h3>
-                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 4px;">
-                        수집 완료: <span id="unlockCount" style="color: var(--accent-gold); font-weight: bold">0</span> /
-                        <span id="totalCount">73</span> (<span id="collectPercent">0%</span>)
-                    </p>
-                </div>
-            </div>
-            <div class="progress-bar-container">
-                <div class="progress-bar" id="progressBar"></div>
-            </div>
-            <div class="compendium-grid" id="compendiumGrid"></div>
-        </section>
+        </div>
     </div>
 
-    <!-- 모달 1: 요괴 소환 결과 모달 -->
-    <div class="modal-overlay" id="resultModal">
-        <div class="modal-box">
-            <button type="button" class="close-btn" onclick="closeModal('resultModal')">✕</button>
-            <div class="modal-hero-img-wrap">
-                <img id="modalYokaiImg" src="" alt="소환된 요괴" class="modal-yokai-img"
-                    onerror="this.style.display='none'; document.getElementById('modalFallbackEmoji').style.display='block';">
-                <div id="modalFallbackEmoji" class="modal-fallback-emoji">👻</div>
-            </div>
-            <div class="modal-details" id="modalDetails">
-                <div>
-                    <h3 id="modalYokaiName" style="color: var(--accent-gold); font-size: 1.3rem">요괴 이름</h3>
-                    <p id="modalEmotionTag"
-                        style="color: var(--accent-color); font-size: 0.85rem; font-weight: 600; margin-top: 4px;">
-                        SpookMate가 감정을 깔끔하게 삼켜 소화했습니다!
-                    </p>
+    <!-- ================= 1:1 실시간 감정 상담 챗 모달 ================= -->
+    <div id="yokai-chat-modal"
+        class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md hidden items-center justify-center p-4">
+        <div
+            class="relative w-full max-w-lg bg-spook-dark border border-spook-border rounded-xl overflow-hidden shadow-2xl flex flex-col h-[580px]">
+            <div class="bg-black/90 px-5 py-3.5 border-b border-spook-border flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full border border-spook-gold overflow-hidden bg-black flex-shrink-0">
+                        <img id="chat-modal-avatar" src="img/1.png" alt="" class="w-full h-full object-cover">
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h3 id="chat-modal-title" class="font-cinzel font-bold text-base text-white">화차 (Kasha)</h3>
+                            <span id="chat-modal-pole"
+                                class="text-[10px] font-mono px-2 py-0.5 rounded bg-red-950 text-red-400 border border-red-800">🔥
+                                분노</span>
+                        </div>
+                        <p id="chat-modal-sub" class="text-[10px] font-mono text-gray-400">1:1 방구석 룸메이트 실시간 대화</p>
+                    </div>
                 </div>
-                <div class="dialogue-bubble">
-                    <p style="font-size: 0.78rem; color: var(--accent-gold); font-weight: 600; margin-bottom: 4px;">
-                        괴물 룸메의 뼈 때리는 맞장구:
-                    </p>
-                    <p id="modalDialogue">대사 출력 영역</p>
-                </div>
-                <div class="cbt-box">
-                    <p><b style="color: var(--accent-cyan);">[찌든 멘탈 강제 세척]</b> <span id="modalAlternative"></span></p>
-                    <p style="margin-top: 6px"><b style="color: #feca57">[인간 재부팅 1분 처방]</b> <span id="modalAction"
-                            style="color: #feca57"></span></p>
-                </div>
-                <button type="button" class="btn-secondary" onclick="switchTab('calendar'); closeModal('resultModal');">
-                    🛋️ 룸메 사육 일지(달력) 확인하러 가기
+                <button onclick="closeYokaiChatModal()" class="text-gray-400 hover:text-white p-1">
+                    <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
             </div>
-        </div>
-    </div>
 
-    <!-- 모달 2: 73종 도감 상세 정보 팝업 -->
-    <div class="modal-overlay" id="detailModal">
-        <div class="modal-box detail-modal-box">
-            <button type="button" class="close-btn" onclick="closeModal('detailModal')">✕</button>
-            <div class="detail-header">
-                <div class="detail-avatar">
-                    <img id="detAvatarImg" src="" alt="요괴 이미지"
-                        onerror="this.style.display='none'; document.getElementById('detFallbackEmoji').style.display='block';">
-                    <span id="detFallbackEmoji" style="display: none; font-size: 2rem;">👹</span>
-                </div>
-                <div>
-                    <h2 id="detName">요괴 이름</h2>
-                    <p id="detOrigin" style="font-size: 0.82rem; color: var(--text-muted); margin: 4px 0;">출처</p>
-                    <span class="tag-badge" id="detEmotion">감정</span>
-                    <span id="detElement" style="display: none;"></span>
-                </div>
-            </div>
-            <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 10px;">
-                <div>
-                    <span style="font-size: 0.82rem; font-weight: 700; color: var(--accent-gold);">📜 배경 설화 및 전승</span>
-                    <p class="story-desc" id="detStory"></p>
-                </div>
-                <div>
-                    <span style="font-size: 0.82rem; font-weight: 700; color: var(--accent-gold);">💬 외재화 위로의 말</span>
-                    <div class="quote-box" id="detDialogue"></div>
-                </div>
-                <div>
-                    <span style="font-size: 0.82rem; font-weight: 700; color: var(--accent-gold);">🧘 1분 마이크로 행동
-                        처방</span>
-                    <div class="action-box" id="detAction"></div>
-                </div>
+            <div id="chat-messages-container"
+                class="flex-1 overflow-y-auto p-4 space-y-3 bg-spook-black/80 font-mono text-xs"></div>
+
+            <div class="p-3 bg-black/90 border-t border-spook-border">
+                <form id="chat-form" onsubmit="submitUserChat(event)" class="flex gap-2">
+                    <input type="text" id="chat-user-input" placeholder="속마음이나 빡치는 일, 불안한 생각을 털어놓으세요..." required
+                        autocomplete="off"
+                        class="flex-1 bg-spook-dark border border-spook-border rounded px-4 py-2.5 text-xs text-white focus:outline-none focus:border-spook-red font-mono" />
+                    <button type="submit" id="chat-submit-btn"
+                        class="px-4 py-2.5 bg-spook-red hover:bg-red-700 text-white font-bold text-xs font-mono rounded transition-colors flex items-center gap-1.5">
+                        <i data-lucide="send" class="w-3.5 h-3.5"></i>
+                        <span>전송</span>
+                    </button>
+                </form>
             </div>
         </div>
     </div>
 
-    <!-- 모달 3: 최초 접속자 닉네임 입력 모달 (스크립트 태그보다 위에 배치) -->
-    <div id="loginModal" class="modal-overlay">
-        <div class="modal-box" style="max-width: 380px; gap: 14px;">
-            <h2 style="color: var(--accent-gold); font-size: 1.35rem;">👹스푹이 룸매 등록</h2>
-            <p style="color: var(--text-muted); font-size: 0.88rem; line-height: 1.5;">
-                "스푹이가 나를 부를 닉네임을 정해주세요!".<br>
-                등록한 닉네임은 다음 방문 시 자동으로 불러와지며, 상단 프로필을 눌러 언제든 다른 닉네임으로 변경할 수 있습니다.
-            </p>
-            <input type="text" id="modalNicknameInput" placeholder="닉네임 입력 (예: 마포구불주먹)" maxlength="12"
-                style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--card-border); background: #0d1117; color: #fff; font-size: 1rem; text-align: center; outline: none;">
-            <button type="button" class="submit-btn" onclick="confirmNickname()"
-                style="padding: 12px; font-size: 1rem;">
-                스푹이 밥 챙겨주는 집사 되기
-            </button>
+    <!-- ================= SPOOK-CAM 펫캠 뷰어 모달 ================= -->
+    <div id="cctv-modal" class="fixed inset-0 z-50 bg-black/95 backdrop-blur-md hidden items-center justify-center p-4">
+        <div
+            class="relative w-full max-w-3xl bg-spook-dark border-2 border-spook-border rounded-xl overflow-hidden shadow-2xl crt flex flex-col">
+            <div
+                class="bg-black px-5 py-3 flex items-center justify-between border-b border-spook-border font-mono text-xs">
+                <div class="flex items-center gap-2.5">
+                    <span class="w-2.5 h-2.5 rounded-full bg-red-600 animate-ping"></span>
+                    <span id="cctv-cam-title" class="text-emerald-400 font-bold">CAM-01 [주방] : 냉장고 털이 중</span>
+                </div>
+                <div class="flex items-center gap-4 text-gray-400 text-[11px]">
+                    <span id="cctv-timecode">2026-09-22 14:22:08</span>
+                    <button onclick="closeCctvModal()" class="text-gray-400 hover:text-white p-1">
+                        <i data-lucide="x" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="relative h-80 sm:h-96 bg-black flex items-center justify-center overflow-hidden">
+                <img id="cctv-feed-img" src="img/web_2.png"
+                    onerror="this.src='https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=1200&q=80'"
+                    alt="Spook-Cam Feed"
+                    class="w-full h-full object-cover filter contrast-150 brightness-75 transition-all duration-300" />
+
+                <div
+                    class="absolute top-4 left-4 font-mono text-[11px] text-white/80 space-y-1 bg-black/60 p-2.5 rounded border border-white/10 backdrop-blur-sm">
+                    <div class="text-emerald-400 font-bold">● SPOOK-CAM LIVE FEED</div>
+                    <div id="cam-status-text">활동: <span class="text-amber-300">내 장판 발톱으로 긁기</span></div>
+                    <div>룸메 상태: <span class="text-red-400">배고픔 (감정 야식 필요)</span></div>
+                </div>
+
+                <div id="cam-graffiti"
+                    class="absolute bottom-4 right-4 font-marker text-spook-blood text-2xl opacity-80 select-none">
+                    spookmate is hungry...
+                </div>
+            </div>
+
+            <div
+                class="bg-black/90 p-4 border-t border-spook-border flex flex-wrap gap-2.5 items-center justify-between font-mono text-xs">
+                <div class="flex gap-1.5">
+                    <button
+                        onclick="switchCamFeed('CAM-01 [주방] : 유통기한 지난 우유 냄새 맡기', 'img/web_2.png', '냉장고 문 열어두고 멍때리기', 'spookmate is snacking...')"
+                        class="px-2.5 py-1.5 rounded bg-spook-dark border border-spook-border hover:border-emerald-500 text-gray-300 text-[10px]">
+                        CAM 1 (주방)
+                    </button>
+                    <button
+                        onclick="switchCamFeed('CAM-02 [침대] : 주인 잠옷 뒤집어쓰고 셀카 놀이', 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=800&q=80', '이불 속에 들어가서 나오기 싫어함', 'so cozy in here...')"
+                        class="px-2.5 py-1.5 rounded bg-spook-dark border border-spook-border hover:border-emerald-500 text-gray-300 text-[10px]">
+                        CAM 2 (침대)
+                    </button>
+                    <button
+                        onclick="switchCamFeed('CAM-03 [현관] : 도어락 소리 날까 봐 귀 쫑긋', 'https://images.unsplash.com/photo-1509114397022-ed747cca3f65?auto=format&fit=crop&w=800&q=80', '문틈에서 주인 발소리 기다리는 중', 'when are you coming?')"
+                        class="px-2.5 py-1.5 rounded bg-spook-dark border border-spook-border hover:border-emerald-500 text-gray-300 text-[10px]">
+                        CAM 3 (현관)
+                    </button>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <button onclick="yellAtYokai()"
+                        class="px-3 py-1.5 bg-red-950/80 hover:bg-red-800 text-red-300 border border-red-700/60 rounded font-bold transition-colors flex items-center gap-1.5">
+                        <i data-lucide="mic" class="w-3.5 h-3.5"></i>
+                        <span>"야! 장판 뜯지 마!" 호통치기</span>
+                    </button>
+                    <button onclick="feedYokaiTreat()"
+                        class="px-3 py-1.5 bg-amber-950/80 hover:bg-amber-800 text-amber-300 border border-amber-700/60 rounded font-bold transition-colors flex items-center gap-1.5">
+                        <i data-lucide="cookie" class="w-3.5 h-3.5"></i>
+                        <span>감정 간식 던져주기</span>
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- 비동기 인터랙션 엔진 스크립트 (모든 HTML 로드 후 맨 마지막에 실행) -->
-    <script src="app.js"></script>
+    <!-- JavaScript 엔진 -->
+    <script>
+        lucide.createIcons();
+
+        const API_BASE = (window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost")
+            ? "http://127.0.0.1:8000/api"
+            : "https://spookmate-backend.onrender.com/api";
+
+        const now = new Date();
+        const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+        document.getElementById('vent-today-date').textContent = todayStr;
+
+        // =====================================================================
+        // [핵심] 73종 요괴 도감 데이터 & 매월 1일 리셋 엔진
+        // =====================================================================
+        const YOKAI_NAMES_73 = [
+            "화차", "백목귀", "금와 도깨비", "비련의 손각시", "인면조", "구미호", "어둑시니", "그슨새",
+            "장산범", "삼두구미", "달걀귀신", "물귀신", "묘두사", "야광귀", "두억시니", "저승사자",
+            "강철이", "처녀귀신", "총각귀신", "몽달귀신", "창귀", "바리공주", "마고할미", "삼신할미",
+            "염라대왕", "천구", "텐구", "갓파", "설녀", "자시키와라시", "누에", "로쿠로쿠비",
+            "우부메", "우시오니", "누라리횬", "바케네코", "네코마타", "오니", "타마모노마에", "주텐도지",
+            "강시", "백골정", "우마왕", "철부채공주", "나찰녀", "흑무상", "백무상", "맥 (Baku)",
+            "해태", "불가사리", "치우", "용마", "기린", "현무", "주작", "청룡",
+            "백호", "이무기", "비형랑", "두두리", "길달", "노구화호", "신검", "동자귀",
+            "사령", "도척귀", "귀마", "야차", "아수라", "가릉빈가", "나찰", "수금아", "방구석 스푹이"
+        ];
+
+        // 1. 매월 1일 자동 리셋 검사 함수
+        function checkMonthlyCompendiumReset() {
+            const currentMonthCycle = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+            const lastSavedCycle = localStorage.getItem("spookmate_compendium_cycle");
+
+            if (lastSavedCycle !== currentMonthCycle) {
+                // 매월 1일이 되었거나 새 달로 변경됨 -> 도감 자동 리셋!
+                localStorage.setItem("spookmate_compendium_cycle", currentMonthCycle);
+                // 기본으로 만난 초기 4종만 남기고 리셋
+                localStorage.setItem("spookmate_monthly_unlocked", JSON.stringify([1, 2, 3, 4]));
+                console.log(`[도감 리셋 완료] 새로운 월간 주기(${currentMonthCycle})가 시작되었습니다.`);
+            }
+        }
+
+        // 2. 도감 렌더링 함수
+        function renderMonthlyCompendium() {
+            checkMonthlyCompendiumReset();
+
+            const unlockedList = JSON.parse(localStorage.getItem("spookmate_monthly_unlocked") || "[1,2,3,4]");
+            const grid = document.getElementById("compendium-cards-grid");
+            if (!grid) return;
+            grid.innerHTML = "";
+
+            // 상단 수집률 계산
+            const unlockedCount = unlockedList.length;
+            const percent = Math.round((unlockedCount / 73) * 100);
+            document.getElementById("compendium-unlocked-count").textContent = unlockedCount;
+            document.getElementById("compendium-percent").textContent = `${percent}%`;
+            document.getElementById("compendium-progress-bar").style.width = `${percent}%`;
+
+            // 매달 1일까지 남은 D-Day 계산
+            const lastDayThisMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+            const daysRemaining = lastDayThisMonth - now.getDate() + 1;
+            const nextMonth = (now.getMonth() + 2 > 12) ? 1 : now.getMonth() + 2;
+            document.getElementById("compendium-reset-dday").innerHTML = `
+                <i data-lucide="refresh-cw" class="w-3 h-3"></i> D-${daysRemaining}일 (${nextMonth}월 1일 자정 리셋)
+            `;
+
+            // 73개 카드 렌더링
+            for (let i = 1; i <= 73; i++) {
+                const isUnlocked = unlockedList.includes(i);
+                const name = YOKAI_NAMES_73[i - 1] || `요괴 #${i}`;
+                const card = document.createElement("div");
+
+                if (isUnlocked) {
+                    // 해금된 카드
+                    card.className = "group cursor-pointer bg-spook-card border border-spook-gold/50 hover:border-spook-gold rounded-xl p-2.5 flex flex-col items-center text-center transition-all duration-300 hover:-translate-y-1 shadow-[0_4px_15px_rgba(212,163,89,0.15)]";
+                    card.onclick = () => openZoomImage(`img/${i}.png`);
+                    card.innerHTML = `
+                        <div class="w-full aspect-square rounded-lg overflow-hidden bg-black mb-2 border border-spook-border group-hover:border-spook-gold transition-colors">
+                            <img src="img/${i}.png" alt="${name}" class="w-full h-full object-cover group-hover:scale-105 transition-transform" onerror="this.src='img/web_2.png'">
+                        </div>
+                        <span class="text-[9px] font-mono text-spook-gold font-bold">NO.${String(i).padStart(2, '0')}</span>
+                        <h4 class="text-xs font-bold text-white truncate w-full mt-0.5">${name}</h4>
+                        <span class="text-[9px] font-mono text-emerald-400 mt-0.5">봉인 해금</span>
+                    `;
+                } else {
+                    // 미해금 카드 (흑백 실루엣 + 잠금)
+                    card.className = "bg-spook-card/40 border border-gray-800 rounded-xl p-2.5 flex flex-col items-center text-center opacity-40 cursor-not-allowed select-none";
+                    card.innerHTML = `
+                        <div class="w-full aspect-square rounded-lg bg-black/80 mb-2 border border-gray-900 flex items-center justify-center text-gray-700">
+                            <i data-lucide="lock" class="w-5 h-5"></i>
+                        </div>
+                        <span class="text-[9px] font-mono text-gray-600">NO.${String(i).padStart(2, '0')}</span>
+                        <h4 class="text-xs font-bold text-gray-600 truncate w-full mt-0.5">미확인 요괴</h4>
+                        <span class="text-[9px] font-mono text-gray-600 mt-0.5">잠김</span>
+                    `;
+                }
+                grid.appendChild(card);
+            }
+            lucide.createIcons();
+        }
+
+        // 요괴 해금 등록 함수
+        function unlockYokaiInMonthlyCompendium(yokaiId) {
+            checkMonthlyCompendiumReset();
+            const unlockedList = JSON.parse(localStorage.getItem("spookmate_monthly_unlocked") || "[1,2,3,4]");
+            if (!unlockedList.includes(yokaiId)) {
+                unlockedList.push(yokaiId);
+                localStorage.setItem("spookmate_monthly_unlocked", JSON.stringify(unlockedList));
+                renderMonthlyCompendium();
+            }
+        }
+
+        // =====================================================================
+        // 손전등(후레쉬) 8초 자동 소등 타이머 엔진
+        // =====================================================================
+        const torchOverlay = document.getElementById('torch-overlay');
+        const torchToggle = document.getElementById('torch-toggle');
+        let torchActive = false;
+        let torchTimer = null;
+
+        function turnOnTorch() {
+            torchActive = true;
+            torchOverlay.classList.remove('disabled');
+            torchToggle.classList.add('text-spook-blood', 'border-spook-blood');
+
+            if (torchTimer) clearTimeout(torchTimer);
+            torchTimer = setTimeout(() => {
+                turnOffTorch();
+            }, 8000);
+        }
+
+        function turnOffTorch() {
+            torchActive = false;
+            torchOverlay.classList.add('disabled');
+            torchToggle.classList.remove('text-spook-blood', 'border-spook-blood');
+            if (torchTimer) clearTimeout(torchTimer);
+        }
+
+        window.addEventListener('mousemove', (e) => {
+            if (!torchActive) return;
+            document.documentElement.style.setProperty('--mouse-x', `${e.clientX}px`);
+            document.documentElement.style.setProperty('--mouse-y', `${e.clientY}px`);
+        });
+
+        torchToggle.addEventListener('click', () => {
+            if (torchActive) turnOffTorch();
+            else turnOnTorch();
+        });
+
+        window.addEventListener('load', () => {
+            turnOnTorch();
+            renderMonthlyCompendium();
+        });
+
+        // =====================================================================
+        // 'WHO EATS YOUR SINS?' 소환 연출 (도감 해금 연동)
+        // =====================================================================
+        const sinModal = document.getElementById('sin-eater-modal');
+        const sinModalContainer = document.getElementById('sin-modal-container');
+        const sinYokaiImg = document.getElementById('sin-yokai-img');
+
+        async function handleSinVentSubmit(e) {
+            e.preventDefault();
+            const textInput = document.getElementById('sin-entry-text');
+            const submitBtn = document.getElementById('vent-submit-btn');
+            const rawEntry = textInput.value.trim();
+            if (!rawEntry) return;
+
+            const userId = localStorage.getItem("spookmate_user_id") || "마포구 보안관";
+
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = `
+                <span class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                <span>문틈 너머에서 감정을 씹어 삼키며 73종 요괴 매칭 중...</span>
+            `;
+
+            try {
+                const res = await fetch(`${API_BASE}/diary/submit`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        user_id: userId,
+                        diary_date: todayStr,
+                        raw_entry: rawEntry
+                    })
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+                    triggerSummonSequence(data.eaten_by_yokai, data.analysis);
+                    unlockYokaiInMonthlyCompendium(data.eaten_by_yokai.id);
+                } else {
+                    throw new Error("서버 응답 오류");
+                }
+            } catch (err) {
+                const fallbackYokaiList = [
+                    { id: 1, name: "화차 (Kasha)", country: "일본", comfort_quote: "그딴 인간 때문에 홧병 내지 마라! 네 분통은 내가 활활 타는 불바퀴로 다 짓밟아 삼켜주마!", micro_action: "쿠션 안기: 부드러운 쿠션을 꼭 껴안고 깊은숨을 천천히 3회 내쉬세요." },
+                    { id: 2, name: "백목귀 (Hyakume)", country: "동아시아", comfort_quote: "일어나지도 않은 일로 덜덜 떨지 마. 네 주변의 모든 위험은 내 100개 눈동자가 지켜보고 있다.", micro_action: "시선을 바닥 45도에 고정하고 4초간 들이마시고 7초간 멈춘 뒤 8초간 길게 내쉬세요." },
+                    { id: 3, name: "금와 도깨비", country: "한국", comfort_quote: "인생 원래 롤러코스터야! 뚝딱! 오늘치 썩은 고민은 내 방망이로 박살 냈으니 야식이나 먹자!", micro_action: "자리에서 일어나 가볍게 어깨를 으쓱거리며 기지개를 10초간 시원하게 켜세요." },
+                    { id: 4, name: "비련의 손각시", country: "한국", comfort_quote: "혼자 끙끙 앓으며 자책하지 마... 네 외로움과 슬픔의 눈물은 내 차가운 옷자락이 다 닦아줄게.", micro_action: "따뜻한 물을 양손으로 감싸 쥐고, 손바닥에 전해지는 온기를 1분간 가만히 느껴보세요." },
+                    { id: 5, name: "인면조 (Inmyeonjo)", country: "한국", comfort_quote: "하늘 높이 날아올라 네 작은 걱정거리들을 내려다보아라. 티끌만도 못한 일들이다.", micro_action: "양팔을 넓게 벌리고 가슴을 펴며 10초간 하늘을 올려다보세요." }
+                ];
+                const matched = fallbackYokaiList[Math.floor(Math.random() * fallbackYokaiList.length)];
+                triggerSummonSequence(matched, { emotion_tag: "혼합 감정", alternative_thought: "상대방의 무례함은 그 사람의 문제일 뿐, 내 인격과 가치를 깎아내릴 수 없다." });
+                unlockYokaiInMonthlyCompendium(matched.id);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = `
+                    <i data-lucide="flame" class="w-4 h-4"></i>
+                    <span>문틈 너머로 감정 찌꺼기 던져넣기 (요괴 소환)</span>
+                `;
+                textInput.value = '';
+                lucide.createIcons();
+            }
+        }
+
+        function triggerSummonSequence(yokai, analysis) {
+            sinYokaiImg.src = `img/${yokai.id}.png`;
+            document.getElementById('sin-yokai-name').textContent = yokai.name;
+            document.getElementById('sin-yokai-meta').textContent = `#${analysis.emotion_tag || '감정 포식'} 완료 // 73종 도감 기록됨`;
+            document.getElementById('sin-yokai-quote').textContent = `"${yokai.comfort_quote}"`;
+            document.getElementById('sin-yokai-action').textContent = yokai.micro_action || "의자에 깊숙이 등을 기대고 1분간 눈을 감은 채 어깨의 힘을 툭 빼보세요.";
+            document.getElementById('sin-yokai-alt').textContent = analysis.alternative_thought || "이 일은 지나갈 것이며, 나의 전부를 규정하지 않는다.";
+
+            sinModalContainer.classList.remove('settled');
+            sinModalContainer.classList.add('summoning');
+            sinYokaiImg.classList.add('animate-summon-glitch');
+
+            sinModal.classList.remove('hidden');
+            sinModal.classList.add('flex');
+            lucide.createIcons();
+
+            setTimeout(() => {
+                sinYokaiImg.classList.remove('animate-summon-glitch');
+                sinModalContainer.classList.remove('summoning');
+                sinModalContainer.classList.add('settled');
+            }, 1300);
+        }
+
+        function closeSinEaterModal() {
+            sinModal.classList.add('hidden');
+            sinModal.classList.remove('flex');
+            sinYokaiImg.classList.remove('animate-summon-glitch');
+        }
+
+        // =====================================================================
+        // 사진 클릭 시 대형 확대 뷰어 (Lightbox)
+        // =====================================================================
+        const imageZoomModal = document.getElementById('image-zoom-modal');
+        const zoomedImage = document.getElementById('zoomed-image');
+
+        function openZoomImage(imgSrc) {
+            zoomedImage.src = imgSrc;
+            imageZoomModal.classList.remove('hidden');
+            imageZoomModal.classList.add('flex');
+        }
+
+        function closeZoomImage() {
+            imageZoomModal.classList.add('hidden');
+            imageZoomModal.classList.remove('flex');
+        }
+
+        // =====================================================================
+        // 동거 계약서 모달 & 캘린더 엔진
+        // =====================================================================
+        const contractModal = document.getElementById('contract-modal');
+        const contractNameInput = document.getElementById('contract-name');
+        const contractDateDisplay = document.getElementById('contract-date-display');
+        const contractCalTitle = document.getElementById('contract-cal-title');
+        const contractCalGrid = document.getElementById('contract-cal-grid');
+
+        let calYear = now.getFullYear();
+        let calMonth = now.getMonth() + 1;
+        let selectedContractDate = todayStr;
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedUser = localStorage.getItem("spookmate_user_id");
+            const savedDate = localStorage.getItem("spookmate_contract_date");
+
+            if (savedUser) {
+                applyUserNickname(savedUser);
+                syncUserWithDB(savedUser);
+            }
+            if (savedDate) {
+                selectedContractDate = savedDate;
+            }
+
+            openContractModal();
+        });
+
+        function openContractModal() {
+            const currentName = localStorage.getItem("spookmate_user_id") || "";
+            if (contractNameInput) contractNameInput.value = currentName;
+            if (contractDateDisplay) contractDateDisplay.value = selectedContractDate;
+
+            renderContractCalendar(calYear, calMonth);
+
+            contractModal.classList.remove('hidden');
+            contractModal.classList.add('flex');
+            setTimeout(() => {
+                if (!contractNameInput.value) contractNameInput.focus();
+            }, 150);
+        }
+
+        function closeContractModal() {
+            contractModal.classList.add('hidden');
+            contractModal.classList.remove('flex');
+        }
+
+        function changeContractCalMonth(delta) {
+            calMonth += delta;
+            if (calMonth < 1) { calMonth = 12; calYear--; }
+            else if (calMonth > 12) { calMonth = 1; calYear++; }
+            renderContractCalendar(calYear, calMonth);
+        }
+
+        function renderContractCalendar(year, month) {
+            contractCalTitle.textContent = `${year}년 ${month}월`;
+            contractCalGrid.innerHTML = '';
+
+            const firstDayIndex = new Date(year, month - 1, 1).getDay();
+            const lastDate = new Date(year, month, 0).getDate();
+
+            for (let i = 0; i < firstDayIndex; i++) {
+                const empty = document.createElement('div');
+                empty.className = 'py-1 text-transparent select-none';
+                empty.textContent = '·';
+                contractCalGrid.appendChild(empty);
+            }
+
+            for (let d = 1; d <= lastDate; d++) {
+                const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.textContent = d;
+
+                const isSelected = (dateStr === selectedContractDate);
+                btn.className = `py-1.5 rounded transition-colors text-xs font-mono ${isSelected
+                        ? 'bg-spook-red text-white font-bold shadow-[0_0_10px_rgba(225,29,72,0.8)]'
+                        : 'text-gray-300 hover:bg-gray-800 hover:text-spook-gold'
+                    }`;
+
+                btn.onclick = () => {
+                    selectedContractDate = dateStr;
+                    contractDateDisplay.value = selectedContractDate;
+                    renderContractCalendar(calYear, calMonth);
+                };
+
+                contractCalGrid.appendChild(btn);
+            }
+        }
+
+        async function handleContractSubmit(e) {
+            e.preventDefault();
+            const nickname = contractNameInput.value.trim();
+            if (!nickname) return;
+
+            localStorage.setItem("spookmate_user_id", nickname);
+            localStorage.setItem("spookmate_contract_date", selectedContractDate);
+
+            applyUserNickname(nickname);
+            closeContractModal();
+
+            await syncUserWithDB(nickname);
+        }
+
+        function applyUserNickname(name) {
+            const headerNameEl = document.getElementById('header-user-name');
+            if (headerNameEl) headerNameEl.textContent = name;
+        }
+
+        async function syncUserWithDB(userName) {
+            try {
+                await fetch(`${API_BASE}/user/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: userName })
+                });
+            } catch (err) {
+                console.warn("DB 연결 대기 중 (오프라인 모드 유지)");
+            }
+        }
+
+        // =====================================================================
+        // 4대 요괴 페르소나 정의 & 1:1 티키타카 대화 (도감 해금 연동)
+        // =====================================================================
+        const YOKAI_PERSONAS = {
+            kasha: {
+                id: 1,
+                name: "화차 (Kasha)",
+                pole: "🔥 극단적 분노",
+                badgeClass: "bg-red-950 text-red-400 border border-red-800",
+                avatar: "img/1.png",
+                greeting: "야, 룸메! 문 쾅 닫고 들어올 때부터 알아봤다. 어떤 놈이 네 속을 박박 긁었냐? 누구야? 당장 불바퀴 굴려버리게 이름 대!",
+                generateReply: (msg, turn, userName) => {
+                    const m = msg.toLowerCase();
+                    if (m.includes("부장") || m.includes("팀장") || m.includes("상사") || m.includes("회사") || m.includes("일")) {
+                        return `${userName}아, 그 인간 대가리에 숯불을 얹어버릴라! 자기는 손 하나 까딱 안 하면서 잔소리만 늘어놓지? 네 탓 절대 아니다! 그놈 면상에 분노의 화염포를 갈겨야 하는데 말이야. 오늘 무슨 헛소리를 지껄였는데?`;
+                    }
+                    if (m.includes("친구") || m.includes("애인") || m.includes("남친") || m.includes("여친") || m.includes("사람")) {
+                        return `배은망덕한 놈이네! ${userName} 네가 그렇게 배려해줬으면 고마운 줄 알아야지, 감히 널 서운하게 해? 참지 마라. 참으면 네 속만 타서 재가 된다. 내가 오늘 밤 그놈 꿈에 찾아가서 이불에 불장난 쳐줄까?`;
+                    }
+                    return `우걱우걱!! ${userName} 네가 말한 '${msg}' 속에서 시뻘건 분노 냄새가 진동하는구나! 아주 찰진 야식이야! 그 화병 내가 싹 삼킬 테니 넌 발 뻗어라. 그래서 또 억울한 건 없었냐?`;
+                }
+            },
+            hyakume: {
+                id: 2,
+                name: "백목귀 (Hyakume)",
+                pole: "⚡ 극도의 공포/불안",
+                badgeClass: "bg-blue-950 text-blue-400 border border-blue-800",
+                avatar: "img/2.png",
+                greeting: "(벽 틈새에서 눈알 수십 개를 일제히 깜빡이며) ...쉿. 불 끄지 마. 네가 문 열고 들어올 때부터 심장 박동이 120bpm인 거 다 읽었어. 뭐가 그렇게 불안해서 사시나무 떨듯 떠는 거야?",
+                generateReply: (msg, turn, userName) => {
+                    const m = msg.toLowerCase();
+                    if (m.includes("내일") || m.includes("발표") || m.includes("면접") || m.includes("시험")) {
+                        return `(눈알 20개를 360도로 회전시키며) ${userName}아, 네 머릿속에서 최악의 시나리오가 100만 편째 상영 중이군. 망치면 어때? 지구가 반으로 갈라져? 내 눈으로 미리 내일을 내다봤는데, 망쳐봤자 사람들은 3분 만에 까먹어. 쫄지 마, 내가 네 등 뒤에 붙어있을 테니까.`;
+                    }
+                    return `(눈알들이 찌릿하게 떨리며) '${msg}'... 그 생각에 갇히면 끝없이 깊은 수렁으로 떨어져. 내 시선으로 그 끈을 싹 끊어줄게. 숨을 깊게 들이쉬어 봐 ${userName}. 지금 방 안에 너랑 나 말고 아무 위험도 없어.`;
+                }
+            },
+            dokkaebi: {
+                id: 3,
+                name: "금와 도깨비",
+                pole: "✨ 찬란한 환희/도취",
+                badgeClass: "bg-amber-950 text-amber-400 border border-amber-800",
+                avatar: "img/3.png",
+                greeting: "에헤라디야~! 풍악을 울려라! 룸메 인간아, 오늘 얼굴에 아주 쬐끔이라도 신바람이 도는구나! 무슨 재밌는 일 있었어? 얼른 불어봐, 내 방망이로 흥을 열 배로 불려줄 테니!",
+                generateReply: (msg, turn, userName) => {
+                    return `야하하! ${userName}아! 고민해서 해결될 일이면 나도 매일 고민했지! 답 안 나오는 건 내 방망이 밑에 깔아뭉개고 춤이나 추자! 일단 맛있는 거 시켜, 야식 먹고 놀면 장땡이지!`;
+                }
+            },
+            songakshi: {
+                id: 4,
+                name: "비련의 손각시",
+                pole: "🌧️ 심연의 우울/비통",
+                badgeClass: "bg-purple-950 text-purple-400 border border-purple-800",
+                avatar: "img/4.png",
+                greeting: "(서늘한 흰 소매로 눈가를 훔치며)...또 들어왔구나. 네 발소리만 들어도 알아. 영혼이 바닥까지 갈려 나간 그 무거운 걸음... 아무것도 하지 마. 그냥 내 옆에 누워.",
+                generateReply: (msg, turn, userName) => {
+                    return `...${userName}아, 네가 털어놓은 '${msg}'... 듣기만 해도 가슴이 저릿하네. 그 무거운 짐을 혼자 지고 어떻게 버텼니. 내 품에 다 내려놓으렴. 세상 사람들 다 욕해도 난 네 편이야.`;
+                }
+            }
+        };
+
+        let currentYokaiKey = 'kasha';
+        let chatTurn = 0;
+        const chatModal = document.getElementById('yokai-chat-modal');
+        const chatContainer = document.getElementById('chat-messages-container');
+        const chatInput = document.getElementById('chat-user-input');
+
+        function openYokaiChatModal(yokaiKey) {
+            currentYokaiKey = yokaiKey;
+            chatTurn = 0;
+            const y = YOKAI_PERSONAS[yokaiKey];
+
+            unlockYokaiInMonthlyCompendium(y.id);
+
+            document.getElementById('chat-modal-title').textContent = y.name;
+            document.getElementById('chat-modal-avatar').src = y.avatar;
+            const poleEl = document.getElementById('chat-modal-pole');
+            poleEl.textContent = y.pole;
+            poleEl.className = `text-[10px] font-mono px-2 py-0.5 rounded ${y.badgeClass}`;
+
+            chatContainer.innerHTML = `
+                <div class="flex items-start gap-2.5">
+                    <div class="w-8 h-8 rounded-full overflow-hidden border border-spook-gold flex-shrink-0 bg-black">
+                        <img src="${y.avatar}" class="w-full h-full object-cover" onerror="this.src='img/web_2.png'">
+                    </div>
+                    <div class="bg-spook-dark border border-spook-border rounded-lg p-3 max-w-[85%] text-gray-200 leading-relaxed shadow">
+                        <div class="text-[10px] text-spook-gold font-bold mb-1">${y.name}</div>
+                        "${y.greeting}"
+                    </div>
+                </div>
+            `;
+
+            chatModal.classList.remove('hidden');
+            chatModal.classList.add('flex');
+            setTimeout(() => chatInput.focus(), 150);
+        }
+
+        function closeYokaiChatModal() {
+            chatModal.classList.add('hidden');
+            chatModal.classList.remove('flex');
+        }
+
+        async function submitUserChat(e) {
+            e.preventDefault();
+            const userMsg = chatInput.value.trim();
+            if (!userMsg) return;
+
+            chatContainer.innerHTML += `
+                <div class="flex justify-end">
+                    <div class="bg-spook-red/80 border border-red-500/40 text-white rounded-lg p-3 max-w-[85%] leading-relaxed shadow">
+                        ${userMsg}
+                    </div>
+                </div>
+            `;
+            chatInput.value = '';
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+            chatTurn++;
+
+            const currentUserName = localStorage.getItem("spookmate_user_id") || "룸메";
+
+            setTimeout(() => {
+                const y = YOKAI_PERSONAS[currentYokaiKey];
+                const reply = y.generateReply(userMsg, chatTurn, currentUserName);
+
+                chatContainer.innerHTML += `
+                    <div class="flex items-start gap-2.5">
+                        <div class="w-8 h-8 rounded-full overflow-hidden border border-spook-gold flex-shrink-0 bg-black">
+                            <img src="${y.avatar}" class="w-full h-full object-cover" onerror="this.src='img/web_2.png'">
+                        </div>
+                        <div class="bg-spook-dark border border-spook-border rounded-lg p-3 max-w-[85%] text-gray-200 leading-relaxed shadow">
+                            <div class="text-[10px] text-spook-gold font-bold mb-1">${y.name}</div>
+                            "${reply}"
+                        </div>
+                    </div>
+                `;
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+                lucide.createIcons();
+            }, 600);
+        }
+
+        // =====================================================================
+        // 펫캠(Spook-Cam) 제어[cite: 10]
+        // =====================================================================
+        const cctvModal = document.getElementById('cctv-modal');
+        const cctvCamTitle = document.getElementById('cctv-cam-title');
+        const cctvTimecode = document.getElementById('cctv-timecode');
+        const cctvFeedImg = document.getElementById('cctv-feed-img');
+        const camStatusText = document.getElementById('cam-status-text');
+        const camGraffiti = document.getElementById('cam-graffiti');
+
+        function openSpookCamModal(title) {
+            cctvCamTitle.textContent = title;
+            cctvModal.classList.remove('hidden');
+            cctvModal.classList.add('flex');
+        }
+
+        function closeCctvModal() {
+            cctvModal.classList.add('hidden');
+            cctvModal.classList.remove('flex');
+        }
+
+        function switchCamFeed(title, imgSrc, statusDesc, graffitiText) {
+            cctvCamTitle.textContent = title;
+            cctvFeedImg.src = imgSrc;
+            camStatusText.innerHTML = `활동: <span class="text-amber-300">${statusDesc}</span>`;
+            camGraffiti.textContent = graffitiText;
+
+            cctvFeedImg.style.filter = 'invert(1) contrast(300%)';
+            setTimeout(() => {
+                cctvFeedImg.style.filter = 'contrast(150%) brightness(75%)';
+            }, 180);
+        }
+
+        function yellAtYokai() {
+            alert('📢 마이크 전송 : "야! 장판 뜯지 말랬지! 당장 손 떼!"');
+            cctvFeedImg.style.filter = 'brightness(200%) contrast(250%)';
+            camStatusText.innerHTML = `활동: <span class="text-red-400 font-bold">호통에 흠칫 놀라 얼어붙음!</span>`;
+            camGraffiti.textContent = "i'm sorry, roommate...";
+            setTimeout(() => {
+                cctvFeedImg.style.filter = 'contrast(150%) brightness(75%)';
+            }, 400);
+        }
+
+        function feedYokaiTreat() {
+            alert('🍪 감정 간식 투척 : [달콤한 위로 사탕 1개]를 문틈 아래로 던졌습니다!');
+            camStatusText.innerHTML = `활동: <span class="text-emerald-400 font-bold">간식 주워 먹고 만족스럽게 그르렁거림</span>`;
+            camGraffiti.textContent = "yummy! more feelings!";
+        }
+
+        setInterval(() => {
+            const nowTime = new Date();
+            if (cctvTimecode) cctvTimecode.textContent = nowTime.toISOString().replace('T', ' ').substring(0, 19);
+        }, 1000);
+
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeZoomImage();
+                closeContractModal();
+                closeSinEaterModal();
+                closeYokaiChatModal();
+                closeCctvModal();
+            }
+        });
+    </script>
 </body>
 
 </html>

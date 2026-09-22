@@ -501,6 +501,122 @@ def get_compendium(user_id: str):
         cursor.close()
         conn.close()
 
+# ==============================================================================
+# 7. [Spook of Feelings] 4대 상극 감정 요괴 추출 & 1:1 대화 API
+# ==============================================================================
+OPPOSING_POLES = [
+    {"pole": "분노/격분", "oppose": "공포/불안", "label": "🔥 극단적 분노", "keywords": ["분노", "격분", "화", "파괴"]},
+    {"pole": "불안/초조", "oppose": "분노/격분", "label": "⚡ 극도의 공포·불안", "keywords": ["불안", "초조", "공포", "두려움"]},
+    {"pole": "기쁨/환희", "oppose": "우울/절망", "label": "✨ 찬란한 환희", "keywords": ["기쁨", "환희", "행복", "사랑"]},
+    {"pole": "우울/절망", "oppose": "기쁨/환희", "label": "🌧️ 심연의 슬픔·우울", "keywords": ["우울", "절망", "슬픔", "비통"]}
+]
+
+@app.get("/api/spook-of-feelings")
+def get_spook_of_feelings():
+    conn = get_db()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("""
+            SELECT id, name, country, plutchik_dyad, plutchik_ko,
+                   valence, arousal, narrative_dialogue, micro_action, story
+            FROM yokai_compendium;
+        """)
+        all_yokai = cursor.fetchall()
+        
+        selected_cards = []
+        used_ids = set()
+
+        for config in OPPOSING_POLES:
+            candidates = []
+            for y in all_yokai:
+                if y["id"] in used_ids:
+                    continue
+                dyad_text = (y.get("plutchik_dyad") or "") + " " + (y.get("plutchik_ko") or "")
+                if any(kw in dyad_text for kw in config["keywords"]):
+                    candidates.append(y)
+            
+            # 후보군 중 하나 무작위 추출 (없으면 전체 중 선택)
+            chosen = random.choice(candidates) if candidates else random.choice(all_yokai)
+            used_ids.add(chosen["id"])
+            
+            selected_cards.append({
+                "pole_label": config["label"],
+                "opposing_target": config["oppose"],
+                "yokai": chosen
+            })
+
+        return {"status": "success", "cards": selected_cards}
+    finally:
+        cursor.close()
+        conn.close()
+
+
+class YokaiChatInput(BaseModel):
+    user_id: str
+    yokai_id: int
+    message: str
+
+@app.post("/api/chat/yokai")
+def chat_with_yokai(data: YokaiChatInput):
+    conn = get_db()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("SELECT * FROM yokai_compendium WHERE id = %s;", (data.yokai_id,))
+        yokai = cursor.fetchone()
+        if not yokai:
+            raise HTTPException(status_code=404, detail="요괴를 찾을 수 없습니다.")
+
+        y_name = yokai["name"].split()[0]
+        dyad = yokai.get("plutchik_ko") or "기이한 정서"
+        user_msg = data.message.strip()
+
+        # 요괴 캐릭터 맞춤형 심리학 1:1 대화 프롬프트 엔진
+        response_templates = [
+            f"크하하! 네 녀석의 '{user_msg}' 속에서 진득한 {dyad}의 맛이 나는구나. 인간아, 그 감정에 휘둘리지 말고 내 입속에 던져버려라.",
+            f"흐음... 방구석에서 털어놓는 말 치고는 꽤나 깊은 독이 차 있군. {y_name}인 내가 그 찌꺼기는 소화시킬 테니 넌 발 뻗고 쉬어라.",
+            f"네가 말한 '{user_msg}'... 그건 네 탓이 아니다. 나와 같은 요괴들이 속을 긁어놓았을 뿐이지. 네 마음에서 그놈들을 쫓아내 주마."
+        ]
+        
+        reply = random.choice(response_templates)
+
+        return {
+            "status": "success",
+            "yokai_name": yokai["name"],
+            "reply": reply,
+            "micro_action": yokai.get("micro_action", "숨을 깊게 들이마시고 3초간 내쉬어 보세요.")
+        }
+    finally:
+        cursor.close()
+        conn.close()
+
+        # ==============================================================================
+# 8. 입주자 닉네임 등록 및 이전 방문 기록 조회 API
+# ==============================================================================
+class UserRegisterInput(BaseModel):
+    user_id: str
+
+@app.post("/api/user/register")
+def register_user(data: UserRegisterInput):
+    conn = get_db()
+    cursor = conn.cursor()
+    try:
+        user_name = data.user_id.strip()
+        # 과거 이 닉네임으로 작성된 감정 일기/소환 기록 카운트 조회
+        cursor.execute("SELECT count(*) FROM emotion_diary WHERE user_id = %s;", (user_name,))
+        diary_count = cursor.fetchone()[0]
+        
+        return {
+            "status": "success",
+            "user_id": user_name,
+            "diary_count": diary_count,
+            "message": f"방 주인 '{user_name}'님의 이전 동거 기록 {diary_count}건을 성공적으로 불러왔습니다."
+        }
+    except Exception as e:
+        return {"status": "error", "message": str(e), "user_id": data.user_id}
+    finally:
+        cursor.close()
+        conn.close()
+
 
 if __name__ == "__main__":
     import uvicorn

@@ -5,14 +5,14 @@ const isLocal =
   window.location.hostname === "127.0.0.1" ||
   window.location.hostname === "localhost";
 
-// 로컬 환경이면 8000 포트 호출, 배포된 웹사이트면 Render 클라우드 백엔드 호출
 const API_BASE = isLocal
   ? "http://127.0.0.1:8000/api"
-  : "https://spookmate-backend.onrender.com/api"; // Render 배포 후 실제 백엔드 URL로 교체
+  : "https://spookmate-backend.onrender.com/api";
 
 const todayObj = new Date();
 let currentYear = todayObj.getFullYear();
 let currentMonth = todayObj.getMonth() + 1;
+let shrinkTimer = null; // 5초 요괴 축소 타이머
 
 // ============================================================================
 // 1. 앱 시작 시 닉네임 체크 및 사용자 기록 동기화
@@ -22,7 +22,6 @@ window.addEventListener("DOMContentLoaded", () => {
   const userInput = document.getElementById("userIdInput");
   const modalInput = document.getElementById("modalNicknameInput");
 
-  // 오늘 날짜를 일기 작성 기본값으로 자동 세팅 (YYYY-MM-DD)
   const dateInput = document.getElementById("diaryDate");
   if (dateInput) {
     const yyyy = todayObj.getFullYear();
@@ -31,14 +30,12 @@ window.addEventListener("DOMContentLoaded", () => {
     dateInput.value = `${yyyy}-${mm}-${dd}`;
   }
 
-  // 닉네임 모달 인풋창에서 엔터(Enter) 키 입력 시 확인 처리
   if (modalInput) {
     modalInput.addEventListener("keydown", (e) => {
       if (e.key === "Enter") confirmNickname();
     });
   }
 
-  // 저장된 닉네임이 없으면 등록 모달 오픈, 있으면 즉시 데이터 로드
   if (!savedUserId) {
     openLoginModal();
   } else {
@@ -48,9 +45,6 @@ window.addEventListener("DOMContentLoaded", () => {
   }
 });
 
-/**
- * 닉네임 등록 모달 열기
- */
 function openLoginModal() {
   const modal = document.getElementById("loginModal");
   const modalInput = document.getElementById("modalNicknameInput");
@@ -63,9 +57,6 @@ function openLoginModal() {
   if (modal) modal.classList.add("active");
 }
 
-/**
- * 닉네임 등록 확인 및 데이터 즉시 동기화
- */
 function confirmNickname() {
   const modalInput = document.getElementById("modalNicknameInput");
   const userInput = document.getElementById("userIdInput");
@@ -73,24 +64,18 @@ function confirmNickname() {
 
   const newId = modalInput?.value.trim() || "마포구 보안관";
 
-  // 로컬 스토리지 및 상단 인풋에 저장
   localStorage.setItem("spookmate_user_id", newId);
   if (userInput) userInput.value = newId;
 
-  // 모달 닫기
   if (modal) modal.classList.remove("active");
 
-  // 해당 닉네임 기준 달력 및 도감 기록 새로고침
   loadCalendar(currentYear, currentMonth);
   loadCompendium(newId);
 }
 
 // ============================================================================
-// 2. UI 제어 함수 (탭 전환 및 모달 제어)
+// 2. UI 제어 함수
 // ============================================================================
-/**
- * 상단 탭 전환 함수
- */
 function switchTab(tabName) {
   document.querySelectorAll(".tab-btn").forEach((btn, idx) => {
     btn.classList.toggle(
@@ -115,20 +100,15 @@ function switchTab(tabName) {
   if (tabName === "compendium") loadCompendium(userId);
 }
 
-/**
- * 팝업 모달 닫기
- */
 function closeModal(modalId) {
   const modal = document.getElementById(modalId);
   if (modal) modal.classList.remove("active");
+  if (shrinkTimer) clearTimeout(shrinkTimer);
 }
 
 // ============================================================================
-// 3. 일기 작성 및 비동기 API 통신
+// 3. 일기 작성 및 비동기 API 통신 (문틈 슬라이딩 애니메이션 1초 보장)
 // ============================================================================
-/**
- * 하소연 제출 처리 이벤트 핸들러
- */
 async function handleDiarySubmit(e) {
   e.preventDefault();
 
@@ -139,18 +119,21 @@ async function handleDiarySubmit(e) {
   const diaryDate = document.getElementById("diaryDate").value;
   const rawEntry = document.getElementById("rawEntry").value.trim();
   const submitBtn = document.getElementById("submitBtn");
+  const paperSlipArea = document.getElementById("paperSlipArea");
 
   if (!rawEntry) {
-    alert("털어놓을 하소연 내용을 입력해 주세요!");
+    alert("털어놓을 넋두리를 적어주세요.");
     return;
   }
 
-  // 중복 제출 방지 처리
+  // 1. 문틈 아래로 종이가 쏙 빨려 들어가는 3D 애니메이션 가동
   submitBtn.disabled = true;
-  submitBtn.innerText = "스푹이 흔들어 깨우는 중...";
+  submitBtn.innerText = "문틈 아래로 하소연 빨려들어가는 중...";
+  if (paperSlipArea) paperSlipArea.classList.add("slipping");
 
   try {
-    const res = await fetch(`${API_BASE}/diary/submit`, {
+    // 2. 백엔드 통신과 최소 1.0초의 슬라이딩 시각 효과를 병렬 보장
+    const fetchPromise = fetch(`${API_BASE}/diary/submit`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -160,70 +143,67 @@ async function handleDiarySubmit(e) {
       }),
     });
 
+    const [res] = await Promise.all([
+      fetchPromise,
+      new Promise((resolve) => setTimeout(resolve, 1000)),
+    ]);
+
     if (!res.ok) {
-      // 서버에서 500 등 에러가 발생한 경우 구체적인 이유 파싱
       const errData = await res.json().catch(() => ({}));
       throw new Error(errData.detail || `서버 에러 상태 코드: ${res.status}`);
     }
 
     const data = await res.json();
 
-    // 요괴 소환 애니메이션 실행
+    // 3. 대형 요괴 선(先)강조 출현 (5초 후 축소 시퀀스 포함)
     showYokaiHeroReveal(data);
 
-    // 입력창 초기화
+    // 4. 입력창 리셋 및 종이 위치 원상 복구
     document.getElementById("rawEntry").value = "";
+    if (paperSlipArea) paperSlipArea.classList.remove("slipping");
 
-    // ★ 일기 저장 성공 즉시 달력과 도감 현황 동기화
+    // 달력 및 도감 실시간 동기화
     loadCalendar(currentYear, currentMonth);
     loadCompendium(userId);
   } catch (err) {
     console.error("Diary Submit Error:", err);
-    alert(`스푹이 소환 실패!\n원인: ${err.message}`);
+    if (paperSlipArea) paperSlipArea.classList.remove("slipping");
+    alert(`배달 실패!\n원인: ${err.message}`);
   } finally {
     submitBtn.disabled = false;
-    submitBtn.innerText = "SpookMate에게 하소연 폭격하기";
+    submitBtn.innerText = "문틈 아래로 하소연 밀어넣기";
   }
 }
 
 // ============================================================================
-// 4. 요괴 차원 균열 소환 & 클릭 시 확대/축소 시퀀스
+// 4. 요괴 선(先)강조 출현 -> 5초 후 축소 및 쪽지 노출 시퀀스
 // ============================================================================
 function showYokaiHeroReveal(serverData) {
   const modal = document.getElementById("resultModal");
+  const stage = document.getElementById("modalYokaiStage");
+  const details = document.getElementById("modalDetails");
+  const eatingStatus = document.getElementById("eatingStatus");
   const yokaiImg = document.getElementById("modalYokaiImg");
-  const fallbackEmoji = document.getElementById("modalFallbackEmoji");
-  const modalDetails = document.getElementById("modalDetails");
-
   const matched = serverData.eaten_by_yokai;
-  const isPositive = (serverData.analysis?.valence ?? 3.0) >= 5.0;
 
-  // 모달 초기화
-  modalDetails.classList.remove("reveal");
-  if (fallbackEmoji) fallbackEmoji.style.display = "none";
+  if (shrinkTimer) clearTimeout(shrinkTimer);
 
+  // 1단계: 초기화 - 대형 일러스트 모드로 세팅하고 글씨 영역 숨김
+  stage.classList.remove("settled");
+  details.classList.remove("revealed");
+  if (eatingStatus) eatingStatus.style.display = "block";
+
+  // 요괴 이미지 및 기본 정보 바인딩 (img 폴더 경로 지정)
   if (yokaiImg) {
-    yokaiImg.classList.remove("zoomed");
-    yokaiImg.style.display = "inline-block";
-    yokaiImg.className = "modal-yokai-img glitch-summon";
     yokaiImg.src = `img/${matched.id}.png`;
     yokaiImg.alt = matched.name;
-
-    yokaiImg.onclick = function () {
-      if (this.classList.contains("glitch-summon")) return;
-      this.classList.toggle("zoomed");
-    };
   }
+  document.getElementById("modalYokaiName").innerText = matched.name;
+  document.getElementById("modalYokaiMeta").innerText =
+    `${matched.country} 전승 | 상징: ${matched.plutchik_ko || serverData.analysis.emotion_tag}`;
 
-  // 텍스트 데이터 바인딩
-  document.getElementById("modalYokaiName").innerText =
-    `${matched.name} (${matched.country})`;
-  document.getElementById("modalEmotionTag").innerText = isPositive
-    ? `#${serverData.analysis.emotion_tag} 에너지를 흡수해 요괴가 힘을 얻었습니다!`
-    : `#${serverData.analysis.emotion_tag} 감정을 시원하게 먹어치웠습니다!`;
-
-  // [입맛 싱크로율 XX%] 대사 접두사 및 파이썬 튜플 잔여물 정제 (버그 수정)
-  const matchRate = matched.match_rate || 92;
+  // 쪽지 텍스트 데이터 바인딩
+  const matchRate = matched.match_rate || 90;
   let quote = (matched.comfort_quote || "").trim();
   quote = quote.replace(/^\s*\(?['"]?/, "").replace(/['"]?,?\s*\)?$/, "");
 
@@ -238,24 +218,34 @@ function showYokaiHeroReveal(serverData) {
     serverData.analysis.alternative_thought;
   document.getElementById("modalAction").innerText = matched.micro_action;
 
-  // 모달 오픈
+  // 모달 열기
   modal.classList.add("active");
 
-  // 0.7초 뒤 기본 크기 안착
-  setTimeout(() => {
-    if (yokaiImg) {
-      yokaiImg.className = "modal-yokai-img glitch-settled";
+  // 2단계: 정확히 5초(5000ms) 동안 대형 일러스트 강조 후 축소 & 쪽지 노출
+  let remainingSeconds = 5;
+  const countdownInterval = setInterval(() => {
+    remainingSeconds--;
+    if (remainingSeconds > 0 && eatingStatus) {
+      eatingStatus.innerText = `스푹메이트가 요괴의 원혼을 씹어 삼키는 중... (${remainingSeconds}초)`;
+    } else {
+      clearInterval(countdownInterval);
     }
-  }, 700);
+  }, 1000);
 
-  // 1.05초 뒤 말풍선 및 CBT 처방전 등장
-  setTimeout(() => {
-    modalDetails.classList.add("reveal");
-  }, 1050);
+  shrinkTimer = setTimeout(() => {
+    // 5초 경과: 요괴 일러스트가 상단 액자로 축소
+    stage.classList.add("settled");
+    if (eatingStatus) eatingStatus.style.display = "none";
+
+    // 0.25초 뒤 문틈 쪽지 내용(대사 및 처방전)이 스르륵 등장
+    setTimeout(() => {
+      details.classList.add("revealed");
+    }, 250);
+  }, 5000);
 }
 
 // ============================================================================
-// 5. 월간 캘린더 렌더링 (오늘 날짜 강조 & 감정 스탬프 표시)
+// 5. 월간 캘린더 (월세 대장)
 // ============================================================================
 async function loadCalendar(year, month) {
   const userId =
@@ -269,7 +259,6 @@ async function loadCalendar(year, month) {
   if (!grid) return;
   grid.innerHTML = "";
 
-  // 요일 헤더 생성 (일 ~ 토)
   const dayNames = ["일", "월", "화", "수", "목", "금", "토"];
   dayNames.forEach((d) => {
     const el = document.createElement("div");
@@ -279,7 +268,6 @@ async function loadCalendar(year, month) {
   });
 
   try {
-    // URL 인코딩 처리(encodeURIComponent)로 한글/공백 ID 보호
     const res = await fetch(
       `${API_BASE}/calendar?user_id=${encodeURIComponent(userId)}&year=${year}&month=${month}`,
     );
@@ -294,7 +282,6 @@ async function loadCalendar(year, month) {
     const firstDay = new Date(year, month - 1, 1).getDay();
     const lastDate = new Date(year, month, 0).getDate();
 
-    // 시작 전 빈 칸 생성
     for (let i = 0; i < firstDay; i++) {
       const emptyCell = document.createElement("div");
       emptyCell.className = "day-cell empty";
@@ -303,7 +290,6 @@ async function loadCalendar(year, month) {
 
     const todayStr = `${todayObj.getFullYear()}-${String(todayObj.getMonth() + 1).padStart(2, "0")}-${String(todayObj.getDate()).padStart(2, "0")}`;
 
-    // 날짜 셀 채우기
     for (let date = 1; date <= lastDate; date++) {
       const dateStr = `${year}-${String(month).padStart(2, "0")}-${String(date).padStart(2, "0")}`;
       const cell = document.createElement("div");
@@ -312,20 +298,15 @@ async function loadCalendar(year, month) {
       const isToday = dateStr === todayStr;
       if (isToday) cell.classList.add("today");
 
-      cell.innerHTML = `
-        <div class="date-header">
-          <span class="day-number">${date}</span>
-          ${isToday ? '<span class="today-badge">오늘</span>' : ""}
-        </div>
-      `;
+      cell.innerHTML = `<span class="day-number">${date}</span>`;
 
       if (stampMap[dateStr]) {
         const s = stampMap[dateStr];
         cell.innerHTML += `
-          <div class="stamp-badge">👹 ${s.yokai_name.split(" ")[0]}</div>
+          <div class="stamp-badge">완식</div>
           <div class="stamp-tag">${s.emotion_tag}</div>
         `;
-        cell.title = `[일기 내용] ${s.raw_entry}`;
+        cell.title = `[하소연 내용] ${s.raw_entry}`;
       }
 
       grid.appendChild(cell);
@@ -335,9 +316,6 @@ async function loadCalendar(year, month) {
   }
 }
 
-/**
- * 캘린더 월 이동
- */
 function changeMonth(delta) {
   currentMonth += delta;
   if (currentMonth < 1) {
@@ -351,11 +329,10 @@ function changeMonth(delta) {
 }
 
 // ============================================================================
-// 6. 요괴 도감 렌더링 & 상세 정보 모달 바인딩
+// 6. 73종 요괴 도감 (img 폴더 경로 적용)
 // ============================================================================
 async function loadCompendium(userId) {
   try {
-    // URL 인코딩 처리(encodeURIComponent)
     const res = await fetch(
       `${API_BASE}/compendium?user_id=${encodeURIComponent(userId)}`,
     );
@@ -380,17 +357,18 @@ async function loadCompendium(userId) {
       const card = document.createElement("div");
       card.className = `yokai-card ${y.is_unlocked ? "" : "locked"}`;
 
+      // img 폴더 내의 요괴 일러스트 연결
       const avatarHtml = y.is_unlocked
-        ? `<img src="img/${y.id}.png" alt="${y.name}" onerror="this.style.display='none'; this.parentElement.innerText='👹';">`
-        : `<span style="font-size: 1.4rem;">❓</span>`;
+        ? `<img src="img/${y.id}.png" alt="${y.name}" onerror="this.style.display='none';">`
+        : `<span style="font-size: 1.2rem; color: #555;">?</span>`;
 
-      const displayName = y.is_unlocked ? y.name.split(" ")[0] : "미확인 요괴";
-      const displaySub = y.is_unlocked ? `${y.country} 전설` : "잠김";
+      const displayName = y.is_unlocked ? y.name.split(" ")[0] : "미확인 악령";
+      const displaySub = y.is_unlocked ? y.plutchik_ko : "봉인됨";
 
       card.innerHTML = `
         <div class="yokai-avatar">${avatarHtml}</div>
         <div class="yokai-name">${displayName}</div>
-        <div class="yokai-element" style="color: var(--accent-gold); font-size: 0.72rem;">${displaySub}</div>
+        <div class="yokai-element">${displaySub}</div>
       `;
 
       if (y.is_unlocked) {
@@ -403,15 +381,10 @@ async function loadCompendium(userId) {
   }
 }
 
-/**
- * 도감 카드 클릭 시 상세 정보 모달 채우기
- */
 function openYokaiDetail(y) {
   const detImg = document.getElementById("detAvatarImg");
-  const detFallback = document.getElementById("detFallbackEmoji");
   if (detImg) {
     detImg.style.display = "block";
-    if (detFallback) detFallback.style.display = "none";
     detImg.src = `img/${y.id}.png`;
     detImg.alt = y.name;
   }
