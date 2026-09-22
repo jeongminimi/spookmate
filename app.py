@@ -1,65 +1,47 @@
-from datetime import date
+import os
+from datetime import datetime, date
 import math
 import random
+import re
+import traceback
+
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-import mysql.connector
+import psycopg2
+from psycopg2.extras import RealDictCursor
 from pydantic import BaseModel, Field
+
 from analyzer import analyze_entry
-import traceback
-import math
-import re
-from datetime import datetime, date
 
-
+# ==============================================================================
+# 1. FastAPI 인스턴스 초기화 & CORS 설정
+# ==============================================================================
 app = FastAPI(
     title="SpookMate API",
-    description="플루치크 24대 혼합정서 모델 & 동서양 69종 요괴 설화 매칭 엔진",
-    version="1.1.1",
+    description="플루치크 24대 혼합정서 모델 & 동서양 73종 요괴 설화 매칭 엔진 (Supabase Ver.)",
+    version="1.2.0",
 )
-
-from fastapi import FastAPI
-# 1. CORSMiddleware import 확인
-from fastapi.middleware.cors import CORSMiddleware
-
-app = FastAPI(title="SpookMate API")
-
-# 2. CORS 미들웨어 등록 (모든 포트/도메인에서의 요청 허용)
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=[
-        "http://127.0.0.1:5500",
-        "http://localhost:5500",
-        "http://127.0.0.1:8000",
-        "http://localhost:8000",
-        "*"  # 개발 단계에서는 모든 도메인 허용
-    ],
-    allow_credentials=True,
-    allow_methods=["*"],  # GET, POST 등 모든 HTTP 메서드 허용
-    allow_headers=["*"],  # 모든 헤더 허용
-)
-
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["*"],  # GitHub Pages 및 로컬 5500 등 모든 포트 허용
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-DB_CONFIG = {
-    "host": "localhost",
-    "port": 3306,
-    "user": "root",
-    "password": "1234",  # 본인의 MySQL 접속 패스워드
-    "database": "yokai_diary_db",
-    "charset": "utf8mb4",
-}
+# ==============================================================================
+# 2. 데이터베이스 연결 설정 (Supabase PostgreSQL)
+# ==============================================================================
+SUPABASE_DB_URL = os.getenv(
+    "DATABASE_URL",
+    "postgresql://postgres.aywtiggvataezyxeuexe:tkfkdgo91!SPDB@aws-0-ap-south-1.pooler.supabase.com:6543/postgres"
+)
 
 
 def get_db():
-  return mysql.connector.connect(**DB_CONFIG)
+    # RealDictCursor를 기본 적용하여 딕셔너리 형태로 결과 행 반환
+    return psycopg2.connect(SUPABASE_DB_URL, cursor_factory=RealDictCursor)
 
 
 # ==============================================================================
@@ -87,7 +69,7 @@ SPOOKMATE_RESPONSES = {
         (
             "인간아, 일어나지도 않은 일 가지고 머릿속에서 SF 공포 영화 좀 그만"
             " 찍어라! 네 뇌 속 망상 회로는 내가 다 뜯어먹었으니까 걱정 끄고"
-            " 대자로 뻗어 자.",
+            " 대자로 뻗어 자."
         ),
         (
             "덜덜 떨지 마라, 구경하는 스푹메이트가 다 멀미 난다. '망하면"
@@ -155,83 +137,68 @@ DEFAULT_SPOOKMATE = [
 
 
 def get_clean_spookmate_dialogue(dyad: str, yokai_name: str) -> str:
-  candidates = SPOOKMATE_RESPONSES.get(dyad, DEFAULT_SPOOKMATE)
-  selected = random.choice(candidates)
-  short_name = yokai_name.split(" ")[0]
-  return f"[{short_name}] {selected}"
+    candidates = SPOOKMATE_RESPONSES.get(dyad, DEFAULT_SPOOKMATE)
+    selected = random.choice(candidates)
+    short_name = yokai_name.split(" ")[0]
+    return f"[{short_name}] {selected}"
 
 
 class DiaryInput(BaseModel):
-  user_id: str = Field(..., examples=["user_01"])
-  diary_date: date = Field(..., examples=["2026-09-18"])
-  raw_entry: str = Field(
-      ..., examples=["팀장이 내 기획안 보고 헛소리 취급함. 속에서 천불이 난다."]
-  )
+    user_id: str = Field(..., examples=["user_01"])
+    diary_date: date = Field(..., examples=["2026-09-18"])
+    raw_entry: str = Field(
+        ..., examples=["팀장이 내 기획안 보고 헛소리 취급함. 속에서 천불이 난다."]
+    )
 
 
 # ==============================================================================
-# 0. 다차원 정밀 감정 어휘 사전 (7대 정서군 / 어간 및 구어체 최적화)
+# 3. 다차원 정밀 감정 어휘 사전 (7대 정서군)
 # ==============================================================================
 EMOTION_THESAURUS = {
-    # 1. 분노 및 적개심 (High Arousal, Low Valence)
     "분노/격분": {
         "화", "분노", "빡침", "개빡", "열받", "짜증", "억울", "극대노", "킹받", "폭발",
         "미쳐", "욕나", "지랄", "답답", "속뒤집", "천불", "울화", "적개심", "배신", "예민",
         "성질", "열불", "치밀"
     },
-
-    # 2. 우울 및 자기 비하 (Low Arousal, Very Low Valence)
     "우울/절망": {
         "우울", "슬픔", "슬퍼", "눈물", "현타", "무기력", "번아웃", "암담", "막막", "허무",
         "공허", "비관", "한숨", "좌절", "의욕없", "축처", "비참", "자책", "죽고싶", "살기싫",
         "낙담", "비통", "괴롭"
     },
-
-    # 3. 불안 및 공포 (High Arousal, Tension/Panic)
     "불안/초조": {
         "불안", "초조", "걱정", "긴장", "무섭", "공포", "떨림", "두려움", "패닉",
         "조마조마", "안절부절", "어쩌지", "망했", "압박", "식은땀", "심장", "가슴이",
         "악몽", "겁나", "사시나무"
     },
-
-    # 4. 사회적 고립 및 소외감 (Mid-Low Arousal, Interpersonal Negative)
     "고립/외로움": {
         "외롭", "혼자", "소외", "왕따", "버려짐", "단절", "서러움", "눈치", "위축",
         "내편", "쓸쓸", "낙오", "자괴감", "따돌림", "고독"
     },
-
-    # 5. 신체적·에너지 방전 (Extremely Low Arousal, Physical Depletion)
     "피로/탈진": {
         "힘들다", "힘들어", "힘듦", "피곤", "피곤해", "졸려", "잠와", "방전", "탈진",
         "녹초", "버겁", "쉼", "쉬고싶", "지쳐", "지침", "지친다", "골병", "헤롱",
         "기절", "몸살", "기운없", "나른", "하품", "자고싶", "눈감겨"
     },
-
-    # 6. 신체적 허기 및 갈망 (Mid-High Arousal, Physiological Craving)
     "갈망/결핍": {
         "배고픔", "배고파", "배고파서", "허기", "출출", "밥", "야식", "굶주림", "당떨어",
         "먹고싶", "입심심", "식탐", "폭식", "목말라", "갈증", "결핍", "허전", "군침", "먹방"
     },
-
-    # 7. 긍정 정서 및 성취/안도 (High Valence)
     "기쁨/환희": {
         "기쁨", "행복", "신남", "즐겁", "쾌감", "뿌듯", "보람", "짜릿", "최고", "감사",
         "힐링", "웃음", "만족", "설렘", "축하", "환호", "해냈다", "맛있다", "꿀맛", "개운"
     }
 }
 
-# 러셀 원형 모델 기반 정서 좌표 (Valence, Arousal)
 DEFAULT_COORDINATES = {
     "분노/격분": (1.6, 4.6),
     "불안/초조": (2.0, 4.2),
     "우울/절망": (1.4, 1.6),
     "고립/외로움": (1.8, 2.0),
-    "피로/탈진": (2.4, 1.2),   # 극저각성(1.2): 불안(4.2)과 확연히 분리됨
+    "피로/탈진": (2.4, 1.2),
     "갈망/결핍": (2.7, 3.4),
     "기쁨/환희": (4.6, 3.8)
 }
 
-# 2차 의미적 브릿지 맵핑 (DB에 특정 태그가 적을 때 유사 정서군 보너스 부여)
 EMOTION_BRIDGE = {
     "피로/탈진": {"우울/절망", "슬픔", "무기력", "탈진"},
     "갈망/결핍": {"욕망", "탐욕", "집착", "결핍"},
@@ -248,7 +215,7 @@ STOPWORDS = {
 
 
 # ==============================================================================
-# 일기 작성 및 지능형 요괴 매칭 API
+# 4. 일기 작성 및 지능형 요괴 매칭 API
 # ==============================================================================
 @app.post("/api/diary/submit")
 def submit_diary(data: DiaryInput):
@@ -272,7 +239,7 @@ def submit_diary(data: DiaryInput):
         if not isinstance(analysis, dict):
             raise ValueError("분석 결과 포맷 오류")
     except Exception as e:
-        print(f"⚠️ 감정 분석기 Fallback 가동 (입력 기반 자동 태깅): {e}")
+        print(f"⚠️ 감정 분석기 Fallback 가동: {e}")
         fallback_family = detected_family or "피로/탈진"
         def_v, def_a = DEFAULT_COORDINATES.get(fallback_family, (2.5, 2.0))
 
@@ -315,16 +282,16 @@ def submit_diary(data: DiaryInput):
         d_year, d_month, d_date = int(parts[0]), int(parts[1]), str(data.diary_date)
 
     conn = get_db()
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor()  # dictionary=True 제거 (psycopg2 호환)
 
     try:
-        # 3. 당월 쿨다운 조회
+        # 3. 당월 쿨다운 조회 (PostgreSQL EXTRACT 함수 적용)
         query_month_yokais = """
             SELECT matched_yokai_id FROM emotion_diary 
             WHERE user_id = %s 
-              AND YEAR(diary_date) = %s 
-              AND MONTH(diary_date) = %s 
-              AND diary_date != %s
+              AND EXTRACT(YEAR FROM diary_date) = %s 
+              AND EXTRACT(MONTH FROM diary_date) = %s 
+              AND diary_date != %s;
         """
         cursor.execute(query_month_yokais, (data.user_id, d_year, d_month, d_date))
         encountered_ids = {row["matched_yokai_id"] for row in cursor.fetchall()}
@@ -333,7 +300,7 @@ def submit_diary(data: DiaryInput):
         cursor.execute("""
             SELECT id, name, country, plutchik_dyad, plutchik_ko,
                    valence, arousal, narrative_dialogue, micro_action, story
-            FROM yokai_compendium
+            FROM yokai_compendium;
         """)
         all_yokai = cursor.fetchall()
         if not all_yokai:
@@ -350,40 +317,33 @@ def submit_diary(data: DiaryInput):
             y_ko = y.get("plutchik_ko") or ""
             y_tokens = set(y_dyad.replace("/", " ").split()) | set(y_ko.replace("/", " ").split())
 
-            # [점수 1: 정서 다이애드 일치도 - 최대 40점]
             if target_dyad == y_dyad:
                 score += 40.0
             elif target_tokens & y_tokens:
-                score += 32.0  # 교집합 일치 (예: '무기력', '탈진')
+                score += 32.0
             elif any(br in y_dyad for br in EMOTION_BRIDGE.get(target_dyad, set())):
-                score += 24.0  # 브릿지 유사 정서 일치
+                score += 24.0
 
-            # [점수 2: 러셀 원형 모델 정서 거리 - 최대 35점]
-            # 각성도 차이가 크면 점수가 급격히 하락 (불안 <-> 피로 완벽 차단)
             y_v = float(y.get("valence") or 3.0)
             y_a = float(y.get("arousal") or 3.0)
             dist = math.sqrt((target_v - y_v) ** 2 + ((target_a - y_a) * 1.2) ** 2)
             coord_score = max(0.0, 35.0 - (dist * 7.5))
             score += coord_score
 
-            # [점수 3: 생리적 갈망 및 신체 상태 특화 가산점 - 최대 15점]
             story_text = f"{y.get('story', '')} {y.get('narrative_dialogue', '')}"
             if target_dyad == "갈망/결핍" and any(k in story_text for k in ["먹", "음식", "밥", "식탐", "삼키"]):
                 score += 15.0
             elif target_dyad == "피로/탈진" and any(k in story_text for k in ["잠", "피로", "지친", "방전", "쉬", "눕"]):
                 score += 15.0
 
-            # [점수 4: 문맥 키워드 일치 및 다양성 난수 - 최대 10점]
             kw_hits = sum(1 for w in raw_words if w in story_text)
             score += min(kw_hits * 3.5, 8.0)
-            # 동점일 때 매번 같은 요괴만 나오는 것을 막는 미세 보정치 (0.00 ~ 1.99)
             score += (hash(f"{y['id']}_{raw_text}") % 200) * 0.01
 
             scored_yokai.append((score, y))
 
         scored_yokai.sort(key=lambda x: x[0], reverse=True)
 
-        # 미소환 요괴 우선 선별 (점수 차 20점 이내)
         fresh_candidates = [
             (sc, y) for (sc, y) in scored_yokai if y["id"] not in encountered_ids
         ]
@@ -395,10 +355,8 @@ def submit_diary(data: DiaryInput):
             matched_yokai = scored_yokai[0][1]
             final_score = top_score
 
-        # 입맛 싱크로율 계산 (75% ~ 98%)
         match_rate = int(min(max(final_score, 75.0), 98.0))
 
-        # 요괴 맞장구 대사 정제 (튜플 기호 ('...', ) 완전 제거)
         comfort_quote = matched_yokai.get("narrative_dialogue") or ""
         if isinstance(comfort_quote, (tuple, list)):
             comfort_quote = comfort_quote[0] if comfort_quote else ""
@@ -415,9 +373,9 @@ def submit_diary(data: DiaryInput):
         if not comfort_quote.startswith("[입맛 싱크로율"):
             comfort_quote = f"[입맛 싱크로율 {match_rate}%] {comfort_quote}"
 
-        print(f"🎯 [매칭 판정] 입력:'{raw_text}' -> 판별정서:{target_dyad} (V:{target_v}, A:{target_a}) => 요괴:{matched_yokai['name']} ({matched_yokai['plutchik_dyad']}) 싱크로율:{match_rate}%")
+        print(f"🎯 [매칭 판정] 입력:'{raw_text}' -> 요괴:{matched_yokai['name']} 싱크로율:{match_rate}%")
 
-        # 6. 일기 저장
+        # 6. 일기 저장 (PostgreSQL ON CONFLICT 구문 적용)
         insert_sql = """
             INSERT INTO emotion_diary (
                 user_id, diary_date, raw_entry,
@@ -425,17 +383,17 @@ def submit_diary(data: DiaryInput):
                 emotion_tag, plutchik_dyad, analyzed_valence, analyzed_arousal,
                 matched_yokai_id, is_stamped
             ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 1)
-            ON DUPLICATE KEY UPDATE
-                raw_entry = VALUES(raw_entry),
-                cbt_situation = VALUES(cbt_situation),
-                cbt_automatic_thought = VALUES(cbt_automatic_thought),
-                cbt_alternative_thought = VALUES(cbt_alternative_thought),
-                emotion_tag = VALUES(emotion_tag),
-                plutchik_dyad = VALUES(plutchik_dyad),
-                analyzed_valence = VALUES(analyzed_valence),
-                analyzed_arousal = VALUES(analyzed_arousal),
-                matched_yokai_id = VALUES(matched_yokai_id),
-                is_stamped = 1
+            ON CONFLICT (user_id, diary_date) DO UPDATE SET
+                raw_entry = EXCLUDED.raw_entry,
+                cbt_situation = EXCLUDED.cbt_situation,
+                cbt_automatic_thought = EXCLUDED.cbt_automatic_thought,
+                cbt_alternative_thought = EXCLUDED.cbt_alternative_thought,
+                emotion_tag = EXCLUDED.emotion_tag,
+                plutchik_dyad = EXCLUDED.plutchik_dyad,
+                analyzed_valence = EXCLUDED.analyzed_valence,
+                analyzed_arousal = EXCLUDED.analyzed_arousal,
+                matched_yokai_id = EXCLUDED.matched_yokai_id,
+                is_stamped = 1;
         """
         cursor.execute(
             insert_sql,
@@ -480,46 +438,46 @@ def submit_diary(data: DiaryInput):
         conn.close()
 
 
-
 # ==============================================================================
-# 월간 캘린더 조회 API
+# 5. 월간 캘린더 조회 API
 # ==============================================================================
 @app.get("/api/calendar")
 def get_calendar(user_id: str, year: int, month: int):
-  conn = get_db()
-  cursor = conn.cursor(dictionary=True)
-  try:
-    sql = """
+    conn = get_db()
+    cursor = conn.cursor()  # dictionary=True 제거
+    try:
+        sql = """
             SELECT d.diary_date, d.raw_entry, d.emotion_tag,
                    y.id AS yokai_id, y.name AS yokai_name
             FROM emotion_diary d
             JOIN yokai_compendium y ON d.matched_yokai_id = y.id
             WHERE d.user_id = %s 
-              AND YEAR(d.diary_date) = %s 
-              AND MONTH(d.diary_date) = %s
-            ORDER BY d.diary_date ASC
+              AND EXTRACT(YEAR FROM d.diary_date) = %s 
+              AND EXTRACT(MONTH FROM d.diary_date) = %s
+            ORDER BY d.diary_date ASC;
         """
-    cursor.execute(sql, (user_id, year, month))
-    return {
-        "user_id": user_id,
-        "year": year,
-        "month": month,
-        "stamps": cursor.fetchall(),
-    }
-  finally:
-    cursor.close()
-    conn.close()
+        cursor.execute(sql, (user_id, year, month))
+        return {
+            "user_id": user_id,
+            "year": year,
+            "month": month,
+            "stamps": cursor.fetchall(),
+        }
+    finally:
+        cursor.close()
+        conn.close()
 
 
 # ==============================================================================
-# 요괴 도감 조회 API 
+# 6. 요괴 도감 조회 API 
 # ==============================================================================
 @app.get("/api/compendium")
 def get_compendium(user_id: str):
-  conn = get_db()
-  cursor = conn.cursor(dictionary=True)
-  try:
-    sql = """
+    conn = get_db()
+    cursor = conn.cursor()  # dictionary=True 제거
+    try:
+        # id 순서대로 1번부터 73번까지 깔끔하게 정렬 (숫자 캐스팅)
+        sql = """
             SELECT y.id, y.name, y.country, y.plutchik_ko,
                    y.narrative_dialogue, y.micro_action, y.story,
                    CASE WHEN d.matched_yokai_id IS NOT NULL THEN TRUE ELSE FALSE END AS is_unlocked
@@ -527,24 +485,23 @@ def get_compendium(user_id: str):
             LEFT JOIN (
                 SELECT DISTINCT matched_yokai_id FROM emotion_diary WHERE user_id = %s
             ) d ON y.id = d.matched_yokai_id
-            ORDER BY y.id ASC
+            ORDER BY CAST(y.id AS INTEGER) ASC;
         """
-    cursor.execute(sql, (user_id,))
-    compendium = cursor.fetchall()
-    unlocked_count = sum(1 for item in compendium if item["is_unlocked"])
-    return {
-        "user_id": user_id,
-        "unlocked_count": unlocked_count,
-        "total_count": len(compendium),
-        "collection_rate": round((unlocked_count / len(compendium)) * 100, 1),
-        "compendium": compendium,
-    }
-  finally:
-    cursor.close()
-    conn.close()
+        cursor.execute(sql, (user_id,))
+        compendium = cursor.fetchall()
+        unlocked_count = sum(1 for item in compendium if item["is_unlocked"])
+        return {
+            "user_id": user_id,
+            "unlocked_count": unlocked_count,
+            "total_count": len(compendium),
+            "collection_rate": round((unlocked_count / len(compendium)) * 100, 1) if compendium else 0.0,
+            "compendium": compendium,
+        }
+    finally:
+        cursor.close()
+        conn.close()
 
 
 if __name__ == "__main__":
-  import uvicorn
-
-  uvicorn.run("app:app", host="127.0.0.1", port=8000, reload=True)
+    import uvicorn
+    uvicorn.run("app:app", host="127.0.0.1", port=8000, reload=True)

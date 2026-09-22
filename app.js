@@ -1,7 +1,6 @@
 // ============================================================================
 // 전역 변수 및 안전 날짜 초기화 (로컬 / 웹 배포 환경 자동 분기)
 // ============================================================================
-// 현재 접속 환경이 로컬(내 컴퓨터)인지 확인
 const isLocal =
   window.location.hostname === "127.0.0.1" ||
   window.location.hostname === "localhost";
@@ -9,7 +8,7 @@ const isLocal =
 // 로컬 환경이면 8000 포트 호출, 배포된 웹사이트면 Render 클라우드 백엔드 호출
 const API_BASE = isLocal
   ? "http://127.0.0.1:8000/api"
-  : "https://spookmate-backend.onrender.com/api"; // ★ 나중에 Render 배포 후 생성된 실제 주소로 교체할 자리
+  : "https://spookmate-backend.onrender.com/api"; // Render 배포 후 실제 백엔드 URL로 교체
 
 const todayObj = new Date();
 let currentYear = todayObj.getFullYear();
@@ -23,7 +22,7 @@ window.addEventListener("DOMContentLoaded", () => {
   const userInput = document.getElementById("userIdInput");
   const modalInput = document.getElementById("modalNicknameInput");
 
-  // 1) 오늘 날짜를 일기 작성 기본값으로 자동 세팅 (YYYY-MM-DD)
+  // 오늘 날짜를 일기 작성 기본값으로 자동 세팅 (YYYY-MM-DD)
   const dateInput = document.getElementById("diaryDate");
   if (dateInput) {
     const yyyy = todayObj.getFullYear();
@@ -32,22 +31,20 @@ window.addEventListener("DOMContentLoaded", () => {
     dateInput.value = `${yyyy}-${mm}-${dd}`;
   }
 
-  // 2) 닉네임 모달 인풋창에서 엔터(Enter) 키 입력 시 확인 처리
+  // 닉네임 모달 인풋창에서 엔터(Enter) 키 입력 시 확인 처리
   if (modalInput) {
     modalInput.addEventListener("keydown", (e) => {
       if (e.key === "Enter") confirmNickname();
     });
   }
 
-  // 3) 브라우저에 저장된 닉네임이 없으면 모달 띄우기, 있으면 데이터 로드
+  // 저장된 닉네임이 없으면 등록 모달 오픈, 있으면 즉시 데이터 로드
   if (!savedUserId) {
     openLoginModal();
   } else {
     if (userInput) userInput.value = savedUserId;
     loadCalendar(currentYear, currentMonth);
-    if (typeof loadCompendium === "function") {
-      loadCompendium(savedUserId);
-    }
+    loadCompendium(savedUserId);
   }
 });
 
@@ -74,7 +71,7 @@ function confirmNickname() {
   const userInput = document.getElementById("userIdInput");
   const modal = document.getElementById("loginModal");
 
-  const newId = modalInput?.value.trim() || "방구석요괴";
+  const newId = modalInput?.value.trim() || "마포구 보안관";
 
   // 로컬 스토리지 및 상단 인풋에 저장
   localStorage.setItem("spookmate_user_id", newId);
@@ -85,9 +82,7 @@ function confirmNickname() {
 
   // 해당 닉네임 기준 달력 및 도감 기록 새로고침
   loadCalendar(currentYear, currentMonth);
-  if (typeof loadCompendium === "function") {
-    loadCompendium(newId);
-  }
+  loadCompendium(newId);
 }
 
 // ============================================================================
@@ -95,10 +90,8 @@ function confirmNickname() {
 // ============================================================================
 /**
  * 상단 탭 전환 함수
- * @param {'write' | 'calendar' | 'compendium'} tabName
  */
 function switchTab(tabName) {
-  // 1. 상단 탭 버튼 active 클래스 동기화
   document.querySelectorAll(".tab-btn").forEach((btn, idx) => {
     btn.classList.toggle(
       "active",
@@ -106,7 +99,6 @@ function switchTab(tabName) {
     );
   });
 
-  // 2. 모든 탭 섹션 숨김 후 대상 탭만 활성화
   document.querySelectorAll(".tab-content").forEach((content) => {
     content.classList.remove("active");
   });
@@ -114,16 +106,17 @@ function switchTab(tabName) {
   const targetTab = document.getElementById(`tab-${tabName}`);
   if (targetTab) targetTab.classList.add("active");
 
-  // 3. 탭 진입 시 최신 데이터 실시간 패치
   const userId =
-    document.getElementById("userIdInput")?.value.trim() || "user_01";
+    document.getElementById("userIdInput")?.value.trim() ||
+    localStorage.getItem("spookmate_user_id") ||
+    "user_01";
+
   if (tabName === "calendar") loadCalendar(currentYear, currentMonth);
   if (tabName === "compendium") loadCompendium(userId);
 }
 
 /**
  * 팝업 모달 닫기
- * @param {string} modalId
  */
 function closeModal(modalId) {
   const modal = document.getElementById(modalId);
@@ -139,17 +132,24 @@ function closeModal(modalId) {
 async function handleDiarySubmit(e) {
   e.preventDefault();
 
-  const userId = document.getElementById("userIdInput").value.trim();
+  const userId =
+    document.getElementById("userIdInput")?.value.trim() ||
+    localStorage.getItem("spookmate_user_id") ||
+    "user_01";
   const diaryDate = document.getElementById("diaryDate").value;
   const rawEntry = document.getElementById("rawEntry").value.trim();
   const submitBtn = document.getElementById("submitBtn");
+
+  if (!rawEntry) {
+    alert("털어놓을 하소연 내용을 입력해 주세요!");
+    return;
+  }
 
   // 중복 제출 방지 처리
   submitBtn.disabled = true;
   submitBtn.innerText = "스푹이 흔들어 깨우는 중...";
 
   try {
-    // 백엔드 FastAPI 매칭 엔진 호출
     const res = await fetch(`${API_BASE}/diary/submit`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -160,19 +160,26 @@ async function handleDiarySubmit(e) {
       }),
     });
 
-    if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
+    if (!res.ok) {
+      // 서버에서 500 등 에러가 발생한 경우 구체적인 이유 파싱
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.detail || `서버 에러 상태 코드: ${res.status}`);
+    }
+
     const data = await res.json();
 
-    // 요괴 이미지 선(先)강조 확대 -> 축소 안착 -> 글씨 생성 시퀀스 실행
+    // 요괴 소환 애니메이션 실행
     showYokaiHeroReveal(data);
 
     // 입력창 초기화
     document.getElementById("rawEntry").value = "";
+
+    // ★ 일기 저장 성공 즉시 달력과 도감 현황 동기화
+    loadCalendar(currentYear, currentMonth);
+    loadCompendium(userId);
   } catch (err) {
-    alert(
-      "스푹이 소환에 실패했습니다. 백엔드 서버(uvicorn) 상태를 확인해 주세요.",
-    );
     console.error("Diary Submit Error:", err);
+    alert(`스푹이 소환 실패!\n원인: ${err.message}`);
   } finally {
     submitBtn.disabled = false;
     submitBtn.innerText = "SpookMate에게 하소연 폭격하기";
@@ -191,37 +198,34 @@ function showYokaiHeroReveal(serverData) {
   const matched = serverData.eaten_by_yokai;
   const isPositive = (serverData.analysis?.valence ?? 3.0) >= 5.0;
 
-  // 1. 모달 초기화 (확대 상태 및 텍스트 리셋)
+  // 모달 초기화
   modalDetails.classList.remove("reveal");
   if (fallbackEmoji) fallbackEmoji.style.display = "none";
 
   if (yokaiImg) {
-    yokaiImg.classList.remove("zoomed"); // 이전 확대 상태 해제
+    yokaiImg.classList.remove("zoomed");
     yokaiImg.style.display = "inline-block";
-    yokaiImg.className = "modal-yokai-img glitch-summon"; // 1.4배 확대 + 고주파 진동 소환
+    yokaiImg.className = "modal-yokai-img glitch-summon";
     yokaiImg.src = `img/${matched.id}.png`;
     yokaiImg.alt = matched.name;
 
-    // 요괴 이미지 클릭 시 확대/축소 토글 이벤트
     yokaiImg.onclick = function () {
-      if (this.classList.contains("glitch-summon")) return; // 소환 중엔 클릭 방지
+      if (this.classList.contains("glitch-summon")) return;
       this.classList.toggle("zoomed");
     };
   }
 
-  // 2. 텍스트 데이터 바인딩
+  // 텍스트 데이터 바인딩
   document.getElementById("modalYokaiName").innerText =
     `${matched.name} (${matched.country})`;
   document.getElementById("modalEmotionTag").innerText = isPositive
     ? `#${serverData.analysis.emotion_tag} 에너지를 흡수해 요괴가 힘을 얻었습니다!`
     : `#${serverData.analysis.emotion_tag} 감정을 시원하게 먹어치웠습니다!`;
 
-  // [입맛 싱크로율 XX%] 대사 접두사 처리 및 튜플 괄호 찌꺼기 정제
+  // [입맛 싱크로율 XX%] 대사 접두사 및 파이썬 튜플 잔여물 정제 (버그 수정)
   const matchRate = matched.match_rate || 92;
   let quote = (matched.comfort_quote || "").trim();
-  quote = quote
-    .replace(/^(\(\s*['"]?\vert{}['"]?\s*\))/g, "")
-    .replace(/['"],?\s*\)$/, "");
+  quote = quote.replace(/^\s*\(?['"]?/, "").replace(/['"]?,?\s*\)?$/, "");
 
   if (/^\[.*?\]/.test(quote)) {
     quote = quote.replace(/^\[.*?\]\s*/, `[입맛 싱크로율 ${matchRate}%] `);
@@ -234,17 +238,17 @@ function showYokaiHeroReveal(serverData) {
     serverData.analysis.alternative_thought;
   document.getElementById("modalAction").innerText = matched.micro_action;
 
-  // 3. 모달 오픈
+  // 모달 오픈
   modal.classList.add("active");
 
-  // 4. [0.7초 뒤] 고주파 진동 멈추고 1배율(215px) 기본 크기로 안착
+  // 0.7초 뒤 기본 크기 안착
   setTimeout(() => {
     if (yokaiImg) {
       yokaiImg.className = "modal-yokai-img glitch-settled";
     }
   }, 700);
 
-  // 5. [1.05초 뒤] 말풍선 및 처방전 등장
+  // 1.05초 뒤 말풍선 및 CBT 처방전 등장
   setTimeout(() => {
     modalDetails.classList.add("reveal");
   }, 1050);
@@ -255,7 +259,9 @@ function showYokaiHeroReveal(serverData) {
 // ============================================================================
 async function loadCalendar(year, month) {
   const userId =
-    document.getElementById("userIdInput")?.value.trim() || "user_01";
+    document.getElementById("userIdInput")?.value.trim() ||
+    localStorage.getItem("spookmate_user_id") ||
+    "user_01";
   const title = document.getElementById("calendarTitle");
   if (title) title.innerText = `${year}년 ${month}월`;
 
@@ -273,9 +279,9 @@ async function loadCalendar(year, month) {
   });
 
   try {
-    // 월별 스탬프(일기 기록) 목록 수신
+    // URL 인코딩 처리(encodeURIComponent)로 한글/공백 ID 보호
     const res = await fetch(
-      `${API_BASE}/calendar?user_id=${userId}&year=${year}&month=${month}`,
+      `${API_BASE}/calendar?user_id=${encodeURIComponent(userId)}&year=${year}&month=${month}`,
     );
     const data = await res.json();
     const stampMap = {};
@@ -285,21 +291,19 @@ async function loadCalendar(year, month) {
       });
     }
 
-    // 해당 월의 첫 날 요일 및 총 일수 계산
     const firstDay = new Date(year, month - 1, 1).getDay();
     const lastDate = new Date(year, month, 0).getDate();
 
-    // 1일 시작 전 빈 칸 생성
+    // 시작 전 빈 칸 생성
     for (let i = 0; i < firstDay; i++) {
       const emptyCell = document.createElement("div");
       emptyCell.className = "day-cell empty";
       grid.appendChild(emptyCell);
     }
 
-    // 시스템 실제 오늘 날짜(YYYY-MM-DD)
     const todayStr = `${todayObj.getFullYear()}-${String(todayObj.getMonth() + 1).padStart(2, "0")}-${String(todayObj.getDate()).padStart(2, "0")}`;
 
-    // 1일부터 마지막 날까지 날짜 셀 생성
+    // 날짜 셀 채우기
     for (let date = 1; date <= lastDate; date++) {
       const dateStr = `${year}-${String(month).padStart(2, "0")}-${String(date).padStart(2, "0")}`;
       const cell = document.createElement("div");
@@ -315,7 +319,6 @@ async function loadCalendar(year, month) {
         </div>
       `;
 
-      // 작성된 일기가 있는 날은 요괴 뱃지 및 감정 태그 각인
       if (stampMap[dateStr]) {
         const s = stampMap[dateStr];
         cell.innerHTML += `
@@ -334,7 +337,6 @@ async function loadCalendar(year, month) {
 
 /**
  * 캘린더 월 이동
- * @param {number} delta -1(이전 달) 또는 1(다음 달)
  */
 function changeMonth(delta) {
   currentMonth += delta;
@@ -353,10 +355,12 @@ function changeMonth(delta) {
 // ============================================================================
 async function loadCompendium(userId) {
   try {
-    const res = await fetch(`${API_BASE}/compendium?user_id=${userId}`);
+    // URL 인코딩 처리(encodeURIComponent)
+    const res = await fetch(
+      `${API_BASE}/compendium?user_id=${encodeURIComponent(userId)}`,
+    );
     const data = await res.json();
 
-    // 1. 도감 게이지 및 수집률 카운트 업데이트
     const unlockCountEl = document.getElementById("unlockCount");
     const totalCountEl = document.getElementById("totalCount");
     const collectPercentEl = document.getElementById("collectPercent");
@@ -372,7 +376,6 @@ async function loadCompendium(userId) {
     if (!grid) return;
     grid.innerHTML = "";
 
-    // 2. 도감 카드 목록 렌더링 (img/ 폴더의 이미지 바인딩)
     data.compendium.forEach((y) => {
       const card = document.createElement("div");
       card.className = `yokai-card ${y.is_unlocked ? "" : "locked"}`;
@@ -402,7 +405,6 @@ async function loadCompendium(userId) {
 
 /**
  * 도감 카드 클릭 시 상세 정보 모달 채우기
- * @param {object} y 선택된 요괴 도감 객체
  */
 function openYokaiDetail(y) {
   const detImg = document.getElementById("detAvatarImg");
