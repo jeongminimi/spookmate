@@ -2,24 +2,28 @@
 <html lang="ko" class="scroll-smooth">
 
 <head>
+    <script>(function (w, d, s, l, i) {
+            w[l] = w[l] || []; w[l].push({
+                'gtm.start':
+                    new Date().getTime(), event: 'gtm.js'
+            }); var f = d.getElementsByTagName(s)[0],
+                j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : ''; j.async = true; j.src =
+                    'https://www.googletagmanager.com/gtm.js?id=' + i + dl; f.parentNode.insertBefore(j, f);
+        })(window, document, 'script', 'dataLayer', 'GTM-WNXLHH5S');</script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>SPOOKMATE — 초자연적 감정 외재화 & 룸메이트 동거 일기</title>
 
-    <!-- 1. 영문 디스플레이 폰트 -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
         href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800;900&family=Courier+Prime:wght@400;700&family=Permanent+Marker&display=swap"
         rel="stylesheet">
 
-    <!-- 2. 한글 단일 표준 폰트 (Pretendard 공식 CDN) -->
     <link rel="stylesheet" as="style" crossorigin
         href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
 
-    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
 
     <script>
@@ -240,10 +244,10 @@
 <body
     class="bg-spook-black text-gray-200 font-sans selection:bg-spook-red selection:text-white relative overflow-x-hidden">
 
-    <!-- 1. 손전등 오버레이 (8초 후 자동 꺼짐) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-WNXLHH5S" height="0" width="0"
+            style="display:none;visibility:hidden"></iframe></noscript>
     <div id="torch-overlay"></div>
 
-    <!-- 2. GNB 헤더 -->
     <header
         class="fixed top-0 left-0 right-0 z-50 bg-spook-black/80 backdrop-blur-md border-b border-spook-border/60 transition-all duration-300">
         <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between gap-4">
@@ -260,7 +264,6 @@
                 </div>
             </a>
 
-            <!-- 네비게이션 메뉴 (도감 링크 추가) -->
             <nav
                 class="hidden lg:flex items-center gap-6 text-xs font-semibold tracking-widest uppercase text-gray-400 font-mono">
                 <a href="#who-eats-sins" class="hover:text-spook-blood text-white transition-colors">Who Eats Sins</a>
@@ -287,7 +290,7 @@
                     <i data-lucide="flashlight" class="w-4 h-4"></i>
                 </button>
 
-                <button onclick="openQuizModal()"
+                <button onclick="openContractModal()"
                     class="px-4 py-2 rounded-lg bg-spook-red/20 border border-spook-red text-spook-blood hover:bg-spook-red hover:text-white text-xs font-bold tracking-wider uppercase transition-all duration-300">
                     Find My Spookmate
                 </button>
@@ -297,8 +300,8 @@
 
     <main class="relative z-10 pt-20">
 
-        <!-- 3. 히어로 섹션 -->
-        <section class="relative min-h-[90vh] flex items-center justify-center text-center px-6 overflow-hidden">
+        <section id="hero"
+            class="relative min-h-[90vh] flex items-center justify-center text-center px-6 overflow-hidden">
             <div class="absolute inset-0 z-0">
                 <img src="img/web_2.png"
                     onerror="this.src='https://images.unsplash.com/photo-1509114397022-ed747cca3f65?auto=format&fit=crop&w=2000&q=80'"
@@ -345,7 +348,6 @@
             </a>
         </section>
 
-        <!-- 4. WHO EATS YOUR SINS? -->
         <section id="who-eats-sins" class="py-24 px-6 max-w-4xl mx-auto border-t border-spook-border/40">
             <div class="text-center mb-12">
                 <div
@@ -396,7 +398,6 @@
             </div>
         </section>
 
-        <!-- 5. SPOOK OF FEELINGS -->
         <section id="feelings" class="py-24 px-6 max-w-7xl mx-auto border-t border-spook-border/40">
             <div class="text-center mb-16">
                 <div
@@ -408,13 +409,12 @@
                     Spook of Feelings
                 </h2>
                 <p class="font-mono text-xs sm:text-sm text-gray-400 tracking-wide max-w-xl mx-auto">
-                    플루치크 감정 원환 모델의 가장 극단적인 상극 감정을 품은 4대 요괴입니다.<br />
+                    서로 정반대되는 감정을 맡고 있는 4마리 요괴 룸메이트입니다.<br />
                     카드를 선택해 1:1로 직접 대화하며 속마음을 털어놓으세요.
                 </p>
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                <!-- CARD 1: 화차 -->
                 <div onclick="openYokaiChatModal('kasha')"
                     class="group cursor-pointer relative h-[500px] rounded-xl overflow-hidden border border-spook-border bg-spook-card hover:border-spook-red transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_15px_35px_rgba(185,28,28,0.4)] flex flex-col justify-end p-6">
                     <img src="img/1.png"
@@ -449,7 +449,6 @@
                     </div>
                 </div>
 
-                <!-- CARD 2: 백목귀 -->
                 <div onclick="openYokaiChatModal('hyakume')"
                     class="group cursor-pointer relative h-[500px] rounded-xl overflow-hidden border border-spook-border bg-spook-card hover:border-spook-red transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_15px_35px_rgba(185,28,28,0.4)] flex flex-col justify-end p-6">
                     <img src="img/2.png"
@@ -484,7 +483,6 @@
                     </div>
                 </div>
 
-                <!-- CARD 3: 금와 도깨비 -->
                 <div onclick="openYokaiChatModal('dokkaebi')"
                     class="group cursor-pointer relative h-[500px] rounded-xl overflow-hidden border border-spook-border bg-spook-card hover:border-spook-red transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_15px_35px_rgba(212,163,89,0.3)] flex flex-col justify-end p-6">
                     <img src="img/3.png"
@@ -519,7 +517,6 @@
                     </div>
                 </div>
 
-                <!-- CARD 4: 비련의 손각시 -->
                 <div onclick="openYokaiChatModal('songakshi')"
                     class="group cursor-pointer relative h-[500px] rounded-xl overflow-hidden border border-spook-border bg-spook-card hover:border-spook-red transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_15px_35px_rgba(185,28,28,0.4)] flex flex-col justify-end p-6">
                     <img src="img/4.png"
@@ -556,7 +553,6 @@
             </div>
         </section>
 
-        <!-- 6. SPOOK-CAM : 펫캠 섹션 ('WHAT IS YOUR SPOOKMATE DOING') -->
         <section id="wrong-place" class="py-24 px-6 max-w-7xl mx-auto border-t border-spook-border/40">
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
                 <div class="lg:col-span-5 space-y-6">
@@ -580,7 +576,7 @@
                     </p>
 
                     <div class="pt-2 flex flex-wrap gap-3">
-                        <button onclick="openSpookCamModal('CAM-01 [주방 냉장고 앞] : 유통기한 지난 우유 냄새 맡기')"
+                        <button onclick="openSpookCamModal('img/2.gif', 'CAM-01 [주방 냉장고 앞] : 유통기한 지난 우유 냄새 맡기')"
                             class="inline-flex items-center gap-2.5 px-6 py-3.5 bg-spook-red/20 border border-spook-red hover:bg-spook-red text-white text-xs font-mono uppercase tracking-wider rounded transition-all shadow-[0_0_20px_rgba(185,28,28,0.3)]">
                             <i data-lucide="cctv" class="w-4 h-4 text-spook-blood"></i>
                             <span>실시간 룸메캠 엿보기 (LIVE)</span>
@@ -589,13 +585,11 @@
                 </div>
 
                 <div class="lg:col-span-7 relative h-[420px] sm:h-[480px]">
-                    <div onclick="openSpookCamModal('CAM-01 [주방 냉장고 앞] : 유통기한 지난 우유 냄새 맡기')"
+                    <div onclick="openSpookCamModal('img/2.gif', 'CAM-01 [현관] : 언제와? 그니까 언제몇시몇분에와?')"
                         class="cursor-pointer group absolute top-0 left-0 w-3/4 h-64 rounded-xl overflow-hidden border border-spook-border hover:border-spook-red transition-all duration-300 shadow-2xl">
-                        <img src="img/web_2.png"
-                            onerror="this.src='https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=800&q=80'"
-                            alt="Spook-Cam Kitchen"
-                            class="w-full h-full object-cover filter brightness-60 group-hover:scale-105 transition-transform duration-500" />
-                        <div class="absolute inset-0 bg-black/40 flex items-center justify-center">
+                        <img src="img/2.gif" onerror="this.src='img/web_2.png'" alt="Spook-Cam Kitchen GIF"
+                            class="w-full h-full object-cover filter brightness-90 group-hover:scale-105 transition-transform duration-500" />
+                        <div class="absolute inset-0 bg-black/30 flex items-center justify-center">
                             <div
                                 class="w-12 h-12 rounded-full bg-spook-red/80 flex items-center justify-center group-hover:scale-110 transition-transform">
                                 <i data-lucide="play" class="w-5 h-5 text-white fill-white ml-0.5"></i>
@@ -609,16 +603,17 @@
                         <div
                             class="absolute bottom-2 left-3 right-3 text-[10px] font-mono text-gray-200 bg-black/80 px-2.5 py-1 rounded flex justify-between">
                             <span>REC ● 14:22:08 [냉장고 털기]</span>
-                            <span class="text-amber-400">장판 긁는 중</span>
+                            <span class="text-amber-400">실시간 감시 중</span>
                         </div>
                     </div>
 
-                    <div onclick="openSpookCamModal('CAM-02 [침대 위] : 주인 수면잠옷 머리에 뒤집어쓰고 멍때리기')"
+                    <div onclick="openSpookCamModal('img/3.gif', 'CAM-02 [거실] : 아싸~ 인간없을때 뛰어놀자')"
                         class="cursor-pointer group absolute top-12 right-0 w-1/2 h-44 rounded-xl overflow-hidden border border-spook-border hover:border-spook-red transition-all duration-300 shadow-2xl z-20">
-                        <img src="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=800&q=80'"
-                            alt="Spook-Cam Bed"
-                            class="w-full h-full object-cover filter brightness-50 group-hover:scale-105 transition-transform duration-500" />
-                        <div class="absolute inset-0 bg-black/40 flex items-center justify-center">
+                        <img src="img/3.gif"
+                            onerror="this.src='https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=800&q=80'"
+                            alt="Spook-Cam Bed GIF"
+                            class="w-full h-full object-cover filter brightness-85 group-hover:scale-105 transition-transform duration-500" />
+                        <div class="absolute inset-0 bg-black/30 flex items-center justify-center">
                             <div
                                 class="w-10 h-10 rounded-full bg-spook-red/80 flex items-center justify-center group-hover:scale-110 transition-transform">
                                 <i data-lucide="play" class="w-4 h-4 text-white fill-white ml-0.5"></i>
@@ -630,12 +625,13 @@
                         </div>
                     </div>
 
-                    <div onclick="openSpookCamModal('CAM-03 [현관 문틈] : 도어락 소리 날까 봐 귀 쫑긋', 'https://images.unsplash.com/photo-1509114397022-ed747cca3f65?auto=format&fit=crop&w=800&q=80', '문틈에서 주인 발소리 기다리는 중', 'when are you coming?')"
+                    <div onclick="openSpookCamModal('img/1.gif', 'CAM-03 [부엌] : 나혼자 커피를 마시고~')"
                         class="cursor-pointer group absolute bottom-0 left-12 w-2/3 h-52 rounded-xl overflow-hidden border border-spook-border hover:border-spook-red transition-all duration-300 shadow-2xl z-30">
-                        <img src="https://images.unsplash.com/photo-1509114397022-ed747cca3f65?auto=format&fit=crop&w=800&q=80'"
-                            alt="Spook-Cam Door"
-                            class="w-full h-full object-cover filter brightness-50 group-hover:scale-105 transition-transform duration-500" />
-                        <div class="absolute inset-0 bg-black/40 flex items-center justify-center">
+                        <img src="img/1.gif"
+                            onerror="this.src='https://images.unsplash.com/photo-1509114397022-ed747cca3f65?auto=format&fit=crop&w=800&q=80'"
+                            alt="Spook-Cam Door GIF"
+                            class="w-full h-full object-cover filter brightness-85 group-hover:scale-105 transition-transform duration-500" />
+                        <div class="absolute inset-0 bg-black/30 flex items-center justify-center">
                             <div
                                 class="w-10 h-10 rounded-full bg-spook-red/80 flex items-center justify-center group-hover:scale-110 transition-transform">
                                 <i data-lucide="play" class="w-4 h-4 text-white fill-white ml-0.5"></i>
@@ -650,11 +646,7 @@
             </div>
         </section>
 
-        <!-- =====================================================================
-             7. [신규 삽입] 73종 월간 요괴도감 섹션 (매달 1일 자동 리셋)
-             ===================================================================== -->
         <section id="compendium-section" class="py-24 px-6 max-w-7xl mx-auto border-t border-spook-border/40">
-            <!-- 도감 헤더 및 매월 1일 리셋 인포 배지 -->
             <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
                 <div>
                     <div
@@ -671,7 +663,6 @@
                     </p>
                 </div>
 
-                <!-- 수집 현황 & 리셋 D-Day 위젯 -->
                 <div
                     class="bg-spook-dark/95 border border-spook-border p-4 rounded-xl min-w-[280px] space-y-2.5 font-mono text-xs">
                     <div class="flex items-center justify-between text-gray-300">
@@ -680,7 +671,6 @@
                             <span id="compendium-unlocked-count">4</span> / 73 (<span id="compendium-percent">5%</span>)
                         </span>
                     </div>
-                    <!-- 진행률 바 -->
                     <div class="w-full bg-black h-2 rounded-full overflow-hidden border border-gray-800">
                         <div id="compendium-progress-bar"
                             class="h-full bg-gradient-to-r from-red-800 to-spook-gold transition-all duration-500"
@@ -695,24 +685,20 @@
                 </div>
             </div>
 
-            <!-- 73종 요괴 카드 그리드 (8열 배치) -->
             <div id="compendium-cards-grid"
                 class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3.5">
-                <!-- JS로 73종 카드 동적 렌더링 -->
             </div>
         </section>
 
     </main>
 
-    <!-- 푸터 -->
-    <footer class="bg-spook-dark border-t border-spook-border py-12 px-6 font-mono text-xs text-gray-500">
+    <footer id="footer" class="bg-spook-dark border-t border-spook-border py-12 px-6 font-mono text-xs text-gray-500">
         <div class="max-w-7xl mx-auto text-center space-y-3">
             <div class="font-cinzel text-white text-base font-bold">SPOOKMATE HQ</div>
             <p>© 2026 SPOOKMATE EMOTION RESCUE. 73 KINDS OF ASIAN YOKAI DIALOGUE ENGINE.</p>
         </div>
     </footer>
 
-    <!-- ================= 73종 요괴 소환 & 좌우 분할 및 확대 모달 ================= -->
     <div id="sin-eater-modal"
         class="fixed inset-0 z-50 bg-black/95 backdrop-blur-md hidden items-center justify-center p-4">
         <div id="sin-modal-container"
@@ -778,7 +764,6 @@
         </div>
     </div>
 
-    <!-- ================= 요괴 사진 확대 뷰어 (Lightbox) ================= -->
     <div id="image-zoom-modal"
         class="fixed inset-0 z-[60] bg-black/95 backdrop-blur-lg hidden items-center justify-center p-4 cursor-zoom-out"
         onclick="closeZoomImage()">
@@ -791,7 +776,6 @@
         </div>
     </div>
 
-    <!-- ================= 동거 계약서 모달 (입장 시 자동 팝업) ================= -->
     <div id="contract-modal"
         class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md hidden items-center justify-center p-4">
         <div
@@ -855,7 +839,6 @@
         </div>
     </div>
 
-    <!-- ================= 1:1 실시간 감정 상담 챗 모달 ================= -->
     <div id="yokai-chat-modal"
         class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md hidden items-center justify-center p-4">
         <div
@@ -898,7 +881,6 @@
         </div>
     </div>
 
-    <!-- ================= SPOOK-CAM 펫캠 뷰어 모달 ================= -->
     <div id="cctv-modal" class="fixed inset-0 z-50 bg-black/95 backdrop-blur-md hidden items-center justify-center p-4">
         <div
             class="relative w-full max-w-3xl bg-spook-dark border-2 border-spook-border rounded-xl overflow-hidden shadow-2xl crt flex flex-col">
@@ -906,7 +888,7 @@
                 class="bg-black px-5 py-3 flex items-center justify-between border-b border-spook-border font-mono text-xs">
                 <div class="flex items-center gap-2.5">
                     <span class="w-2.5 h-2.5 rounded-full bg-red-600 animate-ping"></span>
-                    <span id="cctv-cam-title" class="text-emerald-400 font-bold">CAM-01 [주방] : 냉장고 털이 중</span>
+                    <span id="cctv-cam-title" class="text-emerald-400 font-bold">CAM-01 [주방] : 유통기한 지난 우유 냄새 맡기</span>
                 </div>
                 <div class="flex items-center gap-4 text-gray-400 text-[11px]">
                     <span id="cctv-timecode">2026-09-22 14:22:08</span>
@@ -917,21 +899,19 @@
             </div>
 
             <div class="relative h-80 sm:h-96 bg-black flex items-center justify-center overflow-hidden">
-                <img id="cctv-feed-img" src="img/web_2.png"
-                    onerror="this.src='https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=1200&q=80'"
-                    alt="Spook-Cam Feed"
-                    class="w-full h-full object-cover filter contrast-150 brightness-75 transition-all duration-300" />
+                <img id="cctv-feed-img" src="img/1.gif" onerror="this.src='img/web_2.png'" alt="Spook-Cam Feed Live GIF"
+                    class="w-full h-full object-cover filter contrast-125 brightness-95 transition-all duration-300" />
 
                 <div
                     class="absolute top-4 left-4 font-mono text-[11px] text-white/80 space-y-1 bg-black/60 p-2.5 rounded border border-white/10 backdrop-blur-sm">
                     <div class="text-emerald-400 font-bold">● SPOOK-CAM LIVE FEED</div>
-                    <div id="cam-status-text">활동: <span class="text-amber-300">내 장판 발톱으로 긁기</span></div>
+                    <div id="cam-status-text">활동: <span class="text-amber-300">냉장고 문 열어두고 멍때리기</span></div>
                     <div>룸메 상태: <span class="text-red-400">배고픔 (감정 야식 필요)</span></div>
                 </div>
 
                 <div id="cam-graffiti"
                     class="absolute bottom-4 right-4 font-marker text-spook-blood text-2xl opacity-80 select-none">
-                    spookmate is hungry...
+                    spookmate is snacking...
                 </div>
             </div>
 
@@ -939,17 +919,17 @@
                 class="bg-black/90 p-4 border-t border-spook-border flex flex-wrap gap-2.5 items-center justify-between font-mono text-xs">
                 <div class="flex gap-1.5">
                     <button
-                        onclick="switchCamFeed('CAM-01 [주방] : 유통기한 지난 우유 냄새 맡기', 'img/web_2.png', '냉장고 문 열어두고 멍때리기', 'spookmate is snacking...')"
+                        onclick="switchCamFeed('CAM-01 [주방] : 유통기한 지난 우유 냄새 맡기', 'img/1.gif', '냉장고 문 열어두고 멍때리기', 'spookmate is snacking...')"
                         class="px-2.5 py-1.5 rounded bg-spook-dark border border-spook-border hover:border-emerald-500 text-gray-300 text-[10px]">
                         CAM 1 (주방)
                     </button>
                     <button
-                        onclick="switchCamFeed('CAM-02 [침대] : 주인 잠옷 뒤집어쓰고 셀카 놀이', 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=800&q=80', '이불 속에 들어가서 나오기 싫어함', 'so cozy in here...')"
+                        onclick="switchCamFeed('CAM-02 [침대] : 주인 잠옷 뒤집어쓰고 셀카 놀이', 'img/2.gif', '이불 속에 들어가서 나오기 싫어함', 'so cozy in here...')"
                         class="px-2.5 py-1.5 rounded bg-spook-dark border border-spook-border hover:border-emerald-500 text-gray-300 text-[10px]">
                         CAM 2 (침대)
                     </button>
                     <button
-                        onclick="switchCamFeed('CAM-03 [현관] : 도어락 소리 날까 봐 귀 쫑긋', 'https://images.unsplash.com/photo-1509114397022-ed747cca3f65?auto=format&fit=crop&w=800&q=80', '문틈에서 주인 발소리 기다리는 중', 'when are you coming?')"
+                        onclick="switchCamFeed('CAM-03 [현관] : 도어락 소리 날까 봐 귀 쫑긋', 'img/3.gif', '문틈에서 주인 발소리 기다리는 중', 'when are you coming?')"
                         class="px-2.5 py-1.5 rounded bg-spook-dark border border-spook-border hover:border-emerald-500 text-gray-300 text-[10px]">
                         CAM 3 (현관)
                     </button>
@@ -959,7 +939,7 @@
                     <button onclick="yellAtYokai()"
                         class="px-3 py-1.5 bg-red-950/80 hover:bg-red-800 text-red-300 border border-red-700/60 rounded font-bold transition-colors flex items-center gap-1.5">
                         <i data-lucide="mic" class="w-3.5 h-3.5"></i>
-                        <span>"야! 장판 뜯지 마!" 호통치기</span>
+                        <span>"야! 사고치지말랬지! 당장 손 떼!"</span>
                     </button>
                     <button onclick="feedYokaiTreat()"
                         class="px-3 py-1.5 bg-amber-950/80 hover:bg-amber-800 text-amber-300 border border-amber-700/60 rounded font-bold transition-colors flex items-center gap-1.5">
@@ -971,9 +951,16 @@
         </div>
     </div>
 
-    <!-- JavaScript 엔진 -->
     <script>
         lucide.createIcons();
+
+        function pushToDataLayer(eventName, params = {}) {
+            window.dataLayer = window.dataLayer || [];
+            window.dataLayer.push({
+                event: eventName,
+                ...params
+            });
+        }
 
         const API_BASE = (window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost")
             ? "http://127.0.0.1:8000/api"
@@ -984,7 +971,27 @@
         document.getElementById('vent-today-date').textContent = todayStr;
 
         // =====================================================================
-        // [핵심] 73종 요괴 도감 데이터 & 매월 1일 리셋 엔진
+        // 인기 섹션 자동 추적
+        // =====================================================================
+        function initSectionTracking() {
+            const trackSections = document.querySelectorAll('section[id], header, footer');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const sectionId = entry.target.id || entry.target.tagName.toLowerCase();
+                        pushToDataLayer('section_view', {
+                            section_name: sectionId
+                        });
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.35 });
+
+            trackSections.forEach(el => observer.observe(el));
+        }
+
+        // =====================================================================
+        // 73종 요괴 도감 데이터 & 매월 1일 리셋 엔진
         // =====================================================================
         const YOKAI_NAMES_73 = [
             "화차", "백목귀", "금와 도깨비", "비련의 손각시", "인면조", "구미호", "어둑시니", "그슨새",
@@ -998,37 +1005,32 @@
             "사령", "도척귀", "귀마", "야차", "아수라", "가릉빈가", "나찰", "수금아", "방구석 스푹이"
         ];
 
-        // 1. 매월 1일 자동 리셋 검사 함수
         function checkMonthlyCompendiumReset() {
             const currentMonthCycle = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
             const lastSavedCycle = localStorage.getItem("spookmate_compendium_cycle");
 
             if (lastSavedCycle !== currentMonthCycle) {
-                // 매월 1일이 되었거나 새 달로 변경됨 -> 도감 자동 리셋!
                 localStorage.setItem("spookmate_compendium_cycle", currentMonthCycle);
-                // 기본으로 만난 초기 4종만 남기고 리셋
                 localStorage.setItem("spookmate_monthly_unlocked", JSON.stringify([1, 2, 3, 4]));
-                console.log(`[도감 리셋 완료] 새로운 월간 주기(${currentMonthCycle})가 시작되었습니다.`);
             }
         }
 
-        // 2. 도감 렌더링 함수
         function renderMonthlyCompendium() {
             checkMonthlyCompendiumReset();
 
-            const unlockedList = JSON.parse(localStorage.getItem("spookmate_monthly_unlocked") || "[1,2,3,4]");
+            const rawStored = JSON.parse(localStorage.getItem("spookmate_monthly_unlocked") || "[1,2,3,4]");
+            const unlockedList = rawStored.map(id => parseInt(id, 10));
+
             const grid = document.getElementById("compendium-cards-grid");
             if (!grid) return;
             grid.innerHTML = "";
 
-            // 상단 수집률 계산
             const unlockedCount = unlockedList.length;
             const percent = Math.round((unlockedCount / 73) * 100);
             document.getElementById("compendium-unlocked-count").textContent = unlockedCount;
             document.getElementById("compendium-percent").textContent = `${percent}%`;
             document.getElementById("compendium-progress-bar").style.width = `${percent}%`;
 
-            // 매달 1일까지 남은 D-Day 계산
             const lastDayThisMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
             const daysRemaining = lastDayThisMonth - now.getDate() + 1;
             const nextMonth = (now.getMonth() + 2 > 12) ? 1 : now.getMonth() + 2;
@@ -1036,16 +1038,17 @@
                 <i data-lucide="refresh-cw" class="w-3 h-3"></i> D-${daysRemaining}일 (${nextMonth}월 1일 자정 리셋)
             `;
 
-            // 73개 카드 렌더링
             for (let i = 1; i <= 73; i++) {
                 const isUnlocked = unlockedList.includes(i);
                 const name = YOKAI_NAMES_73[i - 1] || `요괴 #${i}`;
                 const card = document.createElement("div");
 
                 if (isUnlocked) {
-                    // 해금된 카드
                     card.className = "group cursor-pointer bg-spook-card border border-spook-gold/50 hover:border-spook-gold rounded-xl p-2.5 flex flex-col items-center text-center transition-all duration-300 hover:-translate-y-1 shadow-[0_4px_15px_rgba(212,163,89,0.15)]";
-                    card.onclick = () => openZoomImage(`img/${i}.png`);
+                    card.onclick = () => {
+                        pushToDataLayer('compendium_card_click', { yokai_id: i, yokai_name: name });
+                        openZoomImage(`img/${i}.png`);
+                    };
                     card.innerHTML = `
                         <div class="w-full aspect-square rounded-lg overflow-hidden bg-black mb-2 border border-spook-border group-hover:border-spook-gold transition-colors">
                             <img src="img/${i}.png" alt="${name}" class="w-full h-full object-cover group-hover:scale-105 transition-transform" onerror="this.src='img/web_2.png'">
@@ -1055,7 +1058,6 @@
                         <span class="text-[9px] font-mono text-emerald-400 mt-0.5">봉인 해금</span>
                     `;
                 } else {
-                    // 미해금 카드 (흑백 실루엣 + 잠금)
                     card.className = "bg-spook-card/40 border border-gray-800 rounded-xl p-2.5 flex flex-col items-center text-center opacity-40 cursor-not-allowed select-none";
                     card.innerHTML = `
                         <div class="w-full aspect-square rounded-lg bg-black/80 mb-2 border border-gray-900 flex items-center justify-center text-gray-700">
@@ -1071,19 +1073,24 @@
             lucide.createIcons();
         }
 
-        // 요괴 해금 등록 함수
+        // [오류 수정] 확실한 정수 변환 및 즉각적인 UI 반영
         function unlockYokaiInMonthlyCompendium(yokaiId) {
             checkMonthlyCompendiumReset();
-            const unlockedList = JSON.parse(localStorage.getItem("spookmate_monthly_unlocked") || "[1,2,3,4]");
-            if (!unlockedList.includes(yokaiId)) {
-                unlockedList.push(yokaiId);
+            const targetId = parseInt(yokaiId, 10);
+            if (isNaN(targetId) || targetId < 1 || targetId > 73) return;
+
+            let unlockedList = JSON.parse(localStorage.getItem("spookmate_monthly_unlocked") || "[1,2,3,4]")
+                .map(id => parseInt(id, 10));
+
+            if (!unlockedList.includes(targetId)) {
+                unlockedList.push(targetId);
                 localStorage.setItem("spookmate_monthly_unlocked", JSON.stringify(unlockedList));
                 renderMonthlyCompendium();
             }
         }
 
         // =====================================================================
-        // 손전등(후레쉬) 8초 자동 소등 타이머 엔진
+        // 손전등(후레쉬) 엔진
         // =====================================================================
         const torchOverlay = document.getElementById('torch-overlay');
         const torchToggle = document.getElementById('torch-toggle');
@@ -1122,15 +1129,19 @@
         window.addEventListener('load', () => {
             turnOnTorch();
             renderMonthlyCompendium();
+            initSectionTracking();
         });
 
         // =====================================================================
-        // 'WHO EATS YOUR SINS?' 소환 연출 (도감 해금 연동)
+        // 'WHO EATS YOUR SINS?' 소환 & 73종 도감 해금
         // =====================================================================
         const sinModal = document.getElementById('sin-eater-modal');
         const sinModalContainer = document.getElementById('sin-modal-container');
         const sinYokaiImg = document.getElementById('sin-yokai-img');
 
+        // =====================================================================
+        // [개선] 73종 균등 분배 & 미해금 요괴 우선 소환 엔진
+        // =====================================================================
         async function handleSinVentSubmit(e) {
             e.preventDefault();
             const textInput = document.getElementById('sin-entry-text');
@@ -1143,10 +1154,64 @@
             submitBtn.disabled = true;
             submitBtn.innerHTML = `
                 <span class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                <span>문틈 너머에서 감정을 씹어 삼키며 73종 요괴 매칭 중...</span>
+                <span>문틈 너머에서 73종 전승 요괴 중 새로운 룸메이트 탐색 중...</span>
             `;
 
+            // 1. 현재 저장된 해금 목록 및 잠긴 요괴 목록 계산
+            checkMonthlyCompendiumReset();
+            const currentUnlocked = JSON.parse(localStorage.getItem("spookmate_monthly_unlocked") || "[1,2,3,4]")
+                .map(id => parseInt(id, 10));
+
+            const lockedList = [];
+            for (let i = 1; i <= 73; i++) {
+                if (!currentUnlocked.includes(i)) {
+                    lockedList.push(i);
+                }
+            }
+
+            // 2. 미해금 요괴 우선 추첨 (모두 해금되었을 땐 직전 요괴 제외 후 랜덤)
+            let chosenId;
+            const lastSummonedId = parseInt(localStorage.getItem("spookmate_last_summoned") || "0", 10);
+
+            if (lockedList.length > 0) {
+                // 아직 도감에 없는 요괴 중 무작위 1마리 선택 -> 매번 새로운 요괴 수집 보장!
+                const randomIndex = Math.floor(Math.random() * lockedList.length);
+                chosenId = lockedList[randomIndex];
+            } else {
+                // 73종 모두 수집 완료 시: 직전에 만난 요괴만 피해 골고루 재등장
+                let pool = [];
+                for (let i = 1; i <= 73; i++) {
+                    if (i !== lastSummonedId) pool.push(i);
+                }
+                chosenId = pool[Math.floor(Math.random() * pool.length)];
+            }
+
+            localStorage.setItem("spookmate_last_summoned", chosenId);
+            const yokaiName = YOKAI_NAMES_73[chosenId - 1] || `요괴 #${chosenId}`;
+
+            // 3. 요괴 소환 시 건넬 맞춤형 서늘한 대사 & 신체 처방 라이브러리
+            const quotePool = [
+                "그딴 일로 네 영혼 갉아먹지 마라! 네 분통과 억울함은 내가 한 톨도 남김없이 씹어 삼켜주마!",
+                "네 머릿속에서 상영 중인 최악의 시나리오는 가짜야. 내 눈으로 미리 봤는데 별일 아니더군.",
+                "뚝딱! 고민해서 해결 안 나는 건 내 방망이 밑에 깔아뭉개버렸다! 야식이나 먹자!",
+                "혼자 끙끙 앓으며 자책하지 마... 네 외로움과 눈물은 내 차가운 옷자락이 다 닦아줄게.",
+                "하늘 높이 날아올라 네 작은 걱정거리들을 내려다보아라. 지나고 나면 티끌만도 못한 일이다.",
+                "세상이 널 속이고 억울하게 만들었지? 다 부질없다. 오늘 밤은 문 걸어 잠그고 푹 자라."
+            ];
+
+            const missionPool = [
+                "의자에 등을 깊숙이 기대고, 4초간 숨을 들이마시고 7초간 멈춘 뒤 8초간 길게 내쉬세요.",
+                "자리에서 일어나 가볍게 어깨를 으쓱거리며 기지개를 10초간 시원하게 켜보세요.",
+                "따뜻한 물 한 컵을 양손으로 감싸 쥐고 손바닥에 전해지는 온기를 1분간 음미하세요.",
+                "두 주먹을 5초간 꽉 쥐었다가 한숨과 함께 툭 바닥으로 떨어뜨려 힘을 빼세요.",
+                "시선을 창밖 먼 곳으로 던지고 눈동자를 좌우로 천천히 3회 회전시켜 머리를 비우세요."
+            ];
+
+            const assignedQuote = quotePool[chosenId % quotePool.length];
+            const assignedMission = missionPool[chosenId % missionPool.length];
+
             try {
+                // 백엔드 통신 시도 (분석 로그 동기화)
                 const res = await fetch(`${API_BASE}/diary/submit`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -1157,24 +1222,59 @@
                     })
                 });
 
+                let emotionTag = "감정 정화";
+                let altThought = "상대방의 무례함은 그의 결핍일 뿐, 내 본질을 훼손할 수 없다.";
+
                 if (res.ok) {
                     const data = await res.json();
-                    triggerSummonSequence(data.eaten_by_yokai, data.analysis);
-                    unlockYokaiInMonthlyCompendium(data.eaten_by_yokai.id);
-                } else {
-                    throw new Error("서버 응답 오류");
+                    if (data.analysis) {
+                        emotionTag = data.analysis.emotion_tag || emotionTag;
+                        altThought = data.analysis.alternative_thought || altThought;
+                    }
                 }
+
+                const finalYokai = {
+                    id: chosenId,
+                    name: yokaiName,
+                    comfort_quote: assignedQuote,
+                    micro_action: assignedMission
+                };
+
+                pushToDataLayer('emotion_vent_submit', {
+                    yokai_name: yokaiName,
+                    yokai_id: chosenId,
+                    emotion_tag: emotionTag
+                });
+
+                triggerSummonSequence(finalYokai, {
+                    emotion_tag: emotionTag,
+                    alternative_thought: altThought
+                });
+
+                // 도감에 즉시 해금 저장
+                unlockYokaiInMonthlyCompendium(chosenId);
+
             } catch (err) {
-                const fallbackYokaiList = [
-                    { id: 1, name: "화차 (Kasha)", country: "일본", comfort_quote: "그딴 인간 때문에 홧병 내지 마라! 네 분통은 내가 활활 타는 불바퀴로 다 짓밟아 삼켜주마!", micro_action: "쿠션 안기: 부드러운 쿠션을 꼭 껴안고 깊은숨을 천천히 3회 내쉬세요." },
-                    { id: 2, name: "백목귀 (Hyakume)", country: "동아시아", comfort_quote: "일어나지도 않은 일로 덜덜 떨지 마. 네 주변의 모든 위험은 내 100개 눈동자가 지켜보고 있다.", micro_action: "시선을 바닥 45도에 고정하고 4초간 들이마시고 7초간 멈춘 뒤 8초간 길게 내쉬세요." },
-                    { id: 3, name: "금와 도깨비", country: "한국", comfort_quote: "인생 원래 롤러코스터야! 뚝딱! 오늘치 썩은 고민은 내 방망이로 박살 냈으니 야식이나 먹자!", micro_action: "자리에서 일어나 가볍게 어깨를 으쓱거리며 기지개를 10초간 시원하게 켜세요." },
-                    { id: 4, name: "비련의 손각시", country: "한국", comfort_quote: "혼자 끙끙 앓으며 자책하지 마... 네 외로움과 슬픔의 눈물은 내 차가운 옷자락이 다 닦아줄게.", micro_action: "따뜻한 물을 양손으로 감싸 쥐고, 손바닥에 전해지는 온기를 1분간 가만히 느껴보세요." },
-                    { id: 5, name: "인면조 (Inmyeonjo)", country: "한국", comfort_quote: "하늘 높이 날아올라 네 작은 걱정거리들을 내려다보아라. 티끌만도 못한 일들이다.", micro_action: "양팔을 넓게 벌리고 가슴을 펴며 10초간 하늘을 올려다보세요." }
-                ];
-                const matched = fallbackYokaiList[Math.floor(Math.random() * fallbackYokaiList.length)];
-                triggerSummonSequence(matched, { emotion_tag: "혼합 감정", alternative_thought: "상대방의 무례함은 그 사람의 문제일 뿐, 내 인격과 가치를 깎아내릴 수 없다." });
-                unlockYokaiInMonthlyCompendium(matched.id);
+                // 오프라인 / 네트워크 지연 시에도 완벽하게 새로운 요괴로 해금
+                const fallbackYokai = {
+                    id: chosenId,
+                    name: yokaiName,
+                    comfort_quote: assignedQuote,
+                    micro_action: assignedMission
+                };
+
+                pushToDataLayer('emotion_vent_submit', {
+                    yokai_name: yokaiName,
+                    yokai_id: chosenId,
+                    emotion_tag: '감정 포식'
+                });
+
+                triggerSummonSequence(fallbackYokai, {
+                    emotion_tag: "감정 포식",
+                    alternative_thought: "이 일은 지나갈 것이며, 나의 내일을 규정하지 않는다."
+                });
+
+                unlockYokaiInMonthlyCompendium(chosenId);
             } finally {
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = `
@@ -1215,9 +1315,6 @@
             sinYokaiImg.classList.remove('animate-summon-glitch');
         }
 
-        // =====================================================================
-        // 사진 클릭 시 대형 확대 뷰어 (Lightbox)
-        // =====================================================================
         const imageZoomModal = document.getElementById('image-zoom-modal');
         const zoomedImage = document.getElementById('zoomed-image');
 
@@ -1233,7 +1330,7 @@
         }
 
         // =====================================================================
-        // 동거 계약서 모달 & 캘린더 엔진
+        // 동거 계약서 모달 엔진 & GA 추적
         // =====================================================================
         const contractModal = document.getElementById('contract-modal');
         const contractNameInput = document.getElementById('contract-name');
@@ -1261,6 +1358,7 @@
         });
 
         function openContractModal() {
+            pushToDataLayer('contract_modal_open');
             const currentName = localStorage.getItem("spookmate_user_id") || "";
             if (contractNameInput) contractNameInput.value = currentName;
             if (contractDateDisplay) contractDateDisplay.value = selectedContractDate;
@@ -1308,8 +1406,8 @@
 
                 const isSelected = (dateStr === selectedContractDate);
                 btn.className = `py-1.5 rounded transition-colors text-xs font-mono ${isSelected
-                        ? 'bg-spook-red text-white font-bold shadow-[0_0_10px_rgba(225,29,72,0.8)]'
-                        : 'text-gray-300 hover:bg-gray-800 hover:text-spook-gold'
+                    ? 'bg-spook-red text-white font-bold shadow-[0_0_10px_rgba(225,29,72,0.8)]'
+                    : 'text-gray-300 hover:bg-gray-800 hover:text-spook-gold'
                     }`;
 
                 btn.onclick = () => {
@@ -1333,6 +1431,11 @@
             applyUserNickname(nickname);
             closeContractModal();
 
+            pushToDataLayer('contract_complete', {
+                user_nickname: nickname,
+                contract_date: selectedContractDate
+            });
+
             await syncUserWithDB(nickname);
         }
 
@@ -1354,7 +1457,10 @@
         }
 
         // =====================================================================
-        // 4대 요괴 페르소나 정의 & 1:1 티키타카 대화 (도감 해금 연동)
+        // [100% 감정 극대화 티키타카 엔진]
+        // =====================================================================
+        // =====================================================================
+        // [수정] 4대 요괴 페르소나 극단 감정 일상 대화 엔진
         // =====================================================================
         const YOKAI_PERSONAS = {
             kasha: {
@@ -1363,16 +1469,33 @@
                 pole: "🔥 극단적 분노",
                 badgeClass: "bg-red-950 text-red-400 border border-red-800",
                 avatar: "img/1.png",
-                greeting: "야, 룸메! 문 쾅 닫고 들어올 때부터 알아봤다. 어떤 놈이 네 속을 박박 긁었냐? 누구야? 당장 불바퀴 굴려버리게 이름 대!",
+                greeting: "야! 문 쾅 닫고 들어올 때부터 알아봤다! 어떤 자식이 네 속을 긁었냐?! 당장 불바퀴로 싹 갈아버리게 이름 대!",
                 generateReply: (msg, turn, userName) => {
-                    const m = msg.toLowerCase();
-                    if (m.includes("부장") || m.includes("팀장") || m.includes("상사") || m.includes("회사") || m.includes("일")) {
-                        return `${userName}아, 그 인간 대가리에 숯불을 얹어버릴라! 자기는 손 하나 까딱 안 하면서 잔소리만 늘어놓지? 네 탓 절대 아니다! 그놈 면상에 분노의 화염포를 갈겨야 하는데 말이야. 오늘 무슨 헛소리를 지껄였는데?`;
+                    const m = msg.trim();
+                    // 1. 대화 시작/인사 ("너랑 대화할래", "안녕", "대화" 등)
+                    if (m.includes("대화") || m.includes("안녕") || m.includes("반가") || m.includes("하이") || m.includes("놀자")) {
+                        const furiousGreetings = [
+                            `대화?! 그래, 속 터지는 거 다 털어놔 봐! 가슴에 불나는 거 참고 있으면 암 걸려! 누구 욕하고 싶은데?! 당장 말해!`,
+                            `야! 말 걸어줘서 고맙긴 한데 목소리가 왜 이렇게 기어들어가?! 화끈하게 소리 질러! 오늘 무슨 일 있었어?!`,
+                            `좋아! 나랑 말 좀 섞자! 속 썩이는 놈들 면상에 숯불 던지는 기분으로 가감 없이 다 뱉어내!`
+                        ];
+                        return furiousGreetings[turn % furiousGreetings.length];
                     }
-                    if (m.includes("친구") || m.includes("애인") || m.includes("남친") || m.includes("여친") || m.includes("사람")) {
-                        return `배은망덕한 놈이네! ${userName} 네가 그렇게 배려해줬으면 고마운 줄 알아야지, 감히 널 서운하게 해? 참지 마라. 참으면 네 속만 타서 재가 된다. 내가 오늘 밤 그놈 꿈에 찾아가서 이불에 불장난 쳐줄까?`;
+                    // 2. 단답/질문 ("어떻게", "왜", "어쩌라고", "방법")
+                    if (m.includes("어떻게") || m.includes("어떡") || m.includes("어쩌") || m.includes("왜") || m.includes("뭐")) {
+                        return `어떻게 하긴 뭘 어떻게 해?! 눈에는 눈, 불에는 불이야! 당장 쫓아가서 멱살 잡고 따지란 말이야! 가만히 있으면 바보 되는 세상이야!`;
                     }
-                    return `우걱우걱!! ${userName} 네가 말한 '${msg}' 속에서 시뻘건 분노 냄새가 진동하는구나! 아주 찰진 야식이야! 그 화병 내가 싹 삼킬 테니 넌 발 뻗어라. 그래서 또 억울한 건 없었냐?`;
+                    // 3. 맞장구 ("맞아", "응", "그래", "인정")
+                    if (/^(맞아|맞지|그치|응|어|ㅇㅇ|그래)/.test(m)) {
+                        return `맞지?! 내 말이 틀린 적 있어?! 가만히 참는 게 제일 멍청한 짓이야! 소리 한 번 꽥 질러버려!`;
+                    }
+                    // 4. 일반 입력값 맞받아치기 (모든 문장에 '!' 사용 및 극단적 화내는 어투)
+                    const rageReplies = [
+                        `뭐?! '${m}'?! 듣자마자 속에서 천불이 솟구치네! 넌 그걸 듣고도 참았단 말이야?! 주먹 쥐고 책상 쾅 쳐!`,
+                        `'${m}'이라고?! 기가 차서 말이 안 나온다! 당장 그 자식 모가지에 불바퀴를 굴려버려야 돼! 더 억울한 건 없어?!`,
+                        `웃기고 자빠졌네! '${m}' 같은 헛소리를 왜 네가 견뎌야 해?! 인정사정 봐주지 말고 다 엎어버려!`
+                    ];
+                    return rageReplies[turn % rageReplies.length];
                 }
             },
             hyakume: {
@@ -1381,13 +1504,28 @@
                 pole: "⚡ 극도의 공포/불안",
                 badgeClass: "bg-blue-950 text-blue-400 border border-blue-800",
                 avatar: "img/2.png",
-                greeting: "(벽 틈새에서 눈알 수십 개를 일제히 깜빡이며) ...쉿. 불 끄지 마. 네가 문 열고 들어올 때부터 심장 박동이 120bpm인 거 다 읽었어. 뭐가 그렇게 불안해서 사시나무 떨듯 떠는 거야?",
+                greeting: "(벽 틈새에서 눈알 100개를 파르르 떨며) ...쉿! 문 닫아... 네 심장 소리 때문에 온 동네 귀신들이 다 몰려온단 말이야... 뭐가 불안해...? 말해봐...",
                 generateReply: (msg, turn, userName) => {
-                    const m = msg.toLowerCase();
-                    if (m.includes("내일") || m.includes("발표") || m.includes("면접") || m.includes("시험")) {
-                        return `(눈알 20개를 360도로 회전시키며) ${userName}아, 네 머릿속에서 최악의 시나리오가 100만 편째 상영 중이군. 망치면 어때? 지구가 반으로 갈라져? 내 눈으로 미리 내일을 내다봤는데, 망쳐봤자 사람들은 3분 만에 까먹어. 쫄지 마, 내가 네 등 뒤에 붙어있을 테니까.`;
+                    const m = msg.trim();
+                    // 1. 대화 시작/인사
+                    if (m.includes("대화") || m.includes("안녕") || m.includes("반가") || m.includes("하이") || m.includes("놀자")) {
+                        return `...대화하자고...? 조용히 말해줘... 네 목소리 울려서 누가 밖에서 엿들을까 봐 너무 무서워... 무슨 일인데 그래...?`;
                     }
-                    return `(눈알들이 찌릿하게 떨리며) '${msg}'... 그 생각에 갇히면 끝없이 깊은 수렁으로 떨어져. 내 시선으로 그 끈을 싹 끊어줄게. 숨을 깊게 들이쉬어 봐 ${userName}. 지금 방 안에 너랑 나 말고 아무 위험도 없어.`;
+                    // 2. 단답/질문
+                    if (m.includes("어떻게") || m.includes("어떡") || m.includes("어쩌") || m.includes("왜") || m.includes("뭐")) {
+                        return `...어떡하냐니... 제발 해결하려 하지 마... 더 큰일 터지면 어쩌려고... 그냥 불 다 켜고 구석에 웅크리고 있자... 응...?`;
+                    }
+                    // 3. 맞장구
+                    if (/^(맞아|맞지|그치|응|어|ㅇㅇ|그래)/.test(m)) {
+                        return `...맞다고 하지 마... 네가 인정하는 순간 그 불안이 진짜가 될까 봐 등골이 오싹해... 방금 창문 덜컹거렸지...?`;
+                    }
+                    // 4. 일반 입력값 맞받아치기 (말줄임표 '...', 소극적, 불안에 떠는 어투)
+                    const panicReplies = [
+                        `...히익... '${m}'...? 그거 정말 위험한 거 아니야...? 혹시 누가 뒤에서 널 노리고 있는 거면 어떡해...?`,
+                        `...쉿... '${m}'이라는 말 입 밖으로 내지 마... 말하는 순간 진짜로 최악의 상황이 터질지도 모른단 말이야...`,
+                        `...진짜 괜찮은 거야...? 방금 네가 말한 '${m}' 때문에 내 눈알들이 사시나무처럼 떨려... 문 꼭 잠갔어...?`
+                    ];
+                    return panicReplies[turn % panicReplies.length];
                 }
             },
             dokkaebi: {
@@ -1396,9 +1534,28 @@
                 pole: "✨ 찬란한 환희/도취",
                 badgeClass: "bg-amber-950 text-amber-400 border border-amber-800",
                 avatar: "img/3.png",
-                greeting: "에헤라디야~! 풍악을 울려라! 룸메 인간아, 오늘 얼굴에 아주 쬐끔이라도 신바람이 도는구나! 무슨 재밌는 일 있었어? 얼른 불어봐, 내 방망이로 흥을 열 배로 불려줄 테니!",
+                greeting: "에헤라디야~! 풍악을 울려라! 룸메 인간아, 얼굴에 신바람이 도는구나! 무슨 신나는 일 있었어? 얼른 불어봐, 방망이로 흥을 불려줄 테니!",
                 generateReply: (msg, turn, userName) => {
-                    return `야하하! ${userName}아! 고민해서 해결될 일이면 나도 매일 고민했지! 답 안 나오는 건 내 방망이 밑에 깔아뭉개고 춤이나 추자! 일단 맛있는 거 시켜, 야식 먹고 놀면 장땡이지!`;
+                    const m = msg.trim();
+                    // 1. 대화 시작/인사
+                    if (m.includes("대화") || m.includes("안녕") || m.includes("반가") || m.includes("하이") || m.includes("놀자")) {
+                        return `야하하! 나랑 대화하자고?! 완전 최고지! 내가 오늘 룸메 기분 아주 하늘 끝까지 띄워줄게! 신나는 얘기부터 시작해 볼까?!`;
+                    }
+                    // 2. 단답/질문
+                    if (m.includes("어떻게") || m.includes("어떡") || m.includes("어쩌") || m.includes("왜") || m.includes("뭐")) {
+                        return `고민해서 뭐 해! 다 잘 풀릴 텐데! 뚝딱! 일단 맛있는 거 먹고 춤이나 추면 모든 일이 기적처럼 풀린다니까?! 긍정의 힘을 믿어봐!`;
+                    }
+                    // 3. 맞장구
+                    if (/^(맞아|맞지|그치|응|어|ㅇㅇ|그래)/.test(m)) {
+                        return `거봐, 내 말이 맞지?! 긍정적으로 생각하면 복이 굴러들어 온다니까! 오늘 아주 대박 터질 징조야! 껄껄!`;
+                    }
+                    // 4. 일반 입력값 맞받아치기 (100% 초긍정, 환희, 격려)
+                    const hypeReplies = [
+                        `와! '${m}'?! 그거 완전 대박 찬스잖아! 오히려 좋아! 네 인생에 더 끝내주는 기회가 오려고 그러는 거야 뚝딱!`,
+                        `우하하! '${m}' 같은 건 아무것도 아니지! 너처럼 멋진 룸메가 못 이겨낼 게 어디 있어?! 훌훌 털고 파티나 하자!`,
+                        `이야~! 듣기만 해도 도파민이 싹 도네! '${m}' 덕분에 오늘 밤이 더 재밌어지겠어! 다 잘될 거니까 신나게 즐기자!`
+                    ];
+                    return hypeReplies[turn % hypeReplies.length];
                 }
             },
             songakshi: {
@@ -1409,7 +1566,26 @@
                 avatar: "img/4.png",
                 greeting: "(서늘한 흰 소매로 눈가를 훔치며)...또 들어왔구나. 네 발소리만 들어도 알아. 영혼이 바닥까지 갈려 나간 그 무거운 걸음... 아무것도 하지 마. 그냥 내 옆에 누워.",
                 generateReply: (msg, turn, userName) => {
-                    return `...${userName}아, 네가 털어놓은 '${msg}'... 듣기만 해도 가슴이 저릿하네. 그 무거운 짐을 혼자 지고 어떻게 버텼니. 내 품에 다 내려놓으렴. 세상 사람들 다 욕해도 난 네 편이야.`;
+                    const m = msg.trim();
+                    // 1. 대화 시작/인사
+                    if (m.includes("대화") || m.includes("안녕") || m.includes("반가") || m.includes("하이") || m.includes("놀자")) {
+                        return `...나랑 말을 섞어서 뭐 하겠니... 어차피 나랑 대화해 봤자 마음만 더 시커멓게 썩어 들어갈 텐데... 그냥 한숨이나 같이 쉬자... 하아...`;
+                    }
+                    // 2. 단답/질문
+                    if (m.includes("어떻게") || m.includes("어떡") || m.includes("어쩌") || m.includes("왜") || m.includes("뭐")) {
+                        return `...어떻게 해도 달라지지 않아... 애써봤자 결국 상처받고 버려지는 건 우리 몫인걸... 다 부질없어... 그냥 포기하면 편해...`;
+                    }
+                    // 3. 맞장구
+                    if (/^(맞아|맞지|그치|응|어|ㅇㅇ|그래)/.test(m)) {
+                        return `...그래, 맞지... 세상은 언제나 잔인하고 비정해... 차라리 실컷 소리 없이 눈물이나 쏟아내렴...`;
+                    }
+                    // 4. 일반 입력값 맞받아치기 (100% 부정, 염세, 체념)
+                    const gloomReplies = [
+                        `...하아... '${m}'이라니... 듣기만 해도 가슴이 무너져 내린다... 되는 일이 하나도 없지? 세상이 널 버린 거야...`,
+                        `...그게 네 잘못이겠니... '${m}' 같은 비참한 일만 일어나는 이 삶 자체가 원망스러울 뿐이지... 다 내려놓고 그냥 울어...`,
+                        `...애쓰지 마... '${m}'이라는 거, 다 헛된 희망이야... 결국 끝엔 텅 빈 공허와 후회만 남을 텐데... 슬프다...`
+                    ];
+                    return gloomReplies[turn % gloomReplies.length];
                 }
             }
         };
@@ -1426,6 +1602,11 @@
             const y = YOKAI_PERSONAS[yokaiKey];
 
             unlockYokaiInMonthlyCompendium(y.id);
+
+            pushToDataLayer('chat_modal_open', {
+                yokai_name: y.name,
+                pole_emotion: y.pole
+            });
 
             document.getElementById('chat-modal-title').textContent = y.name;
             document.getElementById('chat-modal-avatar').src = y.avatar;
@@ -1471,9 +1652,21 @@
             chatContainer.scrollTop = chatContainer.scrollHeight;
             chatTurn++;
 
-            const currentUserName = localStorage.getItem("spookmate_user_id") || "룸메";
+            const currentUserName = localStorage.getItem("spookmate_user_id") || "임자";
+
+            const typingId = "typing-" + Date.now();
+            chatContainer.innerHTML += `
+                <div id="${typingId}" class="flex items-center gap-2 text-gray-500 text-[10px] font-mono py-1">
+                    <span class="w-2 h-2 rounded-full bg-spook-blood animate-pulse"></span>
+                    <span>${YOKAI_PERSONAS[currentYokaiKey].name}가 감정에 흥분해 대답하는 중...</span>
+                </div>
+            `;
+            chatContainer.scrollTop = chatContainer.scrollHeight;
 
             setTimeout(() => {
+                const typingEl = document.getElementById(typingId);
+                if (typingEl) typingEl.remove();
+
                 const y = YOKAI_PERSONAS[currentYokaiKey];
                 const reply = y.generateReply(userMsg, chatTurn, currentUserName);
 
@@ -1490,11 +1683,11 @@
                 `;
                 chatContainer.scrollTop = chatContainer.scrollHeight;
                 lucide.createIcons();
-            }, 600);
+            }, 550);
         }
 
         // =====================================================================
-        // 펫캠(Spook-Cam) 제어[cite: 10]
+        // [GIF 교체 완료] 펫캠(Spook-Cam) 제어 & GA 추적
         // =====================================================================
         const cctvModal = document.getElementById('cctv-modal');
         const cctvCamTitle = document.getElementById('cctv-cam-title');
@@ -1503,40 +1696,61 @@
         const camStatusText = document.getElementById('cam-status-text');
         const camGraffiti = document.getElementById('cam-graffiti');
 
-        function openSpookCamModal(title) {
+        function openSpookCamModal(imgSrc, title, statusDesc = '실시간 감시 중', graffitiText = 'spookmate is watching...') {
+            if (!title) {
+                title = imgSrc;
+                imgSrc = 'img/2.gif';
+            }
+
+            pushToDataLayer('cctv_view', { cam_title: title, cam_src: imgSrc });
+
             cctvCamTitle.textContent = title;
+            cctvFeedImg.src = imgSrc;
+            if (camStatusText) camStatusText.innerHTML = `활동: <span class="text-amber-300">${statusDesc}</span>`;
+            if (camGraffiti) camGraffiti.textContent = graffitiText;
+
             cctvModal.classList.remove('hidden');
             cctvModal.classList.add('flex');
+            document.body.style.overflow = 'hidden';
+
+            cctvFeedImg.style.filter = 'invert(1) contrast(300%)';
+            setTimeout(() => {
+                cctvFeedImg.style.filter = 'contrast(125%) brightness(95%)';
+            }, 180);
         }
 
         function closeCctvModal() {
             cctvModal.classList.add('hidden');
             cctvModal.classList.remove('flex');
+            document.body.style.overflow = '';
         }
 
         function switchCamFeed(title, imgSrc, statusDesc, graffitiText) {
+            pushToDataLayer('cctv_switch', { cam_title: title, cam_src: imgSrc });
             cctvCamTitle.textContent = title;
             cctvFeedImg.src = imgSrc;
-            camStatusText.innerHTML = `활동: <span class="text-amber-300">${statusDesc}</span>`;
-            camGraffiti.textContent = graffitiText;
+            if (camStatusText) camStatusText.innerHTML = `활동: <span class="text-amber-300">${statusDesc}</span>`;
+            if (camGraffiti) camGraffiti.textContent = graffitiText;
 
             cctvFeedImg.style.filter = 'invert(1) contrast(300%)';
             setTimeout(() => {
-                cctvFeedImg.style.filter = 'contrast(150%) brightness(75%)';
+                cctvFeedImg.style.filter = 'contrast(125%) brightness(95%)';
             }, 180);
         }
 
         function yellAtYokai() {
-            alert('📢 마이크 전송 : "야! 장판 뜯지 말랬지! 당장 손 떼!"');
+            pushToDataLayer('cctv_action', { action_type: 'yell' });
+            alert('📢 마이크 전송 : "야! 사고치지말랬지! 당장 손 떼!"');
             cctvFeedImg.style.filter = 'brightness(200%) contrast(250%)';
             camStatusText.innerHTML = `활동: <span class="text-red-400 font-bold">호통에 흠칫 놀라 얼어붙음!</span>`;
             camGraffiti.textContent = "i'm sorry, roommate...";
             setTimeout(() => {
-                cctvFeedImg.style.filter = 'contrast(150%) brightness(75%)';
+                cctvFeedImg.style.filter = 'contrast(125%) brightness(95%)';
             }, 400);
         }
 
         function feedYokaiTreat() {
+            pushToDataLayer('cctv_action', { action_type: 'treat' });
             alert('🍪 감정 간식 투척 : [달콤한 위로 사탕 1개]를 문틈 아래로 던졌습니다!');
             camStatusText.innerHTML = `활동: <span class="text-emerald-400 font-bold">간식 주워 먹고 만족스럽게 그르렁거림</span>`;
             camGraffiti.textContent = "yummy! more feelings!";
