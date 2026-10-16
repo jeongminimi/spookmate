@@ -195,7 +195,7 @@ function showYokaiHeroReveal(serverData) {
 
   // 요괴 이미지 및 기본 정보 바인딩 (img 폴더 경로 지정)
   if (yokaiImg) {
-    yokaiImg.src = `img/${matched.id}.png`;
+    yokaiImg.src = matched.image_url || "img/web_2.png";
     yokaiImg.alt = matched.name;
   }
   document.getElementById("modalYokaiName").innerText = matched.name;
@@ -306,7 +306,7 @@ async function loadCalendar(year, month) {
           <div class="stamp-badge">완식</div>
           <div class="stamp-tag">${s.emotion_tag}</div>
         `;
-        cell.title = `[하소연 내용] ${s.raw_entry}`;
+        cell.title = `${s.diary_date} · ${s.yokai_name}`;
       }
 
       grid.appendChild(cell);
@@ -359,7 +359,7 @@ async function loadCompendium(userId) {
 
       // img 폴더 내의 요괴 일러스트 연결
       const avatarHtml = y.is_unlocked
-        ? `<img src="img/${y.id}.png" alt="${y.name}" onerror="this.style.display='none';">`
+        ? `<img src="${y.image_url || 'img/web_2.png'}" alt="${y.name}" onerror="this.style.display='none';">`
         : `<span style="font-size: 1.2rem; color: #555;">?</span>`;
 
       const displayName = y.is_unlocked ? y.name.split(" ")[0] : "미확인 악령";
@@ -385,7 +385,7 @@ function openYokaiDetail(y) {
   const detImg = document.getElementById("detAvatarImg");
   if (detImg) {
     detImg.style.display = "block";
-    detImg.src = `img/${y.id}.png`;
+    detImg.src = y.image_url || "img/web_2.png";
     detImg.alt = y.name;
   }
 

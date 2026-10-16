@@ -1,17 +1,23 @@
 import os
+import json
+from pathlib import Path
 from datetime import datetime, date
 import math
 import random
 import re
-import traceback
+from uuid import UUID, uuid4
+from typing import Literal
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 import psycopg2
 from psycopg2.extras import RealDictCursor
 from pydantic import BaseModel, Field
+from dotenv import load_dotenv
+import requests
 
 from analyzer import analyze_entry
+from yokai_chat import ROOMMATES, ROOMMATES_BY_ID, gemini_reply, is_crisis_message, rule_reply
 
 # ==============================================================================
 # 1. FastAPI 인스턴스 초기화 & CORS 설정
@@ -33,15 +39,34 @@ app.add_middleware(
 # ==============================================================================
 # 2. 데이터베이스 연결 설정 (Supabase PostgreSQL)
 # ==============================================================================
-SUPABASE_DB_URL = os.getenv(
-    "DATABASE_URL",
-    "postgresql://postgres.aywtiggvataezyxeuexe:tkfkdgo91!SPDB@aws-0-ap-south-1.pooler.supabase.com:6543/postgres"
-)
+load_dotenv(Path(__file__).resolve().parent / ".env")
+SUPABASE_DB_URL = os.getenv("DATABASE_URL")
+SUPABASE_URL = (os.getenv("SUPABASE_URL") or "").rstrip("/")
+SUPABASE_PUBLISHABLE_KEY = os.getenv("SUPABASE_PUBLISHABLE_KEY") or ""
+ADMIN_EMAIL = (os.getenv("ADMIN_EMAIL") or "").strip().casefold()
 
 
 def get_db():
     # RealDictCursor를 기본 적용하여 딕셔너리 형태로 결과 행 반환
+    if not SUPABASE_DB_URL:
+        raise RuntimeError("DATABASE_URL is not configured")
     return psycopg2.connect(SUPABASE_DB_URL, cursor_factory=RealDictCursor)
+
+
+def _image_name_key(name: str) -> str:
+    """Match a DB name to the reviewed asset list without guessing by ID."""
+    return re.sub(r"[^가-힣a-z0-9]", "", re.sub(r"\([^)]*\)", "", name.lower()))
+
+
+with (Path(__file__).resolve().parent / "yokai_image_map.json").open(encoding="utf-8") as image_map_file:
+    YOKAI_IMAGE_MAP = json.load(image_map_file)
+
+YOKAI_IMAGES_BY_NAME = {_image_name_key(item["name"]): item["image_url"] for item in YOKAI_IMAGE_MAP}
+
+
+def get_yokai_image_path(yokai_id: int, yokai_name: str) -> str | None:
+    # IDs in the database and filenames can drift. A verified name match is required.
+    return YOKAI_IMAGES_BY_NAME.get(_image_name_key(yokai_name))
 
 
 # ==============================================================================
@@ -239,7 +264,7 @@ def submit_diary(data: DiaryInput):
         if not isinstance(analysis, dict):
             raise ValueError("분석 결과 포맷 오류")
     except Exception as e:
-        print(f"⚠️ 감정 분석기 Fallback 가동: {e}")
+        print(f"Emotion analysis fallback ({type(e).__name__}).")
         fallback_family = detected_family or "피로/탈진"
         def_v, def_a = DEFAULT_COORDINATES.get(fallback_family, (2.5, 2.0))
 
@@ -357,23 +382,17 @@ def submit_diary(data: DiaryInput):
 
         match_rate = int(min(max(final_score, 75.0), 98.0))
 
-        comfort_quote = matched_yokai.get("narrative_dialogue") or ""
-        if isinstance(comfort_quote, (tuple, list)):
-            comfort_quote = comfort_quote[0] if comfort_quote else ""
-        comfort_quote = str(comfort_quote).strip("()',\" ")
+        db_dialogue = matched_yokai.get("narrative_dialogue")
+        if isinstance(db_dialogue, (tuple, list)):
+            db_dialogue = db_dialogue[0] if db_dialogue else None
+        db_dialogue = str(db_dialogue).strip() if db_dialogue is not None else ""
+        quote_text = re.sub(r"^\[입맛 싱크로율 \d+%\]\s*", "", db_dialogue)
+        comfort_quote = (
+            f"[입맛 싱크로율 {match_rate}%] {quote_text}"
+            if quote_text else "등록된 요괴 대사가 없습니다."
+        )
 
-        try:
-            if "get_clean_spookmate_dialogue" in globals():
-                comfort_quote = get_clean_spookmate_dialogue(target_dyad, matched_yokai["name"])
-                comfort_quote = str(comfort_quote).strip("()',\" ")
-        except Exception:
-            pass
-
-        comfort_quote = re.sub(r"^\[.*?\]\s*", f"[입맛 싱크로율 {match_rate}%] ", comfort_quote.strip())
-        if not comfort_quote.startswith("[입맛 싱크로율"):
-            comfort_quote = f"[입맛 싱크로율 {match_rate}%] {comfort_quote}"
-
-        print(f"🎯 [매칭 판정] 입력:'{raw_text}' -> 요괴:{matched_yokai['name']} 싱크로율:{match_rate}%")
+        print(f"Matched yokai id={matched_yokai['id']}, match rate={match_rate}%")
 
         # 6. 일기 저장 (PostgreSQL ON CONFLICT 구문 적용)
         insert_sql = """
@@ -422,17 +441,22 @@ def submit_diary(data: DiaryInput):
                 "id": matched_yokai["id"],
                 "name": matched_yokai["name"],
                 "country": matched_yokai["country"],
+                "narrative_dialogue": db_dialogue,
                 "comfort_quote": comfort_quote,
-                "micro_action": matched_yokai.get("micro_action", "잠시 눈을 감고 심호흡을 3회 해보세요."),
+                "micro_action": matched_yokai.get("micro_action"),
                 "story": matched_yokai.get("story", ""),
                 "match_rate": match_rate,
+                "image_url": get_yokai_image_path(matched_yokai["id"], matched_yokai["name"]),
             },
         }
 
+    except HTTPException:
+        conn.rollback()
+        raise
     except Exception as err:
         conn.rollback()
-        traceback.print_exc()
-        raise HTTPException(status_code=500, detail=str(err))
+        print(f"Diary submission failed ({type(err).__name__}).")
+        raise HTTPException(status_code=500, detail="일기를 저장하지 못했습니다. 잠시 후 다시 시도해 주세요.") from None
     finally:
         cursor.close()
         conn.close()
@@ -443,25 +467,32 @@ def submit_diary(data: DiaryInput):
 # ==============================================================================
 @app.get("/api/calendar")
 def get_calendar(user_id: str, year: int, month: int):
+    if not 1 <= month <= 12:
+        raise HTTPException(status_code=400, detail="month must be between 1 and 12")
+    month_start = date(year, month, 1)
+    next_month = date(year + 1, 1, 1) if month == 12 else date(year, month + 1, 1)
     conn = get_db()
     cursor = conn.cursor()  # dictionary=True 제거
     try:
         sql = """
-            SELECT d.diary_date, d.raw_entry, d.emotion_tag,
+            SELECT d.diary_date, d.emotion_tag,
                    y.id AS yokai_id, y.name AS yokai_name
             FROM emotion_diary d
             JOIN yokai_compendium y ON d.matched_yokai_id = y.id
             WHERE d.user_id = %s 
-              AND EXTRACT(YEAR FROM d.diary_date) = %s 
-              AND EXTRACT(MONTH FROM d.diary_date) = %s
+              AND d.diary_date >= %s
+              AND d.diary_date < %s
             ORDER BY d.diary_date ASC;
         """
-        cursor.execute(sql, (user_id, year, month))
+        cursor.execute(sql, (user_id, month_start, next_month))
+        stamps = [dict(item) for item in cursor.fetchall()]
+        for stamp in stamps:
+            stamp["image_url"] = get_yokai_image_path(stamp["yokai_id"], stamp["yokai_name"])
         return {
             "user_id": user_id,
             "year": year,
             "month": month,
-            "stamps": cursor.fetchall(),
+            "stamps": stamps,
         }
     finally:
         cursor.close()
@@ -472,7 +503,12 @@ def get_calendar(user_id: str, year: int, month: int):
 # 6. 요괴 도감 조회 API 
 # ==============================================================================
 @app.get("/api/compendium")
-def get_compendium(user_id: str):
+def get_compendium(user_id: str, year: int | None = None, month: int | None = None):
+    today = date.today()
+    year = year or today.year
+    month = month or today.month
+    if not 1 <= month <= 12:
+        raise HTTPException(status_code=400, detail="month must be between 1 and 12")
     conn = get_db()
     cursor = conn.cursor()  # dictionary=True 제거
     try:
@@ -483,12 +519,17 @@ def get_compendium(user_id: str):
                    CASE WHEN d.matched_yokai_id IS NOT NULL THEN TRUE ELSE FALSE END AS is_unlocked
             FROM yokai_compendium y
             LEFT JOIN (
-                SELECT DISTINCT matched_yokai_id FROM emotion_diary WHERE user_id = %s
+                SELECT DISTINCT matched_yokai_id FROM emotion_diary
+                WHERE user_id = %s
+                  AND EXTRACT(YEAR FROM diary_date) = %s
+                  AND EXTRACT(MONTH FROM diary_date) = %s
             ) d ON y.id = d.matched_yokai_id
             ORDER BY CAST(y.id AS INTEGER) ASC;
         """
-        cursor.execute(sql, (user_id,))
-        compendium = cursor.fetchall()
+        cursor.execute(sql, (user_id, year, month))
+        compendium = [dict(item) for item in cursor.fetchall()]
+        for item in compendium:
+            item["image_url"] = get_yokai_image_path(item["id"], item["name"])
         unlocked_count = sum(1 for item in compendium if item["is_unlocked"])
         return {
             "user_id": user_id,
@@ -502,15 +543,8 @@ def get_compendium(user_id: str):
         conn.close()
 
 # ==============================================================================
-# 7. [Spook of Feelings] 4대 상극 감정 요괴 추출 & 1:1 대화 API
+# 7. [Spook of Feelings] 성격이 다른 네 룸메이트 & 1:1 대화 API
 # ==============================================================================
-OPPOSING_POLES = [
-    {"pole": "분노/격분", "oppose": "공포/불안", "label": "🔥 극단적 분노", "keywords": ["분노", "격분", "화", "파괴"]},
-    {"pole": "불안/초조", "oppose": "분노/격분", "label": "⚡ 극도의 공포·불안", "keywords": ["불안", "초조", "공포", "두려움"]},
-    {"pole": "기쁨/환희", "oppose": "우울/절망", "label": "✨ 찬란한 환희", "keywords": ["기쁨", "환희", "행복", "사랑"]},
-    {"pole": "우울/절망", "oppose": "기쁨/환희", "label": "🌧️ 심연의 슬픔·우울", "keywords": ["우울", "절망", "슬픔", "비통"]}
-]
-
 @app.get("/api/spook-of-feelings")
 def get_spook_of_feelings():
     conn = get_db()
@@ -519,100 +553,229 @@ def get_spook_of_feelings():
         cursor.execute("""
             SELECT id, name, country, plutchik_dyad, plutchik_ko,
                    valence, arousal, narrative_dialogue, micro_action, story
-            FROM yokai_compendium;
-        """)
-        all_yokai = cursor.fetchall()
-        
+            FROM yokai_compendium
+            WHERE id IN (%s, %s, %s, %s);
+        """, tuple(item["id"] for item in ROOMMATES))
+        by_id = {str(item["id"]): dict(item) for item in cursor.fetchall()}
         selected_cards = []
-        used_ids = set()
-
-        for config in OPPOSING_POLES:
-            candidates = []
-            for y in all_yokai:
-                if y["id"] in used_ids:
-                    continue
-                dyad_text = (y.get("plutchik_dyad") or "") + " " + (y.get("plutchik_ko") or "")
-                if any(kw in dyad_text for kw in config["keywords"]):
-                    candidates.append(y)
-            
-            # 후보군 중 하나 무작위 추출 (없으면 전체 중 선택)
-            chosen = random.choice(candidates) if candidates else random.choice(all_yokai)
-            used_ids.add(chosen["id"])
-            
+        for persona in ROOMMATES:
+            yokai = by_id.get(persona["id"])
+            if not yokai or yokai.get("plutchik_dyad") != persona["dyad"]:
+                raise HTTPException(status_code=503, detail="룸메이트 데이터가 변경되었습니다. 담당 요괴를 확인해 주세요.")
+            yokai["image_url"] = get_yokai_image_path(yokai["id"], yokai["name"])
+            if not yokai["image_url"]:
+                raise HTTPException(status_code=503, detail="룸메이트 그림 연결을 확인해 주세요.")
             selected_cards.append({
-                "pole_label": config["label"],
-                "opposing_target": config["oppose"],
-                "yokai": chosen
+                "pole_label": persona["label"],
+                "trait": persona["trait"],
+                "intro": persona["intro"],
+                "yokai": yokai,
             })
-
-        return {"status": "success", "cards": selected_cards}
+        return {"status": "success", "chat_mode": "ai" if os.getenv("GEMINI_API_KEY") else "rules", "cards": selected_cards}
     finally:
         cursor.close()
         conn.close()
+
+
+class ChatTurn(BaseModel):
+    role: Literal["user", "assistant"]
+    content: str = Field(min_length=1, max_length=2000)
 
 
 class YokaiChatInput(BaseModel):
-    user_id: str
+    user_id: str = Field(max_length=80)
     yokai_id: int
-    message: str
+    message: str = Field(min_length=1, max_length=500)
+    history: list[ChatTurn] = Field(default_factory=list, max_length=8)
 
 @app.post("/api/chat/yokai")
 def chat_with_yokai(data: YokaiChatInput):
+    persona = ROOMMATES_BY_ID.get(str(data.yokai_id))
+    if not persona:
+        raise HTTPException(status_code=404, detail="이 방의 룸메이트가 아닙니다.")
+    message = data.message.strip()
+    if not message:
+        raise HTTPException(status_code=422, detail="메시지를 입력해 주세요.")
     conn = get_db()
     cursor = conn.cursor()
     try:
-        cursor.execute("SELECT * FROM yokai_compendium WHERE id = %s;", (data.yokai_id,))
+        cursor.execute("SELECT * FROM yokai_compendium WHERE id = %s;", (str(data.yokai_id),))
         yokai = cursor.fetchone()
-        if not yokai:
+        if not yokai or yokai.get("plutchik_dyad") != persona["dyad"]:
             raise HTTPException(status_code=404, detail="요괴를 찾을 수 없습니다.")
-
-        y_name = yokai["name"].split()[0]
-        dyad = yokai.get("plutchik_ko") or "기이한 정서"
-        user_msg = data.message.strip()
-
-        # 요괴 캐릭터 맞춤형 심리학 1:1 대화 프롬프트 엔진
-        response_templates = [
-            f"크하하! 네 녀석의 '{user_msg}' 속에서 진득한 {dyad}의 맛이 나는구나. 인간아, 그 감정에 휘둘리지 말고 내 입속에 던져버려라.",
-            f"흐음... 방구석에서 털어놓는 말 치고는 꽤나 깊은 독이 차 있군. {y_name}인 내가 그 찌꺼기는 소화시킬 테니 넌 발 뻗고 쉬어라.",
-            f"네가 말한 '{user_msg}'... 그건 네 탓이 아니다. 나와 같은 요괴들이 속을 긁어놓았을 뿐이지. 네 마음에서 그놈들을 쫓아내 주마."
-        ]
-        
-        reply = random.choice(response_templates)
-
-        return {
-            "status": "success",
-            "yokai_name": yokai["name"],
-            "reply": reply,
-            "micro_action": yokai.get("micro_action", "숨을 깊게 들이마시고 3초간 내쉬어 보세요.")
-        }
     finally:
         cursor.close()
         conn.close()
+
+    history = [turn.model_dump() for turn in data.history]
+    if is_crisis_message(message):
+        return {
+            "status": "success",
+            "yokai_name": yokai["name"],
+            "reply": rule_reply(persona, message, history),
+            "mode": "rules",
+            "notice": None,
+            "micro_action": None,
+        }
+    api_key = os.getenv("GEMINI_API_KEY")
+    mode = "rules"
+    if api_key:
+        try:
+            reply = gemini_reply(persona, yokai, message, history)
+            mode = "ai"
+        except (requests.RequestException, ValueError, KeyError) as exc:
+            print(f"Yokai AI chat unavailable ({type(exc).__name__}).")
+            error_payload = {}
+            if isinstance(exc, requests.HTTPError) and exc.response is not None:
+                try:
+                    error_payload = exc.response.json().get("error", {})
+                except ValueError:
+                    pass
+            invalid_key = (
+                error_payload.get("status") == "API_KEY_INVALID"
+                or "API key not valid" in error_payload.get("message", "")
+            )
+            quota_exceeded = (
+                isinstance(exc, requests.HTTPError)
+                and exc.response is not None
+                and exc.response.status_code == 429
+            )
+            detail = (
+                "Gemini API 키가 유효하지 않습니다. 서버 .env의 GEMINI_API_KEY를 확인해 주세요."
+                if invalid_key else
+                "Gemini 사용 한도에 도달했습니다. 잠시 후 다시 시도하거나 Google AI Studio의 사용량을 확인해 주세요."
+                if quota_exceeded else
+                "Gemini 대화에 연결하지 못했습니다. 잠시 후 다시 시도해 주세요."
+            )
+            raise HTTPException(status_code=503, detail=detail) from None
+    else:
+        reply = rule_reply(persona, message, history)
+
+    return {
+        "status": "success",
+        "yokai_name": yokai["name"],
+        "reply": reply,
+        "mode": mode,
+        "notice": None,
+        "micro_action": yokai.get("micro_action") or "숨을 깊게 들이마시고 천천히 내쉬어 보세요.",
+    }
 
         # ==============================================================================
 # 8. 입주자 닉네임 등록 및 이전 방문 기록 조회 API
 # ==============================================================================
 class UserRegisterInput(BaseModel):
-    user_id: str
+    user_id: str = Field(min_length=1, max_length=12)
+    contract_date: date
+    client_id: UUID | None = None
 
 @app.post("/api/user/register")
 def register_user(data: UserRegisterInput):
+    user_name = data.user_id.strip()
+    if not user_name:
+        raise HTTPException(status_code=422, detail="닉네임을 입력해 주세요.")
+    client_id = data.client_id or uuid4()
     conn = get_db()
     cursor = conn.cursor()
     try:
-        user_name = data.user_id.strip()
-        # 과거 이 닉네임으로 작성된 감정 일기/소환 기록 카운트 조회
+        cursor.execute("""
+            INSERT INTO nickname_registry (client_id, nickname, contract_date)
+            VALUES (%s, %s, %s)
+            ON CONFLICT (client_id) DO UPDATE SET
+                nickname = EXCLUDED.nickname,
+                contract_date = EXCLUDED.contract_date
+            WHERE nickname_registry.nickname IS DISTINCT FROM EXCLUDED.nickname
+               OR nickname_registry.contract_date IS DISTINCT FROM EXCLUDED.contract_date;
+        """, (str(client_id), user_name, data.contract_date))
         cursor.execute("SELECT count(*) FROM emotion_diary WHERE user_id = %s;", (user_name,))
-        diary_count = cursor.fetchone()[0]
-        
+        diary_count = cursor.fetchone()["count"]
+        conn.commit()
         return {
             "status": "success",
             "user_id": user_name,
+            "client_id": str(client_id),
             "diary_count": diary_count,
-            "message": f"방 주인 '{user_name}'님의 이전 동거 기록 {diary_count}건을 성공적으로 불러왔습니다."
         }
-    except Exception as e:
-        return {"status": "error", "message": str(e), "user_id": data.user_id}
+    except Exception:
+        conn.rollback()
+        raise HTTPException(status_code=500, detail="닉네임을 저장하지 못했습니다. 잠시 후 다시 시도해 주세요.") from None
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def require_admin(request: Request) -> None:
+    if not (SUPABASE_URL and SUPABASE_PUBLISHABLE_KEY and ADMIN_EMAIL):
+        raise HTTPException(status_code=503, detail="관리자 인증 설정이 완료되지 않았습니다.")
+    authorization = request.headers.get("authorization", "")
+    if not authorization.startswith("Bearer ") or len(authorization) > 5000:
+        raise HTTPException(status_code=401, detail="관리자 로그인이 필요합니다.")
+    try:
+        response = requests.get(
+            f"{SUPABASE_URL}/auth/v1/user",
+            headers={"apikey": SUPABASE_PUBLISHABLE_KEY, "Authorization": authorization},
+            timeout=6,
+        )
+        if response.status_code != 200:
+            raise HTTPException(status_code=401, detail="관리자 로그인이 만료되었습니다.")
+        user = response.json()
+    except requests.RequestException:
+        raise HTTPException(status_code=503, detail="관리자 인증 서버에 연결하지 못했습니다.") from None
+    except ValueError:
+        raise HTTPException(status_code=503, detail="관리자 인증 응답을 확인하지 못했습니다.") from None
+    if not user.get("email_confirmed_at") or (user.get("email") or "").casefold() != ADMIN_EMAIL:
+        raise HTTPException(status_code=403, detail="관리자 권한이 없습니다.")
+
+
+@app.get("/api/admin/config")
+def get_admin_config():
+    return {
+        "enabled": bool(SUPABASE_URL and SUPABASE_PUBLISHABLE_KEY and ADMIN_EMAIL),
+        "supabase_url": SUPABASE_URL,
+        "publishable_key": SUPABASE_PUBLISHABLE_KEY,
+    }
+
+
+@app.get("/api/admin/overview")
+def get_admin_overview(request: Request, page: int = 1):
+    require_admin(request)
+    if page < 1:
+        raise HTTPException(status_code=400, detail="page must be at least 1")
+    page_size = 25
+    offset = (page - 1) * page_size
+    conn = get_db()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("SELECT count(*) AS total FROM nickname_registry")
+        registered_clients = cursor.fetchone()["total"]
+        cursor.execute("""
+            SELECT count(*) AS diary_entries, count(DISTINCT user_id) AS diary_nicknames
+            FROM emotion_diary
+        """)
+        diary_totals = dict(cursor.fetchone())
+        cursor.execute("""
+            SELECT nickname, contract_date, created_at
+            FROM nickname_registry
+            ORDER BY created_at DESC, client_id DESC
+            LIMIT %s OFFSET %s
+        """, (page_size, offset))
+        registrations = [dict(row) for row in cursor.fetchall()]
+        cursor.execute("""
+            SELECT user_id AS nickname, count(*) AS diary_count,
+                   max(diary_date) AS latest_diary_date
+            FROM emotion_diary
+            GROUP BY user_id
+            ORDER BY latest_diary_date DESC, user_id ASC
+            LIMIT %s OFFSET %s
+        """, (page_size, offset))
+        diary_by_nickname = [dict(row) for row in cursor.fetchall()]
+        return {
+            "page": page,
+            "page_size": page_size,
+            "registered_clients": registered_clients,
+            **diary_totals,
+            "registrations": registrations,
+            "diary_by_nickname": diary_by_nickname,
+        }
     finally:
         cursor.close()
         conn.close()

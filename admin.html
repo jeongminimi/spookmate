@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="ko">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>SpookMate 관리자</title>
+    <style>
+        :root { color-scheme: dark; font-family: system-ui, sans-serif; background: #08090c; color: #f4f4f5; }
+        * { box-sizing: border-box; }
+        body { margin: 0; padding: 28px 16px 64px; }
+        main { max-width: 960px; margin: auto; }
+        h1 { margin: 0 0 8px; font-size: 28px; }
+        h2 { font-size: 17px; margin: 0 0 14px; }
+        p { color: #b5b6bf; line-height: 1.55; }
+        .card { background: #121419; border: 1px solid #343944; border-radius: 14px; padding: 20px; margin-top: 18px; }
+        .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+        input { min-width: 240px; flex: 1; padding: 11px; background: #090a0d; border: 1px solid #555b68; border-radius: 8px; color: #fff; font: inherit; }
+        button { padding: 11px 15px; background: #9b1c1c; border: 0; border-radius: 8px; color: #fff; font: inherit; cursor: pointer; }
+        button:disabled { opacity: .45; cursor: default; }
+        .secondary { background: #292d36; }
+        .metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+        .metric strong { display: block; font-size: 27px; margin-top: 5px; color: #e3b978; }
+        .metric span { color: #c1c3ca; font-size: 13px; }
+        .table-wrap { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; min-width: 510px; }
+        th, td { padding: 11px 7px; border-bottom: 1px solid #333843; text-align: left; font-size: 14px; }
+        th { color: #e3b978; font-size: 12px; }
+        #message { min-height: 24px; color: #e3b978; }
+        [hidden] { display: none !important; }
+        @media (max-width: 600px) { .metrics { grid-template-columns: 1fr; } h1 { font-size: 23px; } }
+    </style>
+</head>
+<body>
+<main>
+    <h1>SpookMate 관리자</h1>
+    <p>닉네임 입장 현황과 일기 건수만 표시합니다. 일기 원문과 요괴 대화는 이 화면으로 가져오지 않습니다.</p>
+    <p id="message" role="status">관리자 설정을 확인하는 중...</p>
+
+    <section id="login" class="card" hidden>
+        <h2>관리자 이메일 로그인</h2>
+        <p>등록된 관리자 이메일로 일회용 로그인 링크를 보냅니다.</p>
+        <form id="login-form" class="row">
+            <input id="admin-email" type="email" autocomplete="email" required placeholder="관리자 이메일">
+            <button type="submit">로그인 링크 보내기</button>
+        </form>
+    </section>
+
+    <section id="dashboard" hidden>
+        <div class="row" style="justify-content:space-between; margin-top:20px">
+            <h2 style="margin:0">저장 현황</h2>
+            <button id="sign-out" class="secondary" type="button">로그아웃</button>
+        </div>
+        <div class="metrics">
+            <div class="card metric"><span>닉네임 입장 기기</span><strong id="registered-count">—</strong></div>
+            <div class="card metric"><span>일기를 쓴 닉네임</span><strong id="nickname-count">—</strong></div>
+            <div class="card metric"><span>저장된 일기</span><strong id="diary-count">—</strong></div>
+        </div>
+        <section class="card">
+            <h2>최근 닉네임 입장</h2>
+            <div class="table-wrap"><table><thead><tr><th>닉네임</th><th>선택한 계약일</th><th>첫 입장</th></tr></thead><tbody id="registrations"></tbody></table></div>
+        </section>
+        <section class="card">
+            <h2>닉네임별 일기</h2>
+            <div class="table-wrap"><table><thead><tr><th>닉네임</th><th>일기 건수</th><th>마지막 작성일</th></tr></thead><tbody id="diary-by-nickname"></tbody></table></div>
+        </section>
+        <div class="row" style="justify-content:center; margin-top:18px">
+            <button id="previous-page" class="secondary" type="button">이전</button>
+            <span id="page-number">1</span>
+            <button id="next-page" class="secondary" type="button">다음</button>
+        </div>
+        <p>입장 기기 수는 사람 수와 다를 수 있습니다. 현재 일기는 닉네임 기준이므로 같은 닉네임을 쓰면 기록이 합쳐질 수 있습니다.</p>
+    </section>
+</main>
+<script type="module">
+    const message = document.getElementById('message');
+    const login = document.getElementById('login');
+    const dashboard = document.getElementById('dashboard');
+    const apiBase = ['127.0.0.1', 'localhost'].includes(location.hostname)
+        ? 'http://127.0.0.1:8000/api'
+        : 'https://spookmate-backend.onrender.com/api';
+    let authClient;
+    let currentPage = 1;
+
+    function fillRows(tbodyId, rows, columns) {
+        const tbody = document.getElementById(tbodyId);
+        tbody.replaceChildren();
+        if (!rows.length) {
+            const cell = document.createElement('td');
+            cell.colSpan = columns.length;
+            cell.textContent = '기록이 없습니다.';
+            const row = document.createElement('tr');
+            row.appendChild(cell);
+            tbody.appendChild(row);
+            return;
+        }
+        for (const item of rows) {
+            const row = document.createElement('tr');
+            for (const column of columns) {
+                const cell = document.createElement('td');
+                cell.textContent = item[column] == null ? '—' : String(item[column]);
+                row.appendChild(cell);
+            }
+            tbody.appendChild(row);
+        }
+    }
+
+    async function loadDashboard(page = 1) {
+        const { data: { session } } = await authClient.auth.getSession();
+        if (!session?.access_token) {
+            login.hidden = false;
+            dashboard.hidden = true;
+            message.textContent = '관리자 이메일로 로그인해 주세요.';
+            return;
+        }
+        message.textContent = '저장 현황을 불러오는 중...';
+        try {
+            const response = await fetch(`${apiBase}/admin/overview?page=${page}`, {
+                headers: { Authorization: `Bearer ${session.access_token}` },
+                cache: 'no-store'
+            });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.detail || `HTTP ${response.status}`);
+            currentPage = page;
+            document.getElementById('registered-count').textContent = data.registered_clients;
+            document.getElementById('nickname-count').textContent = data.diary_nicknames;
+            document.getElementById('diary-count').textContent = data.diary_entries;
+            fillRows('registrations', data.registrations, ['nickname', 'contract_date', 'created_at']);
+            fillRows('diary-by-nickname', data.diary_by_nickname, ['nickname', 'diary_count', 'latest_diary_date']);
+            document.getElementById('page-number').textContent = String(page);
+            document.getElementById('previous-page').disabled = page === 1;
+            document.getElementById('next-page').disabled = page * data.page_size >= Math.max(data.registered_clients, data.diary_nicknames);
+            login.hidden = true;
+            dashboard.hidden = false;
+            message.textContent = '';
+        } catch (error) {
+            dashboard.hidden = true;
+            login.hidden = false;
+            message.textContent = `관리자 정보를 불러오지 못했습니다. ${error.message}`;
+        }
+    }
+
+    document.getElementById('login-form').addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const email = document.getElementById('admin-email').value.trim();
+        message.textContent = '로그인 링크를 보내는 중...';
+        const { error } = await authClient.auth.signInWithOtp({
+            email,
+            options: { emailRedirectTo: `${location.origin}${location.pathname}` }
+        });
+        message.textContent = error ? `로그인 링크를 보내지 못했습니다. ${error.message}` : '이메일에서 로그인 링크를 확인해 주세요.';
+    });
+    document.getElementById('sign-out').addEventListener('click', async () => {
+        await authClient.auth.signOut();
+        dashboard.hidden = true;
+        login.hidden = false;
+        message.textContent = '로그아웃했습니다.';
+    });
+    document.getElementById('previous-page').addEventListener('click', () => loadDashboard(currentPage - 1));
+    document.getElementById('next-page').addEventListener('click', () => loadDashboard(currentPage + 1));
+
+    try {
+        const response = await fetch(`${apiBase}/admin/config`, { cache: 'no-store' });
+        const config = await response.json();
+        if (!response.ok || !config.enabled) throw new Error('서버의 관리자 인증 설정이 필요합니다.');
+        const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm');
+        authClient = createClient(config.supabase_url, config.publishable_key);
+        await loadDashboard();
+    } catch (error) {
+        message.textContent = error.message;
+    }
+</script>
+</body>
+</html>

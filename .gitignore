@@ -78,3 +78,4 @@ run.bat
 .DS_Store
 Thumbs.db
 *.log
+!.env.example
