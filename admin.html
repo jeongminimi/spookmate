@@ -78,8 +78,24 @@
     const apiBase = ['127.0.0.1', 'localhost'].includes(location.hostname)
         ? 'http://127.0.0.1:8000/api'
         : 'https://spookmate-backend.onrender.com/api';
+    const adminRedirectUrl = 'https://jeongminimi.github.io/spookmate/admin.html';
+    const loginButton = document.querySelector('#login-form button[type="submit"]');
     let authClient;
     let currentPage = 1;
+    let resendTimer;
+
+    function pauseResend(seconds) {
+        clearInterval(resendTimer);
+        const retryAt = Date.now() + seconds * 1000;
+        const updateButton = () => {
+            const remaining = Math.max(0, Math.ceil((retryAt - Date.now()) / 1000));
+            loginButton.disabled = remaining > 0;
+            loginButton.textContent = remaining ? `${remaining}초 후 다시 보내기` : '로그인 링크 보내기';
+            if (!remaining) clearInterval(resendTimer);
+        };
+        updateButton();
+        if (seconds > 0) resendTimer = setInterval(updateButton, 1000);
+    }
 
     function fillRows(tbodyId, rows, columns) {
         const tbody = document.getElementById(tbodyId);
@@ -142,12 +158,25 @@
     document.getElementById('login-form').addEventListener('submit', async (event) => {
         event.preventDefault();
         const email = document.getElementById('admin-email').value.trim();
+        loginButton.disabled = true;
         message.textContent = '로그인 링크를 보내는 중...';
-        const { error } = await authClient.auth.signInWithOtp({
-            email,
-            options: { emailRedirectTo: `${location.origin}${location.pathname}` }
-        });
-        message.textContent = error ? `로그인 링크를 보내지 못했습니다. ${error.message}` : '이메일에서 로그인 링크를 확인해 주세요.';
+        try {
+            const { error } = await authClient.auth.signInWithOtp({
+                email,
+                options: { emailRedirectTo: adminRedirectUrl }
+            });
+            if (error) {
+                const retrySeconds = Number(error.message.match(/after (\d+) seconds?/i)?.[1] || 0);
+                pauseResend(retrySeconds ? retrySeconds + 1 : error.status === 429 ? 60 : 0);
+                message.textContent = `로그인 링크를 보내지 못했습니다. ${error.message}`;
+                return;
+            }
+            pauseResend(60);
+            message.textContent = '로그인 메일을 보냈습니다. 받은편지함에서 링크를 한 번만 눌러 주세요.';
+        } catch (error) {
+            pauseResend(0);
+            message.textContent = `로그인 링크를 보내지 못했습니다. ${error.message}`;
+        }
     });
     document.getElementById('sign-out').addEventListener('click', async () => {
         await authClient.auth.signOut();
