@@ -19,7 +19,7 @@ from dotenv import load_dotenv
 import requests
 
 from analyzer import PLUTCHIK_24_DYADS, analyze_entry
-from yokai_chat import ROOMMATES, ROOMMATES_BY_ID, gemini_reply, is_crisis_message, rule_reply
+from yokai_chat import ROOMMATES, ROOMMATES_BY_ID, diary_roommate_acknowledgement, gemini_reply, is_crisis_message, rule_reply
 
 # ==============================================================================
 # 1. FastAPI 인스턴스 초기화 & CORS 설정
@@ -388,12 +388,6 @@ def submit_diary(data: DiaryInput):
         if isinstance(db_dialogue, (tuple, list)):
             db_dialogue = db_dialogue[0] if db_dialogue else None
         db_dialogue = str(db_dialogue).strip() if db_dialogue is not None else ""
-        quote_text = re.sub(r"^\[입맛 싱크로율 \d+%\]\s*", "", db_dialogue)
-        comfort_quote = (
-            f"[입맛 싱크로율 {match_rate}%] {quote_text}"
-            if quote_text else "등록된 요괴 대사가 없습니다."
-        )
-
         print(f"Matched yokai id={matched_yokai['id']}, match rate={match_rate}%")
 
         # 6. 일기 저장 (PostgreSQL ON CONFLICT 구문 적용)
@@ -438,6 +432,15 @@ def submit_diary(data: DiaryInput):
             (data.user_id, collection_month, matched_yokai["id"]),
         )
         conn.commit()
+
+        # The diary is saved even if the optional one-line roommate reaction fails.
+        # A fixed compendium line must never masquerade as a response to this entry.
+        comfort_quote = None
+        if os.getenv("GEMINI_API_KEY"):
+            try:
+                comfort_quote = diary_roommate_acknowledgement(matched_yokai, raw_text)
+            except (requests.RequestException, ValueError, KeyError, TypeError) as exc:
+                print(f"Diary acknowledgement unavailable ({type(exc).__name__}).")
 
         # 7. 프론트엔드 응답 반환
         return {

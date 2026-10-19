@@ -621,7 +621,7 @@
                     </div>
 
                     <div class="bg-black/80 border-l-4 border-spook-blood rounded-r-xl p-4 shadow">
-                        <p class="text-[10px] font-mono text-spook-gold font-bold mb-1">방구석 룸메이트의 맞장구 위로:</p>
+                        <p id="sin-yokai-quote-label" class="text-[10px] font-mono text-spook-gold font-bold mb-1">방구석 룸메이트의 맞장구 위로:</p>
                         <p id="sin-yokai-quote"
                             class="text-xs sm:text-sm font-mono text-gray-200 leading-relaxed italic">
                             "대사 출력 영역"
@@ -1081,7 +1081,13 @@
             sinYokaiImg.alt = yokai.name;
             document.getElementById('sin-yokai-name').textContent = yokai.name;
             document.getElementById('sin-yokai-meta').textContent = `#${analysis.emotion_tag || '감정 분석'} 완료 // NO.${yokai.id} 도감 기록됨`;
-            document.getElementById('sin-yokai-quote').textContent = `"${yokai.comfort_quote || '등록된 요괴 대사가 없습니다.'}"`;
+            const hasRoommateReply = Boolean(yokai.comfort_quote?.trim());
+            document.getElementById('sin-yokai-quote-label').textContent = hasRoommateReply
+                ? '방구석 룸메이트의 맞장구 위로:'
+                : '맞장구를 불러오지 못했어요';
+            document.getElementById('sin-yokai-quote').textContent = hasRoommateReply
+                ? `"${yokai.comfort_quote.trim()}"`
+                : '일기와 요괴 도감 기록은 저장됐어요.';
             document.getElementById('sin-yokai-action').textContent = yokai.micro_action || '등록된 신체 미션이 없습니다.';
             document.getElementById('sin-yokai-alt').textContent = analysis.alternative_thought || '대안적 사고 분석 결과가 없습니다.';
 
