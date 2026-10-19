@@ -18,7 +18,7 @@ PLUTCHIK_24_DYADS = {
         "ko": "환희 (기쁨 + 놀람)",
         "valence": 5.85,
         "arousal": 6.10,
-        "keywords": ["대박", "환희", "짜릿", "미쳤다", "횡재", "당첨", "선물", "축제", "감격", "신세계"]
+        "keywords": ["대박", "환희", "기쁘", "기뻤", "기뻐", "짜릿", "미쳤다", "횡재", "당첨", "선물", "축제", "감격", "신세계"]
     },
     "LOVE": {
         "tag": "사랑/유대",
@@ -53,7 +53,7 @@ PLUTCHIK_24_DYADS = {
         "ko": "절망 (공포 + 슬픔)",
         "valence": 1.45,
         "arousal": 4.10,
-        "keywords": ["무기력", "지쳐", "피곤", "피로", "포기", "끝났", "우울", "비가와서", "힘들어", "탈진", "번아웃"]
+        "keywords": ["무기력", "지쳐", "지쳤", "지치", "피곤", "피로", "포기", "끝났", "우울", "비가와서", "힘들", "탈진", "번아웃", "슬픔", "슬프", "슬펐", "울었", "눈물", "이별", "헤어", "외롭", "외로", "소외", "고립", "따돌", "버겁"]
     },
     "REMORSE": {
         "tag": "후회/자책",
@@ -103,7 +103,7 @@ PLUTCHIK_24_DYADS = {
     "MORBIDNESS": {"tag": "섬뜩/기괴", "ko": "섬뜩함 (기쁨 + 혐오)", "valence": 2.40, "arousal": 5.10,
                    "keywords": ["기괴", "섬뜩", "소름끼", "오싹", "으스스", "잔혹", "흉측"]},
     "DISAPPROVAL": {"tag": "실망/거부", "ko": "실망 (놀람 + 슬픔)", "valence": 2.45, "arousal": 3.05,
-                    "keywords": ["실망", "기대했는데", "서운", "허탈", "배신감", "맥 빠", "못마땅"]}
+                    "keywords": ["실망", "기대했는데", "서운", "속상", "허탈", "배신감", "맥 빠", "못마땅"]}
 }
 
 CBT_RESTRUCTURING = {
@@ -145,11 +145,25 @@ def analyze_entry(raw_entry: str):
             max_hits = hits
             matched_dyad = dyad
 
+    if not matched_dyad and any(h in raw_entry for h in POSITIVE_HINTS):
+        matched_dyad = "OPTIMISM"
+
+    # An entry without an emotion cue is not evidence of anxiety. Let the
+    # matcher use its content and a neutral coordinate instead of always
+    # assigning the same anxiety yokai.
     if not matched_dyad:
-        if any(h in raw_entry for h in POSITIVE_HINTS):
-            matched_dyad = "OPTIMISM"
-        else:
-            matched_dyad = "ANXIETY"
+        clean_text = re.sub(r'[^가-힣a-zA-Z0-9\s]', ' ', raw_entry)
+        return {
+            "emotion_tag": "감정 탐색",
+            "plutchik_dyad": None,
+            "plutchik_ko": None,
+            "valence": 3.5,
+            "arousal": 3.5,
+            "situation": raw_entry.strip(),
+            "automatic_thought": "아직 감정 단서를 특정하기 어려운 기록",
+            "alternative_thought": "이야기 속에서 실제로 있었던 일과 지금의 마음을 천천히 살펴보자.",
+            "tokens": [w for w in clean_text.split() if len(w) >= 2],
+        }
 
     dyad_data = PLUTCHIK_24_DYADS[matched_dyad]
     

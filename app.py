@@ -19,7 +19,7 @@ from dotenv import load_dotenv
 import requests
 
 from analyzer import PLUTCHIK_24_DYADS, analyze_entry
-from yokai_chat import ROOMMATES, ROOMMATES_BY_ID, diary_roommate_acknowledgement, gemini_reply, is_crisis_message, rule_reply
+from yokai_chat import ROOMMATES, ROOMMATES_BY_ID, diary_roommate_acknowledgement, fallback_diary_roommate_acknowledgement, gemini_reply, is_crisis_message, rule_reply
 
 # ==============================================================================
 # 1. FastAPI 인스턴스 초기화 & CORS 설정
@@ -294,20 +294,21 @@ def submit_diary(data: DiaryInput):
     # Persist only canonical DB emotion codes. Older Korean family labels are
     # display labels, and must never be compared directly with DB dyad codes.
     family_codes = {
-        "분노/격분": "OUTRAGE", "슬픔/절망": "DESPAIR",
-        "불안/초조": "ANXIETY", "고립/소외": "DESPAIR",
+        "분노/격분": "OUTRAGE", "우울/절망": "DESPAIR",
+        "불안/초조": "ANXIETY", "고립/외로움": "DESPAIR",
         "피로/탈진": "DESPAIR", "갈망/결핍": "PESSIMISM",
         "기쁨/환희": "DELIGHT",
     }
     target_dyad = family_codes.get(analysis.get("plutchik_dyad"), analysis.get("plutchik_dyad"))
     if target_dyad not in PLUTCHIK_24_DYADS:
-        target_dyad = "ANXIETY"
-    analysis["plutchik_dyad"] = target_dyad
-    analysis["emotion_tag"] = PLUTCHIK_24_DYADS[target_dyad]["tag"]
-    analysis["valence"] = PLUTCHIK_24_DYADS[target_dyad]["valence"]
-    analysis["arousal"] = PLUTCHIK_24_DYADS[target_dyad]["arousal"]
-    target_v = float(analysis.get("valence", 2.5))
-    target_a = float(analysis.get("arousal", 2.0))
+        target_dyad = None
+    if target_dyad:
+        analysis["plutchik_dyad"] = target_dyad
+        analysis["emotion_tag"] = PLUTCHIK_24_DYADS[target_dyad]["tag"]
+        analysis["valence"] = PLUTCHIK_24_DYADS[target_dyad]["valence"]
+        analysis["arousal"] = PLUTCHIK_24_DYADS[target_dyad]["arousal"]
+    target_v = float(analysis.get("valence") or 3.5)
+    target_a = float(analysis.get("arousal") or 3.5)
 
     # 날짜 데이터 정규화
     if hasattr(data.diary_date, "year"):
@@ -339,7 +340,7 @@ def submit_diary(data: DiaryInput):
 
         # 5. [정밀 4단계 다차원 스코어링]
         scored_yokai = []
-        target_tokens = set(target_dyad.replace("/", " ").split())
+        target_tokens = set(target_dyad.replace("/", " ").split()) if target_dyad else set()
         raw_words = set(re.findall(r'[가-힣a-zA-Z]{2,}', raw_text)) - STOPWORDS
 
         for y in all_yokai:
@@ -348,7 +349,7 @@ def submit_diary(data: DiaryInput):
             y_ko = y.get("plutchik_ko") or ""
             y_tokens = set(y_dyad.replace("/", " ").split()) | set(y_ko.replace("/", " ").split())
 
-            if target_dyad == y_dyad:
+            if target_dyad and target_dyad == y_dyad:
                 score += 40.0
             elif target_tokens & y_tokens:
                 score += 32.0
@@ -370,7 +371,7 @@ def submit_diary(data: DiaryInput):
             kw_hits = sum(1 for w in raw_words if w in story_text)
             score += min(kw_hits * 3.5, 8.0)
             tie_breaker = hashlib.sha256(f"{y['id']}:{raw_text}".encode("utf-8")).digest()
-            score += int.from_bytes(tie_breaker[:2], "big") / 65535 * 0.01
+            score += int.from_bytes(tie_breaker[:2], "big") / 65535 * (0.01 if target_dyad else 4.0)
 
             scored_yokai.append((score, y))
 
@@ -380,7 +381,19 @@ def submit_diary(data: DiaryInput):
         fresh = [(sc, y) for sc, y in scored_yokai if y["id"] not in encountered_ids]
         same_emotion = [(sc, y) for sc, y in fresh if y["plutchik_dyad"] == target_dyad]
         related = [(sc, y) for sc, y in fresh if sc >= top_score - 20]
-        final_score, matched_yokai = (same_emotion or related or scored_yokai)[0]
+        if target_dyad:
+            final_score, matched_yokai = (same_emotion or related or fresh or scored_yokai)[0]
+        else:
+            # For unclassified entries, rotate among similarly suitable fresh
+            # yokai instead of repeatedly selecting one arbitrary top row.
+            candidates = fresh or scored_yokai
+            near_top = [item for item in candidates if item[0] >= candidates[0][0] - 20]
+            choice_hash = hashlib.sha256(raw_text.encode("utf-8")).digest()
+            final_score, matched_yokai = near_top[int.from_bytes(choice_hash[:4], "big") % len(near_top)]
+
+        persisted_dyad = target_dyad or matched_yokai.get("plutchik_dyad")
+        if persisted_dyad not in PLUTCHIK_24_DYADS:
+            persisted_dyad = "ANXIETY"
 
         match_rate = int(min(max(final_score, 75.0), 98.0))
 
@@ -420,7 +433,7 @@ def submit_diary(data: DiaryInput):
                 analysis.get("automatic_thought", ""),
                 analysis.get("alternative_thought", ""),
                 analysis.get("emotion_tag", "정서 안정"),
-                target_dyad,
+                persisted_dyad,
                 target_v,
                 target_a,
                 matched_yokai["id"],
@@ -441,6 +454,8 @@ def submit_diary(data: DiaryInput):
                 comfort_quote = diary_roommate_acknowledgement(matched_yokai, raw_text)
             except (requests.RequestException, ValueError, KeyError, TypeError) as exc:
                 print(f"Diary acknowledgement unavailable ({type(exc).__name__}).")
+        if not comfort_quote:
+            comfort_quote = fallback_diary_roommate_acknowledgement(matched_yokai, raw_text, target_dyad)
 
         # 7. 프론트엔드 응답 반환
         return {

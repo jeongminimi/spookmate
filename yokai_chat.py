@@ -8,6 +8,28 @@ from difflib import SequenceMatcher
 import requests
 
 
+def fallback_diary_roommate_acknowledgement(yokai: dict, diary_text: str, dyad: str | None = None) -> str:
+    """Keep a short, entry-specific reaction available when Gemini is unavailable."""
+    entry = re.sub(r"\s+", " ", diary_text).strip()
+    first_thought = re.split(r"[.!?。！？\n]", entry, maxsplit=1)[0].strip() or entry
+    anchor = first_thought[:48].rstrip()
+    if len(first_thought) > len(anchor):
+        anchor += "…"
+
+    emotion = dyad or yokai.get("plutchik_dyad")
+    if emotion in {"OPTIMISM", "DELIGHT", "LOVE", "PRIDE", "HOPE"}:
+        reaction = "그 순간이 네게 소중했겠구나. 나도 곁에서 같이 기뻐할게."
+    elif emotion in {"OUTRAGE", "CONTEMPT", "AGGRESSIVENESS"}:
+        reaction = "그런 일을 겪었다니 속이 상했겠어. 여기서 네 얘기 듣고 있어."
+    elif emotion in {"DESPAIR", "REMORSE", "SHAME", "GUILT", "DISAPPROVAL"}:
+        reaction = "그 마음을 꺼내기 쉽지 않았겠다. 내가 옆에서 들어줄게."
+    elif emotion == "ANXIETY":
+        reaction = "마음이 쓰였겠구나. 지금 네 얘기를 듣고 있어."
+    else:
+        reaction = "그런 일이 있었구나. 네 이야기를 조금 더 듣고 싶어."
+    return f"‘{anchor}’라는 이야기구나. {reaction}" if anchor else reaction
+
+
 def diary_roommate_acknowledgement(yokai: dict, diary_text: str) -> str:
     """Generate one grounded, in-character reaction to a diary entry.
 
@@ -52,7 +74,7 @@ def diary_roommate_acknowledgement(yokai: dict, diary_text: str) -> str:
             json=payload,
             timeout=25,
         )
-        if response.status_code == 503 and index + 1 < len(models):
+        if response.status_code in {429, 500, 502, 503, 504} and index + 1 < len(models):
             continue
         response.raise_for_status()
         result = response.json()
