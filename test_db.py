@@ -1,16 +1,25 @@
-import psycopg2
+"""Check the database connection using the local, ignored .env file."""
 
-# 2단계에서 복사한 주소를 넣고, 비밀번호(tkfkdgo91!SPDB)를 정확히 입력합니다.
-DB_URL = "postgresql://postgres.aywtiggvataezyxeuexe:tkfkdgo91!SPDB@aws-0-ap-south-1.pooler.supabase.com:6543/postgres"
+from app import get_db
 
-print("🔄 수파베이스 연결 테스트 중...")
-try:
-    conn = psycopg2.connect(DB_URL)
-    cur = conn.cursor()
-    cur.execute("SELECT count(*) FROM yokai_compendium;")
-    total = cur.fetchone()[0]
-    print(f"🎉 [성공] 수파베이스와 정상 연결되었습니다! (요괴 도감 수: {total}개)")
-    cur.close()
-    conn.close()
-except Exception as e:
-    print(f"❌ [연결 실패] 에러 내용:\n{e}")
+
+def main() -> int:
+    try:
+        conn = get_db()
+        try:
+            with conn.cursor() as cursor:
+                cursor.execute("SELECT count(*) FROM yokai_compendium")
+                total = cursor.fetchone()[0]
+        finally:
+            conn.close()
+    except Exception as error:
+        # Connection errors can contain server addresses or credentials.
+        print(f"Database connection failed ({type(error).__name__}).")
+        return 1
+
+    print(f"Database connection succeeded. Yokai records: {total}")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

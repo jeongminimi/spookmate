@@ -1,0 +1,1438 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>요괴 그림·이름 검수</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#15171c;color:#f4f1e9;font:16px/1.55 system-ui,sans-serif}
+header{position:sticky;top:0;z-index:1;background:#15171cf2;border-bottom:1px solid #555;padding:15px max(20px,calc((100vw - 1400px)/2))}
+h1{font-size:1.35rem;margin:0 0 4px}header p{margin:0 0 10px;color:#bbb;font-size:.88rem}
+.toolbar{display:flex;gap:12px;align-items:center;flex-wrap:wrap}select,button,textarea{font:inherit;border:1px solid #777;border-radius:5px;background:#272a32;color:#fff;padding:7px}
+button{cursor:pointer;background:#a77938;color:#111;font-weight:700;border:0}#progress{margin-left:auto}
+main{max-width:1400px;margin:auto;padding:20px;display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:20px}
+.card{background:#24272e;border:2px solid #484d58;border-radius:8px;overflow:hidden}.card[data-status=match]{border-color:#4ca889}.card[data-status=mismatch]{border-color:#e36868}.card[data-status=uncertain]{border-color:#e0b05b}
+.card img{display:block;width:100%;aspect-ratio:1;object-fit:contain;background:#101216}.body{padding:15px}
+h2{font-size:1.1rem;margin:0}h2 span,small{color:#c7a66a}small{display:block}.description{min-height:7.5em;margin:12px 0;white-space:pre-line}
+a{color:#b7d5ff;font-size:.88rem}label{display:block;margin-top:16px;font-weight:700}label select,.note{display:block;width:100%;margin-top:5px}.note{height:70px;resize:vertical}
+.card[hidden]{display:none}
+</style></head><body>
+<header><h1>요괴 그림·이름 검수</h1><p>Supabase 이름 · 로컬 그림 · 원본 설화 설명을 비교하세요. 판정은 이 브라우저에만 저장되며 DB나 실제 매핑은 바뀌지 않습니다.</p>
+<div class="toolbar"><label>보기 <select id="filter"><option value="all">전체</option><option value="pending">미검수</option><option value="issues">판단 보류·불일치</option></select></label>
+<button id="export">판정 JSON 저장</button><span id="progress"></span></div></header>
+<main>
+        <article class="card" data-id="1" data-name="도깨비" data-image="img/1.png">
+          <img src="img/1.png" alt="도깨비" loading="lazy">
+          <div class="body">
+            <h2><span>#01</span> 도깨비</h2>
+            <small>img/1.png</small>
+            <p class="description">도깨비는 한국의 예술 작품, 민담에 등장하는 상상의 존재로 사람의 형상을 띠기도 하고, 비상한 재주를 부리기도 한다. 악귀를 쫓아내는 문화에 관한 상징으로 여겨진다. 일본의 오니와 혼동되기도 하나, 한국에서는 뿔난 요괴가 곧 도깨비인 것은 아니다.</p>
+            <a href="https://ko.wikipedia.org/wiki/%EB%8F%84%EA%B9%A8%EB%B9%84" target="_blank" rel="noopener noreferrer">설화 출처 보기</a>
+            <label>판정
+              <select class="decision">
+                <option value="">아직 확인하지 않음</option>
+                <option value="match">그림과 이름이 맞음</option>
+                <option value="uncertain">판단 보류</option>
+                <option value="mismatch">그림이 다름</option>
+              </select>
+            </label>
+            <textarea class="note" placeholder="다르다면 보이는 특징이나 추정 이름을 적으세요."></textarea>
+          </div>
+        </article>
+
+        <article class="card" data-id="2" data-name="구미호" data-image="img/2.png">
+          <img src="img/2.png" alt="구미호" loading="lazy">
+          <div class="body">
+            <h2><span>#02</span> 구미호</h2>
+            <small>img/2.png</small>
+            <p class="description">구미호(九尾狐)는 동아시아 설화에 구전되는 9개의 꼬리를 가진 여우괴수, 신수(神獸)이다. 그 기원은 중국《산해경》의 문어체 중 &#x27;호&#x27;(여우)와 &#x27;구미&#x27;(아홉 꼬리)에 대한 전승이 한반도로 확산되면서, &#x27;구미호&#x27;라는 단어로 명사화되었다.</p>
+            <a href="https://ko.wikipedia.org/wiki/%EA%B5%AC%EB%AF%B8%ED%98%B8" target="_blank" rel="noopener noreferrer">설화 출처 보기</a>
+            <label>판정
+              <select class="decision">
+                <option value="">아직 확인하지 않음</option>
+                <option value="match">그림과 이름이 맞음</option>
+                <option value="uncertain">판단 보류</option>
+                <option value="mismatch">그림이 다름</option>
+              </select>
+            </label>
+            <textarea class="note" placeholder="다르다면 보이는 특징이나 추정 이름을 적으세요."></textarea>
+          </div>
+        </article>
+
+        <article class="card" data-id="3" data-name="강철이" data-image="img/3.png">
+          <img src="img/3.png" alt="강철이" loading="lazy">
+          <div class="body">
+            <h2><span>#03</span> 강철이</h2>
+            <small>img/3.png</small>
+            <p class="description">특징: 가뭄이나 우박을 몰고 다니는 상상의 용이자 요괴입니다.능력: 네 발로 뛰어다니며 독을 품고, 강철이가 나타나는 지역에는 지독한 가뭄과 흉년이 든다고 전해집니다.설화: 하늘의 섭리에 의해 비를 내리지 못하게 하거나 가뭄을 일으키는 존재로 묘사되며, 한국 전통 농경 사회에서 날씨의 변덕과 재앙을 상징하는 두려운 존재였습니다</p>
+            <a href="https://ko.wikipedia.org/wiki/%EA%B0%93%ED%8C%8C" target="_blank" rel="noopener noreferrer">설화 출처 보기</a>
+            <label>판정
+              <select class="decision">
+                <option value="">아직 확인하지 않음</option>
+                <option value="match">그림과 이름이 맞음</option>
+                <option value="uncertain">판단 보류</option>
+                <option value="mismatch">그림이 다름</option>
+              </select>
+            </label>
+            <textarea class="note" placeholder="다르다면 보이는 특징이나 추정 이름을 적으세요."></textarea>
+          </div>
+        </article>
+
+        <article class="card" data-id="4" data-name="수금아" data-image="img/4.png">
+          <img src="img/4.png" alt="수금아" loading="lazy">
+          <div class="body">
+            <h2><span>#04</span> 수금아</h2>
+            <small>img/4.png</small>
+            <p class="description">  인간의 얼굴을 한 파충류 인간이미지 특이점: 사람의 얼굴을 하고 있지만 몸통은 뱀이나 개구리의 형태를 띠고 있습니다. 키가 1m도 채 되지 않는 아주 왜소한 크기입니다.특징: 설화에 따르면 아주 작은 체구를 가진 인간 여성에게서 태어난다고 전해지며, 민간에서 전해지는 기괴한 혼종 요괴의 대표적인 형태입니다.</p>
+            <a href="https://ko.wikipedia.org/wiki/%EA%B0%95%EC%8B%9C" target="_blank" rel="noopener noreferrer">설화 출처 보기</a>
+            <label>판정
+              <select class="decision">
+                <option value="">아직 확인하지 않음</option>
+                <option value="match">그림과 이름이 맞음</option>
+                <option value="uncertain">판단 보류</option>
+                <option value="mismatch">그림이 다름</option>
+              </select>
+            </label>
+            <textarea class="note" placeholder="다르다면 보이는 특징이나 추정 이름을 적으세요."></textarea>
+          </div>
+        </article>
+
+        <article class="card" data-id="5" data-name="거구귀" data-image="img/5.png">
+          <img src="img/5.png" alt="거구귀" loading="lazy">
+          <div class="body">
+            <h2><span>#05</span> 거구귀</h2>
+            <small>img/5.png</small>
+            <p class="description">하늘과 땅을 덮는 거대한 입이미지 특이점: 윗입술은 하늘에 닿고 아래입술은 땅에 닿을 정도로 거대한 입을 가진 요괴입니다. 온몸이 입으로만 이루어진 듯한 압도적이고 기괴한 비주얼을 자랑합니다.특징: 무시무시한 겉모습과 달리 사람을 먼저 공격하지 않습니다. 오히려 자신을 두려워하지 않는 비범한 인물을 만나면, 푸른 옷을 입은 어린 소년인 &#x27;청의동자&#x27;로 변신해 그 사람을 보좌하고 지켜주는 반전 매력을 가진 신비로운 존재입니다.</p>
+            <small>온라인 출처 링크 없음</small>
+            <label>판정
+              <select class="decision">
+                <option value="">아직 확인하지 않음</option>
+                <option value="match">그림과 이름이 맞음</option>
+                <option value="uncertain">판단 보류</option>
+                <option value="mismatch">그림이 다름</option>
+              </select>
+            </label>
+            <textarea class="note" placeholder="다르다면 보이는 특징이나 추정 이름을 적으세요."></textarea>
+          </div>
+        </article>
+
+        <article class="card" data-id="6" data-name="어둑시니" data-image="img/6.png">
+          <img src="img/6.png" alt="어둑시니" loading="lazy">
+          <div class="body">
+            <h2><span>#06</span> 어둑시니</h2>
+            <small>img/6.png</small>
+            <p class="description">관심을 먹고 자라는 어둠의 괴물이미지 특이점: 기본적으로 형체가 뚜렷하지 않은 음침한 어둠의 덩어리나 어린아이의 모습을 하고 있습니다.특징: 사람이 이 요괴를 쳐다보거나 두려워할수록 몸집이 집채만 하게 커지며, 결국에는 사람을 깔아뭉개 버립니다. 반대로 무서워하지 않고 억지로 내려다보거나 아예 관심을 주지 않고 무시하면 몸집이 점점 줄어들다가 결국 스스로 사라져 버리는 독특한 심리적 생태를 가졌습니다.</p>
+            <small>온라인 출처 링크 없음</small>
+            <label>판정
+              <select class="decision">
+                <option value="">아직 확인하지 않음</option>
+                <option value="match">그림과 이름이 맞음</option>
+                <option value="uncertain">판단 보류</option>
+                <option value="mismatch">그림이 다름</option>
+              </select>
+            </label>
+            <textarea class="note" placeholder="다르다면 보이는 특징이나 추정 이름을 적으세요."></textarea>
+          </div>
+        </article>
+
+        <article class="card" data-id="7" data-name="카파 (Kappa)" data-image="img/7.png">
+          <img src="img/7.png" alt="카파 (Kappa)" loading="lazy">
+          <div class="body">
+            <h2><span>#07</span> 카파 (Kappa)</h2>
+            <small>img/7.png</small>
+            <p class="description">강이나 연못에 사는 물의 요괴로 &#x27;강아이&#x27;라는 뜻. 물그릇(머리 위의 홈)에 물이 차 있어야 힘을 유지하며, 사람을 물에 빠뜨리거나 장난을 치고 오이 등을 좋아한다는 설화가 전해진다. 예의 바르면 헤아려지는 이야기들도 있다.</p>
+            <a href="https://en.wikipedia.org/wiki/Kappa_(folklore)" target="_blank" rel="noopener noreferrer">설화 출처 보기</a>
+            <label>판정
+              <select class="decision">
+                <option value="">아직 확인하지 않음</option>
+                <option value="match">그림과 이름이 맞음</option>
+                <option value="uncertain">판단 보류</option>
+                <option value="mismatch">그림이 다름</option>
+              </select>
+            </label>
+            <textarea class="note" placeholder="다르다면 보이는 특징이나 추정 이름을 적으세요."></textarea>
+          </div>
+        </article>
+
+        <article class="card" data-id="8" data-name="강시 (Jiangshi)" data-image="img/8.png">
+          <img src="img/8.png" alt="강시 (Jiangshi)" loading="lazy">
+          <div class="body">
+            <h2><span>#08</span> 강시 (Jiangshi)</h2>
+            <small>img/8.png</small>
+            <p class="description">강시(중국어: 殭屍 또는 僵屍)란 중국의 흡혈귀 겸 좀비로서 어떤 힘에 의해서 되살아나 피해자의 기를 빼앗거나, 피해자를 물어 같은 강시로 만들어 해치는 존재이다. 본래는 객지에서 죽은 자들의 원혼이 깃든 시체를 강시라 하는데, 고향으로 이관하기 위하여 영환술사가 부적을 붙여 움직일 수 없도록 한 후 고향으로 돌려 보내었다 한다. 시체이므로 몸이 굳어 관절을 구부리지 못하며, 영환술사의 종소리에 맞추어 뛰면서 이동한다고 전해진다.</p>
+            <a href="https://en.wikipedia.org/wiki/Jiangshi" target="_blank" rel="noopener noreferrer">설화 출처 보기</a>
+            <label>판정
+              <select class="decision">
+                <option value="">아직 확인하지 않음</option>
+                <option value="match">그림과 이름이 맞음</option>
+                <option value="uncertain">판단 보류</option>
+                <option value="mismatch">그림이 다름</option>
+              </select>
+            </label>
+            <textarea class="note" placeholder="다르다면 보이는 특징이나 추정 이름을 적으세요."></textarea>
+          </div>
+        </article>
+
+        <article class="card" data-id="9" data-name="Ma Vú Dài" data-image="img/9.png">
+          <img src="img/9.png" alt="Ma Vú Dài" loading="lazy">
+          <div class="body">
+            <h2><span>#09</span> Ma Vú Dài</h2>
+            <small>img/9.png</small>
+            <p class="description">베트남 민간설화에 전해지는 여성 유령으로, 가슴이 매우 길게 늘어진 모습으로 묘사된다. 밤에 떠돌며 사람들을 위협하거나 아이들을 납치한다는 이야기로 어린이들의 야간 외출을 통제하기 위한 경고담으로도 전해진다.</p>
+            <a href="https://thesmartlocal.com/vietnam/vietnamese-ghosts-demons" target="_blank" rel="noopener noreferrer">설화 출처 보기</a>
+            <label>판정
+              <select class="decision">
+                <option value="">아직 확인하지 않음</option>
+                <option value="match">그림과 이름이 맞음</option>
+                <option value="uncertain">판단 보류</option>
+                <option value="mismatch">그림이 다름</option>
+              </select>
+            </label>
+            <textarea class="note" placeholder="다르다면 보이는 특징이나 추정 이름을 적으세요."></textarea>
+          </div>
+        </article>
+
+        <article class="card" data-id="10" data-name="아스왕 (Aswang)" data-image="img/10.png">
+          <img src="img/10.png" alt="아스왕 (Aswang)" loading="lazy">
+          <div class="body">
+            <h2><span>#10</span> 아스왕 (Aswang)</h2>
+            <small>img/10.png</small>
+            <p class="description">필리핀 전역에 퍼진 복합적 악귀 용어로, 흡혈·육식·내장 흡수 등 다양한 형태의 변신 괴물(흡혈귀·요괴·마녀 등)을 포함한다. 야행성으로 마을을 습격하고 임산부나 아이들을 노린다는 공포담과 다양한 지역별 변형설화가 존재한다.</p>
+            <a href="https://en.wikipedia.org/wiki/Aswang" target="_blank" rel="noopener noreferrer">설화 출처 보기</a>
+            <label>판정
+              <select class="decision">
+                <option value="">아직 확인하지 않음</option>
+                <option value="match">그림과 이름이 맞음</option>
+                <option value="uncertain">판단 보류</option>
+                <option value="mismatch">그림이 다름</option>
+              </select>
+            </label>
+            <textarea class="note" placeholder="다르다면 보이는 특징이나 추정 이름을 적으세요."></textarea>
+          </div>
+        </article>
+
+        <article class="card" data-id="11" data-name="Ma Da" data-image="img/11.png">
+          <img src="img/11.png" alt="Ma Da" loading="lazy">
+          <div class="body">
+            <h2><span>#11</span> Ma Da</h2>
+            <small>img/11.png</small>
+            <p class="description">물에 익사한 자의 원혼이 물가에 남아 다른 사람을 끌어들여 대신 익사시키려 한다는 수령(替命) 개념의 수령귀. 특정 강변·물굽이에서 반복되는 익사 사고를 &#x27;Ma Da&#x27; 전설로 설명하며, 제사·굿으로 달래는 관습이 있음.</p>
+            <a href="https://www.crazyalchemist.com/bestiary/ma-da" target="_blank" rel="noopener noreferrer">설화 출처 보기</a>
+            <label>판정
+              <select class="decision">
+                <option value="">아직 확인하지 않음</option>
+                <option value="match">그림과 이름이 맞음</option>
+                <option value="uncertain">판단 보류</option>
+                <option value="mismatch">그림이 다름</option>
+              </select>
+            </label>
+            <textarea class="note" placeholder="다르다면 보이는 특징이나 추정 이름을 적으세요."></textarea>
+          </div>
+        </article>
+
+        <article class="card" data-id="12" data-name="Phi Tai Hong" data-image="img/12.png">
+          <img src="img/12.png" alt="Phi Tai Hong" loading="lazy">
+          <div class="body">
+            <h2><span>#12</span> Phi Tai Hong</h2>
+            <small>img/12.png</small>
+            <p class="description">갑작스럽고 잔혹한 죽음(살해, 익사 등)을 당한 자의 맺힌 영혼으로 매우 맹렬하고 복수심이 강한 유령. 적절한 장례의식을 치르지 못했거나 비정상적 죽음이 원인으로 여겨지며 태국 민담과 영화·매체에 자주 등장함.</p>
+            <a href="https://en.wikipedia.org/wiki/Phi_Tai_Hong" target="_blank" rel="noopener noreferrer">설화 출처 보기</a>
+            <label>판정
+              <select class="decision">
+                <option value="">아직 확인하지 않음</option>
+                <option value="match">그림과 이름이 맞음</option>
+                <option value="uncertain">판단 보류</option>
+                <option value="mismatch">그림이 다름</option>
+              </select>
+            </label>
+            <textarea class="note" placeholder="다르다면 보이는 특징이나 추정 이름을 적으세요."></textarea>
+          </div>
+        </article>
+
+        <article class="card" data-id="13" data-name="장산범" data-image="img/13.png">
+          <img src="img/13.png" alt="장산범" loading="lazy">
+          <div class="body">
+            <h2><span>#13</span> 장산범</h2>
+            <small>img/13.png</small>
+            <p class="description">부산 장산 일대에서 목격된다는 미확인 괴생물체로, 사람의 목소리를 흉내내어 사람을 홀린 뒤 잡아먹는다는 도시괴담이다. 비교적 최근(2000년대 이후) 인터넷 커뮤니티를 통해 확산된 현대적 도시전설로 알려져 있으며, 몸집이 크고 쇠를 긁는 듯한 소리를 낸다는 등 다양한 목격담이 전해진다.</p>
+            <a href="https://namu.wiki/w/%EC%9E%A5%EC%82%B0%EB%B2%94" target="_blank" rel="noopener noreferrer">설화 출처 보기</a>
+            <label>판정
+              <select class="decision">
+                <option value="">아직 확인하지 않음</option>
+                <option value="match">그림과 이름이 맞음</option>
+                <option value="uncertain">판단 보류</option>
+                <option value="mismatch">그림이 다름</option>
+              </select>
+            </label>
+            <textarea class="note" placeholder="다르다면 보이는 특징이나 추정 이름을 적으세요."></textarea>
+          </div>
+        </article>
+
+        <article class="card" data-id="14" data-name="호려정(Hồ ly tinh)" data-image="img/14.png">
+          <img src="img/14.png" alt="호려정(Hồ ly tinh)" loading="lazy">
+          <div class="body">
+            <h2><span>#14</span> 호려정(Hồ ly tinh)</h2>
+            <small>img/14.png</small>
+            <p class="description">동아시아 전역에 전하는 구미(九尾) 여우 전설의 베트남형으로, 여우가 수백 년 수련하여 인간으로 변하거나 초능력을 얻는 존재이다. 미인으로 변해 사람을 유혹하거나 복을 가져다주는 신성한 존재로 숭배되기도 하며, 동시에 사람을 해치는 &#x27;요괴&#x27;로 묘사되는 이중적 이미지가 있다.</p>
+            <a href="https://vi.wikipedia.org/wiki/H%E1%BB%93_ly_tinh" target="_blank" rel="noopener noreferrer">설화 출처 보기</a>
+            <label>판정
+              <select class="decision">
+                <option value="">아직 확인하지 않음</option>
+                <option value="match">그림과 이름이 맞음</option>
+                <option value="uncertain">판단 보류</option>
+                <option value="mismatch">그림이 다름</option>
+              </select>
+            </label>
+            <textarea class="note" placeholder="다르다면 보이는 특징이나 추정 이름을 적으세요."></textarea>
+          </div>
+        </article>
+
+        <article class="card" data-id="15" data-name="마카롱(Ma cà rồng)" data-image="img/15.png">
+          <img src="img/15.png" alt="마카롱(Ma cà rồng)" loading="lazy">
+          <div class="body">
+            <h2><span>#15</span> 마카롱(Ma cà rồng)</h2>
+            <small>img/15.png</small>
+            <p class="description">베트남 민간설화에 전해지는 &#x27;마(魔)&#x27; 계열 존재로, 서양의 흡혈귀와 달리 주로 생기(생명력)를 빼앗는 존재로 묘사된다. 시체가 밤에 무덤을 떠나 사람의 &#x27;숨&#x27;이나 생기를 빌려 가는 식의 이야기들이 전승되며, 지역·민족에 따라 다양한 명칭과 모습으로 전해진다.</p>
+            <a href="https://kenh14.vn/kham-pha/truyen-thuyet-tin-nguong-ve-ma-ca-rong-va-su-that-20120217041739212.chn" target="_blank" rel="noopener noreferrer">설화 출처 보기</a>
+            <label>판정
+              <select class="decision">
+                <option value="">아직 확인하지 않음</option>
+                <option value="match">그림과 이름이 맞음</option>
+                <option value="uncertain">판단 보류</option>
+                <option value="mismatch">그림이 다름</option>
+              </select>
+            </label>
+            <textarea class="note" placeholder="다르다면 보이는 특징이나 추정 이름을 적으세요."></textarea>
+          </div>
+        </article>
+
+        <article class="card" data-id="16" data-name="Pocong" data-image="img/16.png">
+          <img src="img/16.png" alt="Pocong" loading="lazy">
+          <div class="body">
+            <h2><span>#16</span> Pocong</h2>
+            <small>img/16.png</small>
+            <p class="description">무덤에서 천(장례용 수의)째로 묶인 채로 나타나는 유령으로, 발 밑의 매듭 때문에 뛰듯 이동하거나 떠다니는 모습으로 전해진다. 보통 수의의 매듭을 풀어주면 영혼이 편히 떠난다고 하며, 자바·수마트라 등 인도네시아 지역 민간신앙에서 널리 알려진 존재이다.</p>
+            <a href="https://en.wikipedia.org/wiki/Pocong" target="_blank" rel="noopener noreferrer">설화 출처 보기</a>
+            <label>판정
+              <select class="decision">
+                <option value="">아직 확인하지 않음</option>
+                <option value="match">그림과 이름이 맞음</option>
+                <option value="uncertain">판단 보류</option>
+                <option value="mismatch">그림이 다름</option>
+              </select>
+            </label>
+            <textarea class="note" placeholder="다르다면 보이는 특징이나 추정 이름을 적으세요."></textarea>
+          </div>
+        </article>
+
+        <article class="card" data-id="17" data-name="유키온나" data-image="img/17.png">
+          <img src="img/17.png" alt="유키온나" loading="lazy">
+          <div class="body">
+            <h2><span>#17</span> 유키온나</h2>
+            <small>img/17.png</small>
+            <p class="description">눈보라 속에 나타나는 흰 피부의 여성 영물/요괴로, 길 잃은 사람을 얼려 죽이거나 목숨을 구해주는 대신 조건을 요구하는 이야기 등 지역·이야기마다 선악 양면의 모습으로 전해짐. 무로마치 시대 이후 구전·문헌에 등장하며 근대에 들어 여러 문학·영화로 확산됨.</p>
+            <a href="https://en.wikipedia.org/wiki/Yuki-onna" target="_blank" rel="noopener noreferrer">설화 출처 보기</a>
+            <label>판정
+              <select class="decision">
+                <option value="">아직 확인하지 않음</option>
+                <option value="match">그림과 이름이 맞음</option>
+                <option value="uncertain">판단 보류</option>
+                <option value="mismatch">그림이 다름</option>
+              </select>
+            </label>
+            <textarea class="note" placeholder="다르다면 보이는 특징이나 추정 이름을 적으세요."></textarea>
+          </div>
+        </article>
+
+        <article class="card" data-id="18" data-name="프리 크라수 (Phi Krasue)" data-image="img/18.png">
+          <img src="img/18.png" alt="프리 크라수 (Phi Krasue)" loading="lazy">
+          <div class="body">
+            <h2><span>#18</span> 프리 크라수 (Phi Krasue)</h2>
+            <small>img/18.png</small>
+            <p class="description">밤에 떠도는 여자 머리 모양의 유령으로 목에서 내장이 늘어져 있는 모습으로 묘사된다. 낮에는 평범한 여성으로 지내지만 밤이면 머리만 떠돌아다니며 피나 태반 등 썩은 음식·비위생적 물질을 먹는다는 이야기로 각국(캄보디아·라오스 등) 변형도 있다.</p>
+            <a href="https://en.wikipedia.org/wiki/Krasue" target="_blank" rel="noopener noreferrer">설화 출처 보기</a>
+            <label>판정
+              <select class="decision">
+                <option value="">아직 확인하지 않음</option>
+                <option value="match">그림과 이름이 맞음</option>
+                <option value="uncertain">판단 보류</option>
+                <option value="mismatch">그림이 다름</option>
+              </select>
+            </label>
+            <textarea class="note" placeholder="다르다면 보이는 특징이나 추정 이름을 적으세요."></textarea>
+          </div>
+        </article>
+
+        <article class="card" data-id="19" data-name="누레온나" data-image="img/19.png">
+          <img src="img/19.png" alt="누레온나" loading="lazy">
+          <div class="body">
+            <h2><span>#19</span> 누레온나</h2>
+            <small>img/19.png</small>
+            <p class="description">머리는 여성, 몸은 거대한 뱀 같은 수생 요괴로 해안·강가에 나타난다. 젖은 머리카락을 하고 &#x27;아기를 잠깐 맡아달라&#x27;며 사람을 속인 뒤 무거워진 아기(혹은 돌로 변한 번들) 때문에 피해자가 움직일 수 없게 되면 물속으로 끌어가 죽인다는 전승이 있다.</p>
+            <a href="https://en.wikipedia.org/wiki/Nure-onna" target="_blank" rel="noopener noreferrer">설화 출처 보기</a>
+            <label>판정
+              <select class="decision">
+                <option value="">아직 확인하지 않음</option>
+                <option value="match">그림과 이름이 맞음</option>
+                <option value="uncertain">판단 보류</option>
+                <option value="mismatch">그림이 다름</option>
+              </select>
+            </label>
+            <textarea class="note" placeholder="다르다면 보이는 특징이나 추정 이름을 적으세요."></textarea>
+          </div>
+        </article>
+
+        <article class="card" data-id="20" data-name="죠로구모" data-image="img/20.png">
+          <img src="img/20.png" alt="죠로구모" loading="lazy">
+          <div class="body">
+            <h2><span>#20</span> 죠로구모</h2>
+            <small>img/20.png</small>
+            <p class="description">거미에서 변한 요괴로 아름다운 여성으로 변신해 젊은 남성을 유혹한 뒤 거미줄로 감아 잡아먹는 이야기들이 전해진다. 좌우(女郎)와 거미(蜘蛛)의 이미지가 결합된 형태로, 교묘한 속임수와 치명적 위협을 지닌 존재로 묘사된다.</p>
+            <a href="https://en.wikipedia.org/wiki/Jor%C5%8Dgumo" target="_blank" rel="noopener noreferrer">설화 출처 보기</a>
+            <label>판정
+              <select class="decision">
+                <option value="">아직 확인하지 않음</option>
+                <option value="match">그림과 이름이 맞음</option>
+                <option value="uncertain">판단 보류</option>
+                <option value="mismatch">그림이 다름</option>
+              </select>
+            </label>
+            <textarea class="note" placeholder="다르다면 보이는 특징이나 추정 이름을 적으세요."></textarea>
+          </div>
+        </article>
+
+        <article class="card" data-id="21" data-name="바케쿠지라" data-image="img/21.png">
+          <img src="img/21.png" alt="바케쿠지라" loading="lazy">
+          <div class="body">
+            <h2><span>#21</span> 바케쿠지라</h2>
+            <small>img/21.png</small>
+            <p class="description">고래의 유골이 유령처럼 바다 표면에 떠오르는 괴이한 현상으로 전해진다. 흰 뼈만 남은 거대한 고래 형태로 나타나고, 기묘한 새와 물고기 떼를 동반하며 목격 지역에 불운·병·화재 같은 재앙을 가져온다고 한다.</p>
+            <a href="https://en.wikipedia.org/wiki/Bake-kujira" target="_blank" rel="noopener noreferrer">설화 출처 보기</a>
+            <label>판정
+              <select class="decision">
+                <option value="">아직 확인하지 않음</option>
+                <option value="match">그림과 이름이 맞음</option>
+                <option value="uncertain">판단 보류</option>
+                <option value="mismatch">그림이 다름</option>
+              </select>
+            </label>
+            <textarea class="note" placeholder="다르다면 보이는 특징이나 추정 이름을 적으세요."></textarea>
+          </div>
+        </article>
+
+        <article class="card" data-id="22" data-name="니안 (Nian)" data-image="img/22.png">
+          <img src="img/22.png" alt="니안 (Nian)" loading="lazy">
+          <div class="body">
+            <h2><span>#22</span> 니안 (Nian)</h2>
+            <small>img/22.png</small>
+            <p class="description">설날 전후에 마을을 습격해 사람과 가축을 먹었다는 전설의 괴수로, 붉은 색·빛·큰 소리에 겁을 먹는다는 이야기가 전해진다. 이 전승은 홍·폭죽·사자춤 등 설날 풍속의 기원설과 연결된다.</p>
+            <a href="https://en.wikipedia.org/wiki/Nian" target="_blank" rel="noopener noreferrer">설화 출처 보기</a>
+            <label>판정
+              <select class="decision">
+                <option value="">아직 확인하지 않음</option>
+                <option value="match">그림과 이름이 맞음</option>
+                <option value="uncertain">판단 보류</option>
+                <option value="mismatch">그림이 다름</option>
+              </select>
+            </label>
+            <textarea class="note" placeholder="다르다면 보이는 특징이나 추정 이름을 적으세요."></textarea>
+          </div>
+        </article>
+
+        <article class="card" data-id="23" data-name="로쿠로쿠비 (Rokurokubi)" data-image="img/23.png">
+          <img src="img/23.png" alt="로쿠로쿠비 (Rokurokubi)" loading="lazy">
+          <div class="body">
+            <h2><span>#23</span> 로쿠로쿠비 (Rokurokubi)</h2>
+            <small>img/23.png</small>
+            <p class="description">낮에는 평범한 인간 여성이지만 밤이면 목이 길게 늘어나 머리를 멀리까지 움직일 수 있는 요괴. 보통 저주나 업보로 변했다고 전해지며, 사람들을 놀라게하거나 야간에 등불을 훔쳐먹는 등 이야기들이 전해진다.</p>
+            <a href="https://yokai.com/rokurokubi" target="_blank" rel="noopener noreferrer">설화 출처 보기</a>
+            <label>판정
+              <select class="decision">
+                <option value="">아직 확인하지 않음</option>
+                <option value="match">그림과 이름이 맞음</option>
+                <option value="uncertain">판단 보류</option>
+                <option value="mismatch">그림이 다름</option>
+              </select>
+            </label>
+            <textarea class="note" placeholder="다르다면 보이는 특징이나 추정 이름을 적으세요."></textarea>
+          </div>
+        </article>
+
+        <article class="card" data-id="24" data-name="노페라보 (Noppera-bō )" data-image="img/24.png">
+          <img src="img/24.png" alt="노페라보 (Noppera-bō )" loading="lazy">
+          <div class="body">
+            <h2><span>#24</span> 노페라보 (Noppera-bō )</h2>
+            <small>img/24.png</small>
+            <p class="description">처음에는 평범한 인간처럼 보이다가 가까이에서 얼굴을 보면 눈코입 등 얼굴의 모든 표정이 사라져 매끈한 얼굴만 남는 요괴. 길가나 여인숙 등에서 사람들을 놀라게 하는 이야기로 전해진다.</p>
+            <a href="https://en.wikipedia.org/wiki/Noppera-b%C5%8D" target="_blank" rel="noopener noreferrer">설화 출처 보기</a>
+            <label>판정
+              <select class="decision">
+                <option value="">아직 확인하지 않음</option>
+                <option value="match">그림과 이름이 맞음</option>
+                <option value="uncertain">판단 보류</option>
+                <option value="mismatch">그림이 다름</option>
+              </select>
+            </label>
+            <textarea class="note" placeholder="다르다면 보이는 특징이나 추정 이름을 적으세요."></textarea>
+          </div>
+        </article>
+
+        <article class="card" data-id="25" data-name="불가사리 (Bulgasari)" data-image="img/25.png">
+          <img src="img/25.png" alt="불가사리 (Bulgasari)" loading="lazy">
+          <div class="body">
+            <h2><span>#25</span> 불가사리 (Bulgasari)</h2>
+            <small>img/25.png</small>
+            <p class="description">쌀로 만들어졌다는 전설적 존재로, 쇠붙이를 먹고 끊임없이 성장하는 괴물. 병기와 농기구를 먹어 마을에 피해를 주고 여러 방법으로도 쉽게 죽지 않아 &#x27;불가살이(죽일 수 없다)&#x27;라 불린다. 전설·소설·영화 등으로 전승된다.</p>
+            <a href="https://folkency.nfm.go.kr/topic/detail/5534" target="_blank" rel="noopener noreferrer">설화 출처 보기</a>
+            <label>판정
+              <select class="decision">
+                <option value="">아직 확인하지 않음</option>
+                <option value="match">그림과 이름이 맞음</option>
+                <option value="uncertain">판단 보류</option>
+                <option value="mismatch">그림이 다름</option>
+              </select>
+            </label>
+            <textarea class="note" placeholder="다르다면 보이는 특징이나 추정 이름을 적으세요."></textarea>
+          </div>
+        </article>
+
+        <article class="card" data-id="26" data-name="낭 타니 (Nang Tani )" data-image="img/26.png">
+          <img src="img/26.png" alt="낭 타니 (Nang Tani )" loading="lazy">
+          <div class="body">
+            <h2><span>#26</span> 낭 타니 (Nang Tani )</h2>
+            <small>img/26.png</small>
+            <p class="description">야생 바나나나무(타니나무)에 깃드는 여성 영혼으로, 초록색 전통의상을 입은 젊은 여성으로 나타난다. 보통 호의적이지만 남자를 놀라게 하거나, 나무를 훼손하면 노여움을 보인다는 전승이 있다.</p>
+            <a href="https://en.wikipedia.org/wiki/Nang_Tani" target="_blank" rel="noopener noreferrer">설화 출처 보기</a>
+            <label>판정
+              <select class="decision">
+                <option value="">아직 확인하지 않음</option>
+                <option value="match">그림과 이름이 맞음</option>
+                <option value="uncertain">판단 보류</option>
+                <option value="mismatch">그림이 다름</option>
+              </select>
+            </label>
+            <textarea class="note" placeholder="다르다면 보이는 특징이나 추정 이름을 적으세요."></textarea>
+          </div>
+        </article>
+
+        <article class="card" data-id="27" data-name="쿤틸라낙(Kuntilanak)" data-image="img/27.png">
+          <img src="img/27.png" alt="쿤틸라낙(Kuntilanak)" loading="lazy">
+          <div class="body">
+            <h2><span>#27</span> 쿤틸라낙(Kuntilanak)</h2>
+            <small>img/27.png</small>
+            <p class="description">출산 중 사망한 여성의 원한이 변한 유령으로, 긴 흑발에 흰 옷을 입은 여성의 모습으로 자주 묘사된다. 아기 울음소리나 썩은 냄새로 근처에 있음을 알리며, 남성을 유인해 해를 끼친다는 이야기로 전해진다.</p>
+            <a href="https://en.wikipedia.org/wiki/Kuntilanak" target="_blank" rel="noopener noreferrer">설화 출처 보기</a>
+            <label>판정
+              <select class="decision">
+                <option value="">아직 확인하지 않음</option>
+                <option value="match">그림과 이름이 맞음</option>
+                <option value="uncertain">판단 보류</option>
+                <option value="mismatch">그림이 다름</option>
+              </select>
+            </label>
+            <textarea class="note" placeholder="다르다면 보이는 특징이나 추정 이름을 적으세요."></textarea>
+          </div>
+        </article>
+
+        <article class="card" data-id="28" data-name="잇탄모멘" data-image="img/28.png">
+          <img src="img/28.png" alt="잇탄모멘" loading="lazy">
+          <div class="body">
+            <h2><span>#28</span> 잇탄모멘</h2>
+            <small>img/28.png</small>
+            <p class="description">가고시마 지방 전승의 요괴로, 길게 늘어진 흰 천 조각이 밤에 날아와 사람의 목이나 몸을 감아 질식시키거나 공격한다고 전해진다. 현대 매체에서는 때때로 장난기 많은 형상으로 묘사되기도 한다.</p>
+            <a href="https://en.wikipedia.org/wiki/Ittan-momen" target="_blank" rel="noopener noreferrer">설화 출처 보기</a>
+            <label>판정
+              <select class="decision">
+                <option value="">아직 확인하지 않음</option>
+                <option value="match">그림과 이름이 맞음</option>
+                <option value="uncertain">판단 보류</option>
+                <option value="mismatch">그림이 다름</option>
+              </select>
+            </label>
+            <textarea class="note" placeholder="다르다면 보이는 특징이나 추정 이름을 적으세요."></textarea>
+          </div>
+        </article>
+
+        <article class="card" data-id="29" data-name="틱발랑 (Tikbalang)" data-image="img/29.png">
+          <img src="img/29.png" alt="틱발랑 (Tikbalang)" loading="lazy">
+          <div class="body">
+            <h2><span>#29</span> 틱발랑 (Tikbalang)</h2>
+            <small>img/29.png</small>
+            <p class="description">말의 머리와 사람의 몸을 가진 거대한 요정·정령으로 숲과 산지에 서식한다고 전해진다. 길을 잃게 만들거나 장난을 치는 것으로 알려져 있으며, 전통적으로는 옷을 뒤집어 입으면 혼란스러워 도망간다고 전해진다.</p>
+            <a href="https://en.wikipedia.org/wiki/Tikbalang" target="_blank" rel="noopener noreferrer">설화 출처 보기</a>
+            <label>판정
+              <select class="decision">
+                <option value="">아직 확인하지 않음</option>
+                <option value="match">그림과 이름이 맞음</option>
+                <option value="uncertain">판단 보류</option>
+                <option value="mismatch">그림이 다름</option>
+              </select>
+            </label>
+            <textarea class="note" placeholder="다르다면 보이는 특징이나 추정 이름을 적으세요."></textarea>
+          </div>
+        </article>
+
+        <article class="card" data-id="30" data-name="바쿠나와 (Bakunawa)" data-image="img/30.png">
+          <img src="img/30.png" alt="바쿠나와 (Bakunawa)" loading="lazy">
+          <div class="body">
+            <h2><span>#30</span> 바쿠나와 (Bakunawa)</h2>
+            <small>img/30.png</small>
+            <p class="description">달을 먹는 거대한 용뱀으로 전해지며, 일식·월식 같은 현상을 설명하는 존재로 여겨진다. 옛 전승에서는 여러 개의 달을 삼킨 이야기가 전해지고, 사람들은 달을 지키기 위해 북을 치며 소리를 냈다고 한다.</p>
+            <a href="https://en.wikipedia.org/wiki/Bakunawa" target="_blank" rel="noopener noreferrer">설화 출처 보기</a>
+            <label>판정
+              <select class="decision">
+                <option value="">아직 확인하지 않음</option>
+                <option value="match">그림과 이름이 맞음</option>
+                <option value="uncertain">판단 보류</option>
+                <option value="mismatch">그림이 다름</option>
+              </select>
+            </label>
+            <textarea class="note" placeholder="다르다면 보이는 특징이나 추정 이름을 적으세요."></textarea>
+          </div>
+        </article>
+
+        <article class="card" data-id="31" data-name="오랑미냑 (Orang Minyak)" data-image="img/31.png">
+          <img src="img/31.png" alt="오랑미냑 (Orang Minyak)" loading="lazy">
+          <div class="body">
+            <h2><span>#31</span> 오랑미냑 (Orang Minyak)</h2>
+            <small>img/31.png</small>
+            <p class="description">검은 기름이나 기름칠로 전신을 덮은 존재로, 밤에 젊은 여성들을 납치하거나 공격한다고 전해진다. 기원과 묘사는 다양한 변형이 있으며 20세기 중반 신문 보도를 통해 널리 알려졌다.</p>
+            <a href="https://en.wikipedia.org/wiki/Orang_Minyak" target="_blank" rel="noopener noreferrer">설화 출처 보기</a>
+            <label>판정
+              <select class="decision">
+                <option value="">아직 확인하지 않음</option>
+                <option value="match">그림과 이름이 맞음</option>
+                <option value="uncertain">판단 보류</option>
+                <option value="mismatch">그림이 다름</option>
+              </select>
+            </label>
+            <textarea class="note" placeholder="다르다면 보이는 특징이나 추정 이름을 적으세요."></textarea>
+          </div>
+        </article>
+
+        <article class="card" data-id="32" data-name="멍포" data-image="img/32.png">
+          <img src="img/32.png" alt="멍포" loading="lazy">
+          <div class="body">
+            <h2><span>#32</span> 멍포</h2>
+            <small>img/32.png</small>
+            <p class="description">저승에서 환생하기 전 망자에게 &#x27;망각의 탕&#x27;(孟婆湯)을 먹여 이전 생의 기억을 지우는 여신·인물이다. 나이허교(奈何橋) 근처에서 영혼들에게 탕을 제공한다는 이야기가 전해진다.</p>
+            <a href="https://en.wikipedia.org/wiki/Meng_Po" target="_blank" rel="noopener noreferrer">설화 출처 보기</a>
+            <label>판정
+              <select class="decision">
+                <option value="">아직 확인하지 않음</option>
+                <option value="match">그림과 이름이 맞음</option>
+                <option value="uncertain">판단 보류</option>
+                <option value="mismatch">그림이 다름</option>
+              </select>
+            </label>
+            <textarea class="note" placeholder="다르다면 보이는 특징이나 추정 이름을 적으세요."></textarea>
+          </div>
+        </article>
+
+        <article class="card" data-id="33" data-name="키요히메" data-image="img/33.png">
+          <img src="img/33.png" alt="키요히메" loading="lazy">
+          <div class="body">
+            <h2><span>#33</span> 키요히메</h2>
+            <small>img/33.png</small>
+            <p class="description">한 남자 승려 안친(安珍)의 구애를 거절당한 여인 키요가 격노하여 뱀으로 변신해 도조지(道成寺)의 종에 숨어 있던 안친을 쫓아가 죽였다는 전설. 노·교극 등으로 널리 알려진 집착과 변신의 이야기이다.</p>
+            <a href="https://en.wikipedia.org/wiki/Kiyohime" target="_blank" rel="noopener noreferrer">설화 출처 보기</a>
+            <label>판정
+              <select class="decision">
+                <option value="">아직 확인하지 않음</option>
+                <option value="match">그림과 이름이 맞음</option>
+                <option value="uncertain">판단 보류</option>
+                <option value="mismatch">그림이 다름</option>
+              </select>
+            </label>
+            <textarea class="note" placeholder="다르다면 보이는 특징이나 추정 이름을 적으세요."></textarea>
+          </div>
+        </article>
+
+        <article class="card" data-id="34" data-name="지키닌키" data-image="img/34.png">
+          <img src="img/34.png" alt="지키닌키" loading="lazy">
+          <div class="body">
+            <h2><span>#34</span> 지키닌키</h2>
+            <small>img/34.png</small>
+            <p class="description">탐욕이나 죄악으로 인해 저주받아 인간의 시체를 먹고 다니는 식인 귀신(구울)로, 불가사의한 외형과 함께 무덤이나 폐사찰 주변에 출몰한다는 설화가 전해진다.</p>
+            <a href="https://en.wikipedia.org/wiki/Jikininki" target="_blank" rel="noopener noreferrer">설화 출처 보기</a>
+            <label>판정
+              <select class="decision">
+                <option value="">아직 확인하지 않음</option>
+                <option value="match">그림과 이름이 맞음</option>
+                <option value="uncertain">판단 보류</option>
+                <option value="mismatch">그림이 다름</option>
+              </select>
+            </label>
+            <textarea class="note" placeholder="다르다면 보이는 특징이나 추정 이름을 적으세요."></textarea>
+          </div>
+        </article>
+
+        <article class="card" data-id="35" data-name="매 낙 (Mae Nak )" data-image="img/35.png">
+          <img src="img/35.png" alt="매 낙 (Mae Nak )" loading="lazy">
+          <div class="body">
+            <h2><span>#35</span> 매 낙 (Mae Nak )</h2>
+            <small>img/35.png</small>
+            <p class="description">남편이 전쟁터에 가 있는 사이 출산 중 사망한 낙이라는 여인이 귀신이 되어 남편을 기다리다 집을 떠나지 못하고 마을을 괴롭혔다는 전설. 방콕 프라카농 지역의 유명한 귀신으로 사당과 여러 영화·창작물의 소재가 되었다.</p>
+            <a href="https://ko.wikipedia.org/wiki/%EB%A7%A4_%EB%82%99_%ED%94%84%EB%9D%BC%EC%B9%B4%EB%86%8D" target="_blank" rel="noopener noreferrer">설화 출처 보기</a>
+            <label>판정
+              <select class="decision">
+                <option value="">아직 확인하지 않음</option>
+                <option value="match">그림과 이름이 맞음</option>
+                <option value="uncertain">판단 보류</option>
+                <option value="mismatch">그림이 다름</option>
+              </select>
+            </label>
+            <textarea class="note" placeholder="다르다면 보이는 특징이나 추정 이름을 적으세요."></textarea>
+          </div>
+        </article>
+
+        <article class="card" data-id="36" data-name="카프레 (Kapre)" data-image="img/36.png">
+          <img src="img/36.png" alt="카프레 (Kapre)" loading="lazy">
+          <div class="body">
+            <h2><span>#36</span> 카프레 (Kapre)</h2>
+            <small>img/36.png</small>
+            <p class="description">발레테(혹은 큰 나무)에 사는 거대한 털복숭이 남성형 영물로, 파이프를 피우고 나뭇가지에 앉아 사람들을 혼란에 빠뜨리거나 장난을 치는 존재로 묘사된다. 지역에 따라 수호자 또는 장난꾸러기 성격으로 전해진다.</p>
+            <a href="https://en.wikipedia.org/wiki/Kapre" target="_blank" rel="noopener noreferrer">설화 출처 보기</a>
+            <label>판정
+              <select class="decision">
+                <option value="">아직 확인하지 않음</option>
+                <option value="match">그림과 이름이 맞음</option>
+                <option value="uncertain">판단 보류</option>
+                <option value="mismatch">그림이 다름</option>
+              </select>
+            </label>
+            <textarea class="note" placeholder="다르다면 보이는 특징이나 추정 이름을 적으세요."></textarea>
+          </div>
+        </article>
+
+        <article class="card" data-id="37" data-name="위웨 곰벨 (Wewe Gombel)" data-image="img/37.png">
+          <img src="img/37.png" alt="위웨 곰벨 (Wewe Gombel)" loading="lazy">
+          <div class="body">
+            <h2><span>#37</span> 위웨 곰벨 (Wewe Gombel)</h2>
+            <small>img/37.png</small>
+            <p class="description">버림받거나 학대받는 아이들을 납치해 자신이 보살피는다는 자바 전설의 여성 유령. 부모가 뉘우칠 때까지 아이들을 되돌려주지 않는다는 이야기로, 아이 방치에 대한 경고담 역할을 한다.</p>
+            <a href="https://en.wikipedia.org/wiki/Wewe_Gombel" target="_blank" rel="noopener noreferrer">설화 출처 보기</a>
+            <label>판정
+              <select class="decision">
+                <option value="">아직 확인하지 않음</option>
+                <option value="match">그림과 이름이 맞음</option>
+                <option value="uncertain">판단 보류</option>
+                <option value="mismatch">그림이 다름</option>
+              </select>
+            </label>
+            <textarea class="note" placeholder="다르다면 보이는 특징이나 추정 이름을 적으세요."></textarea>
+          </div>
+        </article>
+
+        <article class="card" data-id="38" data-name="텐구 (Tengu)" data-image="img/38.png">
+          <img src="img/38.png" alt="텐구 (Tengu)" loading="lazy">
+          <div class="body">
+            <h2><span>#38</span> 텐구 (Tengu)</h2>
+            <small>img/38.png</small>
+            <p class="description">반인반조 또는 장엄한 산속의 은둔자로 묘사되는 요괴로, 때로는 교활한 장난꾼으로, 때로는 무예를 가르치는 수호자(혹은 사악한 존재)로 전해진다. 산과 신사 주변에 출몰한다고 전해진다.</p>
+            <a href="https://en.wikipedia.org/wiki/Tengu" target="_blank" rel="noopener noreferrer">설화 출처 보기</a>
+            <label>판정
+              <select class="decision">
+                <option value="">아직 확인하지 않음</option>
+                <option value="match">그림과 이름이 맞음</option>
+                <option value="uncertain">판단 보류</option>
+                <option value="mismatch">그림이 다름</option>
+              </select>
+            </label>
+            <textarea class="note" placeholder="다르다면 보이는 특징이나 추정 이름을 적으세요."></textarea>
+          </div>
+        </article>
+
+        <article class="card" data-id="39" data-name="누에 (Nue)" data-image="img/39.png">
+          <img src="img/39.png" alt="누에 (Nue)" loading="lazy">
+          <div class="body">
+            <h2><span>#39</span> 누에 (Nue)</h2>
+            <small>img/39.png</small>
+            <p class="description">원숭이의 얼굴·호랑이의 다리·너구리(타누키)의 몸·뱀의 꼬리 등 혼합된 형상을 한 일본의 기이한 괴물로, 밤에 불길한 울음을 내어 재난이나 불운의 징조로 여겨졌다.</p>
+            <a href="https://en.wikipedia.org/wiki/Nue" target="_blank" rel="noopener noreferrer">설화 출처 보기</a>
+            <label>판정
+              <select class="decision">
+                <option value="">아직 확인하지 않음</option>
+                <option value="match">그림과 이름이 맞음</option>
+                <option value="uncertain">판단 보류</option>
+                <option value="mismatch">그림이 다름</option>
+              </select>
+            </label>
+            <textarea class="note" placeholder="다르다면 보이는 특징이나 추정 이름을 적으세요."></textarea>
+          </div>
+        </article>
+
+        <article class="card" data-id="40" data-name="흑백무상 (Heibai Wuchang)" data-image="img/40.png">
+          <img src="img/40.png" alt="흑백무상 (Heibai Wuchang)" loading="lazy">
+          <div class="body">
+            <h2><span>#40</span> 흑백무상 (Heibai Wuchang)</h2>
+            <small>img/40.png</small>
+            <p class="description">흑무상과 백무상이라는 두 존재로 표현되는 저승의 사자 겸 영혼 인도자들로, 죽은 자의 영혼을 저승으로 데려가며 선악에 따라 보상이나 벌을 준다고 전해진다.</p>
+            <a href="https://en.wikipedia.org/wiki/Heibai_Wuchang" target="_blank" rel="noopener noreferrer">설화 출처 보기</a>
+            <label>판정
+              <select class="decision">
+                <option value="">아직 확인하지 않음</option>
+                <option value="match">그림과 이름이 맞음</option>
+                <option value="uncertain">판단 보류</option>
+                <option value="mismatch">그림이 다름</option>
+              </select>
+            </label>
+            <textarea class="note" placeholder="다르다면 보이는 특징이나 추정 이름을 적으세요."></textarea>
+          </div>
+        </article>
+
+        <article class="card" data-id="41" data-name="티야낙 (Tiyanak)" data-image="img/41.png">
+          <img src="img/41.png" alt="티야낙 (Tiyanak)" loading="lazy">
+          <div class="body">
+            <h2><span>#41</span> 티야낙 (Tiyanak)</h2>
+            <small>img/41.png</small>
+            <p class="description">갓난아기 모습으로 사람을 유인한 뒤 실제로는 흉악한 괴물로 변해 공격하거나 영혼과 생명력을 빨아먹는다고 전해지는 필리핀 민속의 요괴다. 지역별 변형이 많다.</p>
+            <a href="https://en.wikipedia.org/wiki/Tiyanak" target="_blank" rel="noopener noreferrer">설화 출처 보기</a>
+            <label>판정
+              <select class="decision">
+                <option value="">아직 확인하지 않음</option>
+                <option value="match">그림과 이름이 맞음</option>
+                <option value="uncertain">판단 보류</option>
+                <option value="mismatch">그림이 다름</option>
+              </select>
+            </label>
+            <textarea class="note" placeholder="다르다면 보이는 특징이나 추정 이름을 적으세요."></textarea>
+          </div>
+        </article>
+
+        <article class="card" data-id="42" data-name="피 팝 (Phi Pop / Pop)" data-image="img/42.png">
+          <img src="img/42.png" alt="피 팝 (Phi Pop / Pop)" loading="lazy">
+          <div class="body">
+            <h2><span>#42</span> 피 팝 (Phi Pop / Pop)</h2>
+            <small>img/42.png</small>
+            <p class="description">빙의형 악령으로, 사람이나 동물에 들어가 내장 등을 먹어치우는 식인적 성향이 있으며, 마을에서는 무당이나 의식으로 이를 쫓아내려 한다는 전승이 있다.</p>
+            <a href="https://en.wikipedia.org/wiki/Pop_(ghost)" target="_blank" rel="noopener noreferrer">설화 출처 보기</a>
+            <label>판정
+              <select class="decision">
+                <option value="">아직 확인하지 않음</option>
+                <option value="match">그림과 이름이 맞음</option>
+                <option value="uncertain">판단 보류</option>
+                <option value="mismatch">그림이 다름</option>
+              </select>
+            </label>
+            <textarea class="note" placeholder="다르다면 보이는 특징이나 추정 이름을 적으세요."></textarea>
+          </div>
+        </article>
+
+        <article class="card" data-id="43" data-name="장승" data-image="img/43.png">
+          <img src="img/43.png" alt="장승" loading="lazy">
+          <div class="body">
+            <h2><span>#43</span> 장승</h2>
+            <small>img/43.png</small>
+            <p class="description">마을 입구나 사찰 들머리에 세워진 목·석제의 사람 모양 수호상. 악귀를 쫓고 경계 표시·마을 수호의 역할을 했으며, 특정 장승에 대한 제사(장승제)와 관련된 지역별 전승담이 많음. 때로는 마을의 풍년·안녕을 기원하는 주체로서 동제(마을굿)의 중심이 되기도 함.</p>
+            <a href="https://webzine.nfm.go.kr/2023/03/02/%EA%B5%AD%EB%A6%BD%EB%AF%BC%EC%86%8D%EB%B0%95%EB%AC%BC%EA%B4%80%EC%9D%98-%EC%88%98%ED%98%B8%EC%8B%A0-%EC%8C%8D%EA%B3%84%EC%82%AC-%EC%9E%A5%EC%8A%B9" target="_blank" rel="noopener noreferrer">설화 출처 보기</a>
+            <label>판정
+              <select class="decision">
+                <option value="">아직 확인하지 않음</option>
+                <option value="match">그림과 이름이 맞음</option>
+                <option value="uncertain">판단 보류</option>
+                <option value="mismatch">그림이 다름</option>
+              </select>
+            </label>
+            <textarea class="note" placeholder="다르다면 보이는 특징이나 추정 이름을 적으세요."></textarea>
+          </div>
+        </article>
+
+        <article class="card" data-id="44" data-name="삼족오" data-image="img/44.png">
+          <img src="img/44.png" alt="삼족오" loading="lazy">
+          <div class="body">
+            <h2><span>#44</span> 삼족오</h2>
+            <small>img/44.png</small>
+            <p class="description">해를 상징하는 세 발 달린 까마귀 전설. 고구려 고분벽화 등에서 태양을 수호하거나 신성한 징조로 그려지며, 왕권·수호·길조의 상징으로 민담과 고대 유물에 자주 등장한다. 지역 설화에서는 삼족오가 하늘·태양과 연결된 신비한 존재로 묘사됨.</p>
+            <a href="https://folkency.nfm.go.kr/topic/detail/9790" target="_blank" rel="noopener noreferrer">설화 출처 보기</a>
+            <label>판정
+              <select class="decision">
+                <option value="">아직 확인하지 않음</option>
+                <option value="match">그림과 이름이 맞음</option>
+                <option value="uncertain">판단 보류</option>
+                <option value="mismatch">그림이 다름</option>
+              </select>
+            </label>
+            <textarea class="note" placeholder="다르다면 보이는 특징이나 추정 이름을 적으세요."></textarea>
+          </div>
+        </article>
+
+        <article class="card" data-id="45" data-name="해태" data-image="img/45.png">
+          <img src="img/45.png" alt="해태" loading="lazy">
+          <div class="body">
+            <h2><span>#45</span> 해태</h2>
+            <small>img/45.png</small>
+            <p class="description">사자형의 상상 동물로서 정의를 판단하고 화재·재앙을 막는 수호신적 존재. 궁궐·관청의 문·광장 등에 석상으로 세워져 악을 누르거나 풍수를 바로잡는 상징으로 전해지며, 광화문 앞 해태 석상처럼 각지의 유래담과 석물 관련 이야기가 전한다.</p>
+            <a href="https://yeseowon.tistory.com/1634" target="_blank" rel="noopener noreferrer">설화 출처 보기</a>
+            <label>판정
+              <select class="decision">
+                <option value="">아직 확인하지 않음</option>
+                <option value="match">그림과 이름이 맞음</option>
+                <option value="uncertain">판단 보류</option>
+                <option value="mismatch">그림이 다름</option>
+              </select>
+            </label>
+            <textarea class="note" placeholder="다르다면 보이는 특징이나 추정 이름을 적으세요."></textarea>
+          </div>
+        </article>
+
+        <article class="card" data-id="46" data-name="우부메(Ubume)" data-image="img/46.png">
+          <img src="img/46.png" alt="우부메(Ubume)" loading="lazy">
+          <div class="body">
+            <h2><span>#46</span> 우부메(Ubume)</h2>
+            <small>img/46.png</small>
+            <p class="description">산고(産後)에 죽은 여성의 혼령으로, 밤에 다리나 길가에서 지나가는 이에게 아기를 맡겨 달라 부탁하는 모습으로 전승됨. 맡은 아이가 갑자기 무거워지거나 돌·나뭇잎으로 변하는 등 지역별 변이담이 있으며, 때로는 영혼을 달래는 의례로 수호신으로 변모하기도 한다.</p>
+            <a href="https://yokai.jp/en/yokai/ubume" target="_blank" rel="noopener noreferrer">설화 출처 보기</a>
+            <label>판정
+              <select class="decision">
+                <option value="">아직 확인하지 않음</option>
+                <option value="match">그림과 이름이 맞음</option>
+                <option value="uncertain">판단 보류</option>
+                <option value="mismatch">그림이 다름</option>
+              </select>
+            </label>
+            <textarea class="note" placeholder="다르다면 보이는 특징이나 추정 이름을 적으세요."></textarea>
+          </div>
+        </article>
+
+        <article class="card" data-id="47" data-name="도깨비너구리(Bake-danuki)" data-image="img/47.png">
+          <img src="img/47.png" alt="도깨비너구리(Bake-danuki)" loading="lazy">
+          <div class="body">
+            <h2><span>#47</span> 도깨비너구리(Bake-danuki)</h2>
+            <small>img/47.png</small>
+            <p class="description">실제 동물인 너구리(일본의 &#x27;타누키&#x27;)가 변신해 사람·물건으로 속이거나 장난을 치는 전승. 잔꾀·장난·형체 변화를 주로 하며, 에도 이후 그림·설화·도자기(시가라키의 다수의 타누키 조형물)로 대중화되어 친근하면서도 기묘한 요괴로 남아 있다.</p>
+            <a href="https://www.sccp.jp" target="_blank" rel="noopener noreferrer">설화 출처 보기</a>
+            <label>판정
+              <select class="decision">
+                <option value="">아직 확인하지 않음</option>
+                <option value="match">그림과 이름이 맞음</option>
+                <option value="uncertain">판단 보류</option>
+                <option value="mismatch">그림이 다름</option>
+              </select>
+            </label>
+            <textarea class="note" placeholder="다르다면 보이는 특징이나 추정 이름을 적으세요."></textarea>
+          </div>
+        </article>
+
+        <article class="card" data-id="48" data-name="이무기" data-image="img/48.png">
+          <img src="img/48.png" alt="이무기" loading="lazy">
+          <div class="body">
+            <h2><span>#48</span> 이무기</h2>
+            <small>img/48.png</small>
+            <p class="description">뱀과 유사한 거대 수생 생물로, 오랜 세월을 살면 하늘로 올라가 용이 된다는 전승이 전해진다. 마을 우물·연못·냇가와 관련된 지명 설화가 많고, 때로는 사람을 해하거나 길흉을 예고하는 존재로 묘사된다.</p>
+            <a href="https://ncms.nculture.org/origin-of-place-names/story/5088" target="_blank" rel="noopener noreferrer">설화 출처 보기</a>
+            <label>판정
+              <select class="decision">
+                <option value="">아직 확인하지 않음</option>
+                <option value="match">그림과 이름이 맞음</option>
+                <option value="uncertain">판단 보류</option>
+                <option value="mismatch">그림이 다름</option>
+              </select>
+            </label>
+            <textarea class="note" placeholder="다르다면 보이는 특징이나 추정 이름을 적으세요."></textarea>
+          </div>
+        </article>
+
+        <article class="card" data-id="49" data-name="손각시 (손말명)" data-image="img/49.png">
+          <img src="img/49.png" alt="손각시 (손말명)" loading="lazy">
+          <div class="body">
+            <h2><span>#49</span> 손각시 (손말명)</h2>
+            <small>img/49.png</small>
+            <p class="description">시집을 가지 못한 처녀가 죽어 원혼이 되어 나타난다는 이야기로, 집안에 해를 끼치거나 특정 장소에 서려 신경쓰이는 기운을 남긴다고 전해진다. 지역마다 풀어주는 굿이나 치유담이 함께 전승된다.</p>
+            <a href="https://encykorea.aks.ac.kr/Article/E0030464" target="_blank" rel="noopener noreferrer">설화 출처 보기</a>
+            <label>판정
+              <select class="decision">
+                <option value="">아직 확인하지 않음</option>
+                <option value="match">그림과 이름이 맞음</option>
+                <option value="uncertain">판단 보류</option>
+                <option value="mismatch">그림이 다름</option>
+              </select>
+            </label>
+            <textarea class="note" placeholder="다르다면 보이는 특징이나 추정 이름을 적으세요."></textarea>
+          </div>
+        </article>
+
+        <article class="card" data-id="50" data-name="쿠단(Kudan)" data-image="img/50.png">
+          <img src="img/50.png" alt="쿠단(Kudan)" loading="lazy">
+          <div class="body">
+            <h2><span>#50</span> 쿠단(Kudan)</h2>
+            <small>img/50.png</small>
+            <p class="description">소의 몸에 사람 얼굴을 한 예언적 요괴로 전해진다. 태어나 사람의 말을 하여 향후 대사건이나 재앙을 예고한 뒤 짧은 수명을 다한다고 전해지며, 에도·메이지 시대의 시범지(화보 등)에 자주 등장했다.</p>
+            <a href="https://yokai.jp/en/yokai/kudan" target="_blank" rel="noopener noreferrer">설화 출처 보기</a>
+            <label>판정
+              <select class="decision">
+                <option value="">아직 확인하지 않음</option>
+                <option value="match">그림과 이름이 맞음</option>
+                <option value="uncertain">판단 보류</option>
+                <option value="mismatch">그림이 다름</option>
+              </select>
+            </label>
+            <textarea class="note" placeholder="다르다면 보이는 특징이나 추정 이름을 적으세요."></textarea>
+          </div>
+        </article>
+
+        <article class="card" data-id="51" data-name="츠치노코" data-image="img/51.png">
+          <img src="img/51.png" alt="츠치노코" loading="lazy">
+          <div class="body">
+            <h2><span>#51</span> 츠치노코</h2>
+            <small>img/51.png</small>
+            <p class="description">짧고 굵은 몸통에 짧은 꼬리를 가진 뱀과 유사한 미확인생물로, 일본 전역의 마을 설화와 현대의 목격담·축제 문화로 남아 있다. 일부 지방에서는 탐색 행사나 축제가 열리며 마을의 미스터리로 사랑받는다.</p>
+            <a href="https://www.vill.higashishirakawa.gifu.jp/syoukai/gaiyo/tsuchinoko/tsuchinokofesta" target="_blank" rel="noopener noreferrer">설화 출처 보기</a>
+            <label>판정
+              <select class="decision">
+                <option value="">아직 확인하지 않음</option>
+                <option value="match">그림과 이름이 맞음</option>
+                <option value="uncertain">판단 보류</option>
+                <option value="mismatch">그림이 다름</option>
+              </select>
+            </label>
+            <textarea class="note" placeholder="다르다면 보이는 특징이나 추정 이름을 적으세요."></textarea>
+          </div>
+        </article>
+
+        <article class="card" data-id="52" data-name="우시오니" data-image="img/52.png">
+          <img src="img/52.png" alt="우시오니" loading="lazy">
+          <div class="body">
+            <h2><span>#52</span> 우시오니</h2>
+            <small>img/52.png</small>
+            <p class="description">소의 머리와 괴이한 몸을 가진 전통적 요괴로, 특히 에히메·고치 등 서일본 지역의 축제·의례에 등장한다. 마을을 지키거나 악귀를 쫓는 상징으로 거대한 가면·가마로 행렬에 등장하는 경우가 많다.</p>
+            <a href="https://www.hey-japan.com/event/uwajima-ushi-oni-festival" target="_blank" rel="noopener noreferrer">설화 출처 보기</a>
+            <label>판정
+              <select class="decision">
+                <option value="">아직 확인하지 않음</option>
+                <option value="match">그림과 이름이 맞음</option>
+                <option value="uncertain">판단 보류</option>
+                <option value="mismatch">그림이 다름</option>
+              </select>
+            </label>
+            <textarea class="note" placeholder="다르다면 보이는 특징이나 추정 이름을 적으세요."></textarea>
+          </div>
+        </article>
+
+        <article class="card" data-id="53" data-name="처용 (Cheoyong)" data-image="img/53.png">
+          <img src="img/53.png" alt="처용 (Cheoyong)" loading="lazy">
+          <div class="body">
+            <h2><span>#53</span> 처용 (Cheoyong)</h2>
+            <small>img/53.png</small>
+            <p class="description">신라 설화에 등장하는 처용이 귀신을 물리친 이야기를 바탕으로 한 인물이다. 처용의 얼굴을 본 떠 만든 처용탈과 처용무는 액을 막고 역신을 내쫓는 굿·탈춤 전통으로 전승되며, 궁중 및 민속 의례에서 악귀·역병을 막는 상징으로 사용된다.</p>
+            <a href="https://folkency.nfm.go.kr/kr/topic/detail/4986" target="_blank" rel="noopener noreferrer">설화 출처 보기</a>
+            <label>판정
+              <select class="decision">
+                <option value="">아직 확인하지 않음</option>
+                <option value="match">그림과 이름이 맞음</option>
+                <option value="uncertain">판단 보류</option>
+                <option value="mismatch">그림이 다름</option>
+              </select>
+            </label>
+            <textarea class="note" placeholder="다르다면 보이는 특징이나 추정 이름을 적으세요."></textarea>
+          </div>
+        </article>
+
+        <article class="card" data-id="54" data-name="삼신할미 (Samshin Halmi)" data-image="img/54.png">
+          <img src="img/54.png" alt="삼신할미 (Samshin Halmi)" loading="lazy">
+          <div class="body">
+            <h2><span>#54</span> 삼신할미 (Samshin Halmi)</h2>
+            <small>img/54.png</small>
+            <p class="description">삼신(삼신할미)은 잉태·출산·유아기(보통 7세 이전)까지의 탄생과 성장을 관장하는 여성 신들이다. 산모·아이의 건강과 출산을 비는 삼신제(삼신상에 밥·미역국을 올리는 의례) 등으로 민간에서 널리 공경되며 지역·시기별로 다양한 형태의 신앙 행위로 전승된다.</p>
+            <a href="https://encykorea.aks.ac.kr/Article/E0026698" target="_blank" rel="noopener noreferrer">설화 출처 보기</a>
+            <label>판정
+              <select class="decision">
+                <option value="">아직 확인하지 않음</option>
+                <option value="match">그림과 이름이 맞음</option>
+                <option value="uncertain">판단 보류</option>
+                <option value="mismatch">그림이 다름</option>
+              </select>
+            </label>
+            <textarea class="note" placeholder="다르다면 보이는 특징이나 추정 이름을 적으세요."></textarea>
+          </div>
+        </article>
+
+        <article class="card" data-id="55" data-name="좌식와라시(Zashiki‑warashi)" data-image="img/55.jfif">
+          <img src="img/55.jfif" alt="좌식와라시(Zashiki‑warashi)" loading="lazy">
+          <div class="body">
+            <h2><span>#55</span> 좌식와라시(Zashiki‑warashi)</h2>
+            <small>img/55.jfif</small>
+            <p class="description">주로 이와테(岩手) 지방 등 토호 가옥의 &#x27;안방&#x27;에 깃드는 어린아이 모습의 가택신. 집에 좌식와라시가 있으면 그 집은 번영하고, 떠나면 쇠락한다는 설화가 전해진다. 장난스럽고 장가의 물건을 숨기거나 밤에 방석을 뒤집는 등 소소한 장난담이 많다. &#x27;遠野物語&#x27;의 전승지인 원향(遠野)의 민속관과 관련 시설에서 전승·소개된다.</p>
+            <a href="https://tonofurusato.jp" target="_blank" rel="noopener noreferrer">설화 출처 보기</a>
+            <label>판정
+              <select class="decision">
+                <option value="">아직 확인하지 않음</option>
+                <option value="match">그림과 이름이 맞음</option>
+                <option value="uncertain">판단 보류</option>
+                <option value="mismatch">그림이 다름</option>
+              </select>
+            </label>
+            <textarea class="note" placeholder="다르다면 보이는 특징이나 추정 이름을 적으세요."></textarea>
+          </div>
+        </article>
+
+        <article class="card" data-id="56" data-name="아마노자쿠(Amanojaku)" data-image="img/56.jpg">
+          <img src="img/56.jpg" alt="아마노자쿠(Amanojaku)" loading="lazy">
+          <div class="body">
+            <h2><span>#56</span> 아마노자쿠(Amanojaku)</h2>
+            <small>img/56.jpg</small>
+            <p class="description">남의 말이나 사회적 규범에 일부러 거슬리는 행동을 유도하거나 사람의 심중을 읽고 그것을 역이용하는 교활한 소악귀. 설화마다 성격과 형상이 달라 사람을 괴롭히거나 장난을 치는 존재로 묘사되며, &#x27;하기 싫은 대로 하게 만드는 존재&#x27;라는 의미로 현대 일본어의 관용 표현에도 남아 있다.</p>
+            <a href="https://e2japan.com/myth/creatures/amanojaku" target="_blank" rel="noopener noreferrer">설화 출처 보기</a>
+            <label>판정
+              <select class="decision">
+                <option value="">아직 확인하지 않음</option>
+                <option value="match">그림과 이름이 맞음</option>
+                <option value="uncertain">판단 보류</option>
+                <option value="mismatch">그림이 다름</option>
+              </select>
+            </label>
+            <textarea class="note" placeholder="다르다면 보이는 특징이나 추정 이름을 적으세요."></textarea>
+          </div>
+        </article>
+
+        <article class="card" data-id="57" data-name="가마이타치(Kamaitachi)" data-image="img/57.png">
+          <img src="img/57.png" alt="가마이타치(Kamaitachi)" loading="lazy">
+          <div class="body">
+            <h2><span>#57</span> 가마이타치(Kamaitachi)</h2>
+            <small>img/57.png</small>
+            <p class="description">‘낫(鎌)을 지닌 족제비’ 같은 요괴로, 눈보라·소용돌이 바람과 함께 날아와 사람의 살갗을 베는 전설이 있다. 지역마다 달라지지만 흔히 세 마리가 함께 행동한다는 이야기(첫째가 바람을 일으키고 둘째가 베며 셋째가 치료한다는 유형 등)가 전해진다. 눈길에 생긴 설명할 수 없는 날카로운 상처의 원인으로 언급되기도 한다.</p>
+            <a href="https://yokai.com/itachi" target="_blank" rel="noopener noreferrer">설화 출처 보기</a>
+            <label>판정
+              <select class="decision">
+                <option value="">아직 확인하지 않음</option>
+                <option value="match">그림과 이름이 맞음</option>
+                <option value="uncertain">판단 보류</option>
+                <option value="mismatch">그림이 다름</option>
+              </select>
+            </label>
+            <textarea class="note" placeholder="다르다면 보이는 특징이나 추정 이름을 적으세요."></textarea>
+          </div>
+        </article>
+
+        <article class="card" data-id="58" data-name="불개 (Bulgae)" data-image="img/58.png">
+          <img src="img/58.png" alt="불개 (Bulgae)" loading="lazy">
+          <div class="body">
+            <h2><span>#58</span> 불개 (Bulgae)</h2>
+            <small>img/58.png</small>
+            <p class="description">어둠의 나라 가망나라에서 온 불의 사냥개로, 해와 달을 훔치려 달려들었다가 태양·달과 닿으면 타서 도망간다는 전설이 있다. 전통적으로 일식·월식을 설명하는 존재로 전해지며, 하늘을 쫓는 불개 이야기는 여러 지역 민담과 서사에 남아 있다.</p>
+            <a href="https://mythlok.com/bulgae" target="_blank" rel="noopener noreferrer">설화 출처 보기</a>
+            <label>판정
+              <select class="decision">
+                <option value="">아직 확인하지 않음</option>
+                <option value="match">그림과 이름이 맞음</option>
+                <option value="uncertain">판단 보류</option>
+                <option value="mismatch">그림이 다름</option>
+              </select>
+            </label>
+            <textarea class="note" placeholder="다르다면 보이는 특징이나 추정 이름을 적으세요."></textarea>
+          </div>
+        </article>
+
+        <article class="card" data-id="59" data-name="인면조 (Inmyeonjo)" data-image="img/59.png">
+          <img src="img/59.png" alt="인면조 (Inmyeonjo)" loading="lazy">
+          <div class="body">
+            <h2><span>#59</span> 인면조 (Inmyeonjo)</h2>
+            <small>img/59.png</small>
+            <p class="description">사람의 얼굴을 한 새로 고구려·삼국시대 벽화와 문헌에 등장한다. 천지의 화합과 장수를 상징하거나 무덤의 길조로 그려졌으며, 평화로운 시기에 나타난다는 설화적 의미를 지닌다.</p>
+            <a href="https://www.mythosjourney.com/encyclopedia/pages/inmyeonjo" target="_blank" rel="noopener noreferrer">설화 출처 보기</a>
+            <label>판정
+              <select class="decision">
+                <option value="">아직 확인하지 않음</option>
+                <option value="match">그림과 이름이 맞음</option>
+                <option value="uncertain">판단 보류</option>
+                <option value="mismatch">그림이 다름</option>
+              </select>
+            </label>
+            <textarea class="note" placeholder="다르다면 보이는 특징이나 추정 이름을 적으세요."></textarea>
+          </div>
+        </article>
+
+        <article class="card" data-id="60" data-name="아카나메 (Akaname)" data-image="img/60.png">
+          <img src="img/60.png" alt="아카나메 (Akaname)" loading="lazy">
+          <div class="body">
+            <h2><span>#60</span> 아카나메 (Akaname)</h2>
+            <small>img/60.png</small>
+            <p class="description">‘때벗기는 자’라는 뜻의 욕실 요괴로, 더러운 욕탕이나 화장실에 기거하며 때·찌꺼기를 혀로 핥아 먹는다고 전해진다. 아이들에게 청결을 가르치기 위한 교육적 이야기로도 전승되며 에도시대 주변 자료에서 등장한다.</p>
+            <a href="https://yokai.com/akaname" target="_blank" rel="noopener noreferrer">설화 출처 보기</a>
+            <label>판정
+              <select class="decision">
+                <option value="">아직 확인하지 않음</option>
+                <option value="match">그림과 이름이 맞음</option>
+                <option value="uncertain">판단 보류</option>
+                <option value="mismatch">그림이 다름</option>
+              </select>
+            </label>
+            <textarea class="note" placeholder="다르다면 보이는 특징이나 추정 이름을 적으세요."></textarea>
+          </div>
+        </article>
+
+        <article class="card" data-id="61" data-name="카라카사오바케(Karakasa-obake)" data-image="img/61.png">
+          <img src="img/61.png" alt="카라카사오바케(Karakasa-obake)" loading="lazy">
+          <div class="body">
+            <h2><span>#61</span> 카라카사오바케(Karakasa-obake)</h2>
+            <small>img/61.png</small>
+            <p class="description">오래된 기모노 양산(종이우산)이나 우산이 도구요괴(츠쿠모가미)가 되어 변한 존재로, 한쪽 다리·한눈·긴 혀 등 기괴한 모습으로 묘사된다. 주로 밤에 집안에서 튀어나온다는 구전이 있어 오래된 물건을 소중히 하라는 교훈으로도 읽힌다.</p>
+            <a href="https://thejapanbox.com/blogs/japanese-mythology/kasa-obake" target="_blank" rel="noopener noreferrer">설화 출처 보기</a>
+            <label>판정
+              <select class="decision">
+                <option value="">아직 확인하지 않음</option>
+                <option value="match">그림과 이름이 맞음</option>
+                <option value="uncertain">판단 보류</option>
+                <option value="mismatch">그림이 다름</option>
+              </select>
+            </label>
+            <textarea class="note" placeholder="다르다면 보이는 특징이나 추정 이름을 적으세요."></textarea>
+          </div>
+        </article>
+
+        <article class="card" data-id="62" data-name="Kuman Thong" data-image="img/62.png">
+          <img src="img/62.png" alt="Kuman Thong" loading="lazy">
+          <div class="body">
+            <h2><span>#62</span> Kuman Thong</h2>
+            <small>img/62.png</small>
+            <p class="description">‘황금 아이’라는 뜻의 가호 신격화된 유령·인형 신앙으로, 원래는 태아·유아의 영을 봉인해 복과 재물을 불러온다는 믿음에서 유래했다. 현대에는 탈골 인형·부처 사원에서 축복을 받는 형태로 보존되며 논란과 민속적 신앙이 혼재한다.</p>
+            <a href="https://www.atlasobscura.com/articles/kuman-thong-roasted-fetuses-in-gold-leaf" target="_blank" rel="noopener noreferrer">설화 출처 보기</a>
+            <label>판정
+              <select class="decision">
+                <option value="">아직 확인하지 않음</option>
+                <option value="match">그림과 이름이 맞음</option>
+                <option value="uncertain">판단 보류</option>
+                <option value="mismatch">그림이 다름</option>
+              </select>
+            </label>
+            <textarea class="note" placeholder="다르다면 보이는 특징이나 추정 이름을 적으세요."></textarea>
+          </div>
+        </article>
+
+        <article class="card" data-id="63" data-name="아마노자(amanoja)" data-image="img/63.png">
+          <img src="img/63.png" alt="아마노자(amanoja)" loading="lazy">
+          <div class="body">
+            <h2><span>#63</span> 아마노자(amanoja)</h2>
+            <small>img/63.png</small>
+            <p class="description">상대방의 마음을 읽고 일부러 그와 반대되는 행동을 하거나 말썽을 부리는 일본의 전통 요괴.멜론에서 태어난 아름다운 소녀가 혼인을 앞두고 있을 때, 아마노자쿠가 나타나 그녀를 속여 나무에 묶거나 살해한 뒤 그녀의 가죽(옷)을 뒤집어쓰고 공주 행세를 하며 혼례를 망치려다 결국 들통나 쫓겨나거나 처단당한다는 잔혹한 잔혹동화 계열의 이야기</p>
+            <small>온라인 출처 링크 없음</small>
+            <label>판정
+              <select class="decision">
+                <option value="">아직 확인하지 않음</option>
+                <option value="match">그림과 이름이 맞음</option>
+                <option value="uncertain">판단 보류</option>
+                <option value="mismatch">그림이 다름</option>
+              </select>
+            </label>
+            <textarea class="note" placeholder="다르다면 보이는 특징이나 추정 이름을 적으세요."></textarea>
+          </div>
+        </article>
+
+        <article class="card" data-id="64" data-name="우렁각시" data-image="img/64.png">
+          <img src="img/64.png" alt="우렁각시" loading="lazy">
+          <div class="body">
+            <h2><span>#64</span> 우렁각시</h2>
+            <small>img/64.png</small>
+            <p class="description">밭일을 돕거나 집안 살림을 거들어주며 은혜를 베푸는 ‘우렁이(우렁) 각시’ 전설. 주로 가난한 총각에게 우렁이가 밤마다 사람의 모습으로 들어와 밥을 지어주고 집을 돌봐주다가, 은혜를 저버리거나 비밀을 들키면 사라지거나 비극적 결말을 맞는 이야기 유형으로 한국 민담에 여러 변형으로 전해진다.</p>
+            <a href="https://www.hanfuture.pe.kr/bbs/board.php?bo_table=story1&amp;wr_id=59&amp;page=9&amp;device=mobile" target="_blank" rel="noopener noreferrer">설화 출처 보기</a>
+            <label>판정
+              <select class="decision">
+                <option value="">아직 확인하지 않음</option>
+                <option value="match">그림과 이름이 맞음</option>
+                <option value="uncertain">판단 보류</option>
+                <option value="mismatch">그림이 다름</option>
+              </select>
+            </label>
+            <textarea class="note" placeholder="다르다면 보이는 특징이나 추정 이름을 적으세요."></textarea>
+          </div>
+        </article>
+
+        <article class="card" data-id="65" data-name="영노" data-image="img/65.png">
+          <img src="img/65.png" alt="영노" loading="lazy">
+          <div class="body">
+            <h2><span>#65</span> 영노</h2>
+            <small>img/65.png</small>
+            <p class="description">경상도 지역 탈놀이·가면극에 등장하는 상상의 동물형 인물로, 주로 양반을 꾸짖거나 희화화하는 역할을 맡는다. 민속극의 고유한 상징인 영노는 공연 속에서 웃음과 풍자를 담당하며 지역별로 형태와 연행 방식에 차이가 있다.</p>
+            <a href="https://folkency.nfm.go.kr/topic/%EC%98%81%EB%85%B8" target="_blank" rel="noopener noreferrer">설화 출처 보기</a>
+            <label>판정
+              <select class="decision">
+                <option value="">아직 확인하지 않음</option>
+                <option value="match">그림과 이름이 맞음</option>
+                <option value="uncertain">판단 보류</option>
+                <option value="mismatch">그림이 다름</option>
+              </select>
+            </label>
+            <textarea class="note" placeholder="다르다면 보이는 특징이나 추정 이름을 적으세요."></textarea>
+          </div>
+        </article>
+
+        <article class="card" data-id="66" data-name="모쿠모쿠렌 (Mokumokuren)" data-image="img/66.png">
+          <img src="img/66.png" alt="모쿠모쿠렌 (Mokumokuren)" loading="lazy">
+          <div class="body">
+            <h2><span>#66</span> 모쿠모쿠렌 (Mokumokuren)</h2>
+            <small>img/66.png</small>
+            <p class="description">낡아 찢어진 쇼지(종이 미닫이)나 다다미의 구멍에서 수많은 눈들이 빼꼼히 나와 집안을 지켜보는 요괴. 대개 해를 끼치진 않지만 버려진 집이나 방치된 물건에 깃들어 다른 악귀들을 불러오는 징조로 여겨지며, 구멍을 메워 물건을 수리하면 사라진다고 전해진다.</p>
+            <a href="https://thejapanbox.com/blogs/japanese-mythology/mokumokuren" target="_blank" rel="noopener noreferrer">설화 출처 보기</a>
+            <label>판정
+              <select class="decision">
+                <option value="">아직 확인하지 않음</option>
+                <option value="match">그림과 이름이 맞음</option>
+                <option value="uncertain">판단 보류</option>
+                <option value="mismatch">그림이 다름</option>
+              </select>
+            </label>
+            <textarea class="note" placeholder="다르다면 보이는 특징이나 추정 이름을 적으세요."></textarea>
+          </div>
+        </article>
+
+        <article class="card" data-id="67" data-name="히토츠메코조우 (Hitotsume-kozō)" data-image="img/67.png">
+          <img src="img/67.png" alt="히토츠메코조우 (Hitotsume-kozō)" loading="lazy">
+          <div class="body">
+            <h2><span>#67</span> 히토츠메코조우 (Hitotsume-kozō)</h2>
+            <small>img/67.png</small>
+            <p class="description">한쪽 눈만 가진 어린 승려 모습의 요괴로 밤길에 행인을 놀라게 하거나 장난을 치는 존재로 전해진다. 지역 채록 자료와 에도기 회화에 등장하며, 장난 많고 가벼운 괴담의 소재로 민간에 널리 퍼져 있다.</p>
+            <a href="https://www.nichibun.ac.jp/cgi-bin/YoukaiDB3/ksearch.cgi?Name=%E3%83%92%E3%83%88%E3%83%84%E3%83%A1%E3%82%B3%E3%82%BE%E3%82%A6&amp;Pref=&amp;Area=%E4%B8%AD%E9%83%A8" target="_blank" rel="noopener noreferrer">설화 출처 보기</a>
+            <label>판정
+              <select class="decision">
+                <option value="">아직 확인하지 않음</option>
+                <option value="match">그림과 이름이 맞음</option>
+                <option value="uncertain">판단 보류</option>
+                <option value="mismatch">그림이 다름</option>
+              </select>
+            </label>
+            <textarea class="note" placeholder="다르다면 보이는 특징이나 추정 이름을 적으세요."></textarea>
+          </div>
+        </article>
+
+        <article class="card" data-id="68" data-name="크라항 (Krahang)" data-image="img/68.png">
+          <img src="img/68.png" alt="크라항 (Krahang)" loading="lazy">
+          <div class="body">
+            <h2><span>#68</span> 크라항 (Krahang)</h2>
+            <small>img/68.png</small>
+            <p class="description">태국 민간설화의 남성형 야행성 유령으로, 두 개의 대형 키(쟁반 같은)를 양 팔에 붙여 날고, 장대로 된 절구막대(쌀 찧는 막대)를 꼬리처럼 사용해 비행한다고 전해진다. 종종 여성형 유령 &#x27;กระสือ(크라수에)&#x27;와 한 쌍으로 묘사되며, 밤에 사람을 해치하거나 마을을 어지럽히는 이야기로 전해진다.</p>
+            <a href="https://www.silpa-mag.com/culture/article_101789" target="_blank" rel="noopener noreferrer">설화 출처 보기</a>
+            <label>판정
+              <select class="decision">
+                <option value="">아직 확인하지 않음</option>
+                <option value="match">그림과 이름이 맞음</option>
+                <option value="uncertain">판단 보류</option>
+                <option value="mismatch">그림이 다름</option>
+              </select>
+            </label>
+            <textarea class="note" placeholder="다르다면 보이는 특징이나 추정 이름을 적으세요."></textarea>
+          </div>
+        </article>
+
+        <article class="card" data-id="69" data-name="창귀" data-image="img/69.png">
+          <img src="img/69.png" alt="창귀" loading="lazy">
+          <div class="body">
+            <h2><span>#69</span> 창귀</h2>
+            <small>img/69.png</small>
+            <p class="description">호랑이에게 물려죽거나 익사한 자의 혼이 되어 남아, 원한으로 가족과 친척을 차례로 해치거나 물로 유인해 죽게 만든다는 귀신. 옛 사람들은 호환을 두려워해 특별한 장례·제사와 금기(호식총 등)를 남겼고, ‘창귀’는 호환(虎患) 관련 풍습과 연결되어 전승된다.</p>
+            <a href="https://www.kh.or.kr/brd/board/741/L/menu/740?brdType=R&amp;thisPage=1&amp;bbIdx=112285&amp;searchField=&amp;searchText=finden" target="_blank" rel="noopener noreferrer">설화 출처 보기</a>
+            <label>판정
+              <select class="decision">
+                <option value="">아직 확인하지 않음</option>
+                <option value="match">그림과 이름이 맞음</option>
+                <option value="uncertain">판단 보류</option>
+                <option value="mismatch">그림이 다름</option>
+              </select>
+            </label>
+            <textarea class="note" placeholder="다르다면 보이는 특징이나 추정 이름을 적으세요."></textarea>
+          </div>
+        </article>
+
+        <article class="card" data-id="70" data-name="달걀귀신" data-image="img/70.png">
+          <img src="img/70.png" alt="달걀귀신" loading="lazy">
+          <div class="body">
+            <h2><span>#70</span> 달걀귀신</h2>
+            <small>img/70.png</small>
+            <p class="description">오래된 달걀처럼 생겼다는 전승에서 유래한 귀신으로, 인간 모습으로 가장할 때 얼굴의 눈·코·입이 없다고 전해진다. 지역별로 전승 양상이 다르며 마을 전설·구전 괴담집에 수록된 사례들이 남아 있다.</p>
+            <a href="https://pajucc.or.kr/hanmadang/zboard.php" target="_blank" rel="noopener noreferrer">설화 출처 보기</a>
+            <label>판정
+              <select class="decision">
+                <option value="">아직 확인하지 않음</option>
+                <option value="match">그림과 이름이 맞음</option>
+                <option value="uncertain">판단 보류</option>
+                <option value="mismatch">그림이 다름</option>
+              </select>
+            </label>
+            <textarea class="note" placeholder="다르다면 보이는 특징이나 추정 이름을 적으세요."></textarea>
+          </div>
+        </article>
+
+        <article class="card" data-id="71" data-name="Nuppeppō" data-image="img/71.png">
+          <img src="img/71.png" alt="Nuppeppō" loading="lazy">
+          <div class="body">
+            <h2><span>#71</span> Nuppeppō</h2>
+            <small>img/71.png</small>
+            <p class="description">에도 시대 전래의 요괴 그림책·이야기에 등장하는, 일그러진 살덩어리 모양의 괴물. 둔탁하고 역한 냄새를 풍기며, 인간에게 불길한 징조를 남기거나 먹으면 불로불사 같은 전설적 효능을 준다는 변이담이 전해진다. 여러 옛 그림첩(妖怪絵巻)에 도상으로 남아 있다.</p>
+            <a href="https://da.nichibun.ac.jp/item/004587069" target="_blank" rel="noopener noreferrer">설화 출처 보기</a>
+            <label>판정
+              <select class="decision">
+                <option value="">아직 확인하지 않음</option>
+                <option value="match">그림과 이름이 맞음</option>
+                <option value="uncertain">판단 보류</option>
+                <option value="mismatch">그림이 다름</option>
+              </select>
+            </label>
+            <textarea class="note" placeholder="다르다면 보이는 특징이나 추정 이름을 적으세요."></textarea>
+          </div>
+        </article>
+
+        <article class="card" data-id="72" data-name="Gashadokuro" data-image="img/72.png">
+          <img src="img/72.png" alt="Gashadokuro" loading="lazy">
+          <div class="body">
+            <h2><span>#72</span> Gashadokuro</h2>
+            <small>img/72.png</small>
+            <p class="description">전투나 기근으로 묻히지 않은 죽은 이들의 뼈가 모여 거대한 해골 괴물이 되어 밤중에 떠돌며 사람을 잡아먹는다는 전승. 뼈가 부스럭거리는 소리를 내며 나타나고, 목을 물어 머리를 물어뜯는 등 잔혹한 모습으로 묘사된다. 비교적 근현대에 형상화가 확산된 요괴다.</p>
+            <a href="https://yokai.jp/en/yokai/gashadokuro" target="_blank" rel="noopener noreferrer">설화 출처 보기</a>
+            <label>판정
+              <select class="decision">
+                <option value="">아직 확인하지 않음</option>
+                <option value="match">그림과 이름이 맞음</option>
+                <option value="uncertain">판단 보류</option>
+                <option value="mismatch">그림이 다름</option>
+              </select>
+            </label>
+            <textarea class="note" placeholder="다르다면 보이는 특징이나 추정 이름을 적으세요."></textarea>
+          </div>
+        </article>
+
+        <article class="card" data-id="73" data-name="Pret" data-image="img/73.png">
+          <img src="img/73.png" alt="Pret" loading="lazy">
+          <div class="body">
+            <h2><span>#73</span> Pret</h2>
+            <small>img/73.png</small>
+            <p class="description">불교권의 ‘굶주린 귀신’ 전승에 속하는 존재로, 큰 키와 길쭉한 목·입 등으로 묘사되며 끝없는 배고픔과 갈증에 시달린다. 인도·동남아의 전승이 지역별로 변형되어 전해지며, 태국 민담에서는 악업으로 인한 업보의 화신·교훈담으로 자주 등장한다.</p>
+            <a href="https://www.matichon.co.th/weekly/featured/article_67676" target="_blank" rel="noopener noreferrer">설화 출처 보기</a>
+            <label>판정
+              <select class="decision">
+                <option value="">아직 확인하지 않음</option>
+                <option value="match">그림과 이름이 맞음</option>
+                <option value="uncertain">판단 보류</option>
+                <option value="mismatch">그림이 다름</option>
+              </select>
+            </label>
+            <textarea class="note" placeholder="다르다면 보이는 특징이나 추정 이름을 적으세요."></textarea>
+          </div>
+        </article></main>
+<script>
+const key='spookmate-yokai-review-v1';
+let saved={};try{saved=JSON.parse(localStorage.getItem(key)||'{}')}catch{}
+const cards=[...document.querySelectorAll('.card')];
+function refresh(){
+ let reviewed=0,issues=0;
+ for(const card of cards){
+  const id=card.dataset.id, record=saved[id]||{};
+  card.querySelector('.decision').value=record.status||'';
+  card.querySelector('.note').value=record.note||'';
+  card.dataset.status=record.status||'';
+  if(record.status)reviewed++;
+  if(record.status==='uncertain'||record.status==='mismatch')issues++;
+  const filter=document.querySelector('#filter').value;
+  card.hidden=filter==='pending'&&!!record.status || filter==='issues'&&!['uncertain','mismatch'].includes(record.status);
+ }
+ document.querySelector('#progress').textContent=`확인 ${reviewed}/73 · 보류/불일치 ${issues}`;
+}
+document.querySelector('main').addEventListener('input',event=>{
+ const card=event.target.closest('.card');if(!card)return;
+ saved[card.dataset.id]={status:card.querySelector('.decision').value,note:card.querySelector('.note').value};
+ try{localStorage.setItem(key,JSON.stringify(saved))}catch{}
+ refresh();
+});
+document.querySelector('#filter').addEventListener('change',refresh);
+document.querySelector('#export').addEventListener('click',()=>{
+ const result=cards.map(card=>({id:Number(card.dataset.id),name:card.dataset.name,image_url:card.dataset.image,...(saved[card.dataset.id]||{status:'',note:''})}));
+ const link=document.createElement('a');link.href=URL.createObjectURL(new Blob([JSON.stringify(result,null,2)],{type:'application/json'}));
+ link.download='yokai_image_review.json';link.click();setTimeout(()=>URL.revokeObjectURL(link.href),1000);
+});
+refresh();
+</script></body></html>
