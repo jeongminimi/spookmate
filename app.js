@@ -279,7 +279,8 @@ async function loadCalendar(year, month) {
       });
     }
 
-    const firstDay = new Date(year, month - 1, 1).getDay();
+    // Keep weekday placement deterministic across browser timezones.
+    const firstDay = new Date(Date.UTC(year, month - 1, 1)).getUTCDay();
     const lastDate = new Date(year, month, 0).getDate();
 
     for (let i = 0; i < firstDay; i++) {

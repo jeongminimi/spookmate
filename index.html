@@ -578,6 +578,12 @@
         <div class="max-w-7xl mx-auto text-center space-y-3">
             <div class="font-cinzel text-white text-base font-bold">SPOOKMATE HQ</div>
             <p>© 2026 SPOOKMATE EMOTION RESCUE. 73 KINDS OF ASIAN YOKAI DIALOGUE ENGINE.</p>
+            <a href="admin.html" target="_blank" rel="noopener noreferrer"
+                class="inline-flex items-center gap-1.5 rounded border border-gray-700 px-3 py-2 text-[11px] text-gray-500 transition-colors hover:border-spook-gold hover:text-spook-gold focus:outline-none focus:ring-2 focus:ring-spook-gold/60"
+                aria-label="관리자 페이지 새 창에서 열기">
+                <i data-lucide="shield-check" class="w-3.5 h-3.5" aria-hidden="true"></i>
+                관리자 페이지
+            </a>
         </div>
     </footer>
 
@@ -1211,7 +1217,9 @@
             contractCalTitle.textContent = `${year}년 ${month}월`;
             contractCalGrid.innerHTML = '';
 
-            const firstDayIndex = new Date(year, month - 1, 1).getDay();
+            // Use UTC for calendar arithmetic so the weekday does not shift with
+            // the visitor's browser timezone or daylight-saving settings.
+            const firstDayIndex = new Date(Date.UTC(year, month - 1, 1)).getUTCDay();
             const lastDate = new Date(year, month, 0).getDate();
 
             for (let i = 0; i < firstDayIndex; i++) {
