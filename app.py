@@ -2,7 +2,9 @@ import os
 import json
 from pathlib import Path
 from datetime import datetime, date
+from zoneinfo import ZoneInfo
 import math
+import hashlib
 import random
 import re
 from uuid import UUID, uuid4
@@ -16,7 +18,7 @@ from pydantic import BaseModel, Field
 from dotenv import load_dotenv
 import requests
 
-from analyzer import analyze_entry
+from analyzer import PLUTCHIK_24_DYADS, analyze_entry
 from yokai_chat import ROOMMATES, ROOMMATES_BY_ID, gemini_reply, is_crisis_message, rule_reply
 
 # ==============================================================================
@@ -289,13 +291,21 @@ def submit_diary(data: DiaryInput):
         }
 
     # 단문(25자 이하)이거나 명확한 키워드가 있을 경우 분석기 오분류 강제 교정
-    if detected_family and (len(raw_text) <= 25 or analysis.get("plutchik_dyad") == "불안/초조"):
-        analysis["plutchik_dyad"] = detected_family
-        def_v, def_a = DEFAULT_COORDINATES.get(detected_family, (2.5, 2.0))
-        analysis["valence"], analysis["arousal"] = def_v, def_a
-        analysis["emotion_tag"] = detected_family.split("/")[0]
-
-    target_dyad = analysis.get("plutchik_dyad", "피로/탈진")
+    # Persist only canonical DB emotion codes. Older Korean family labels are
+    # display labels, and must never be compared directly with DB dyad codes.
+    family_codes = {
+        "분노/격분": "OUTRAGE", "슬픔/절망": "DESPAIR",
+        "불안/초조": "ANXIETY", "고립/소외": "DESPAIR",
+        "피로/탈진": "DESPAIR", "갈망/결핍": "PESSIMISM",
+        "기쁨/환희": "DELIGHT",
+    }
+    target_dyad = family_codes.get(analysis.get("plutchik_dyad"), analysis.get("plutchik_dyad"))
+    if target_dyad not in PLUTCHIK_24_DYADS:
+        target_dyad = "ANXIETY"
+    analysis["plutchik_dyad"] = target_dyad
+    analysis["emotion_tag"] = PLUTCHIK_24_DYADS[target_dyad]["tag"]
+    analysis["valence"] = PLUTCHIK_24_DYADS[target_dyad]["valence"]
+    analysis["arousal"] = PLUTCHIK_24_DYADS[target_dyad]["arousal"]
     target_v = float(analysis.get("valence", 2.5))
     target_a = float(analysis.get("arousal", 2.0))
 
@@ -310,16 +320,12 @@ def submit_diary(data: DiaryInput):
     cursor = conn.cursor()  # dictionary=True 제거 (psycopg2 호환)
 
     try:
-        # 3. 당월 쿨다운 조회 (PostgreSQL EXTRACT 함수 적용)
-        query_month_yokais = """
-            SELECT matched_yokai_id FROM emotion_diary 
-            WHERE user_id = %s 
-              AND EXTRACT(YEAR FROM diary_date) = %s 
-              AND EXTRACT(MONTH FROM diary_date) = %s 
-              AND diary_date != %s;
-        """
-        cursor.execute(query_month_yokais, (data.user_id, d_year, d_month, d_date))
-        encountered_ids = {row["matched_yokai_id"] for row in cursor.fetchall()}
+        collection_month = date(d_year, d_month, 1)
+        cursor.execute(
+            "SELECT yokai_id FROM yokai_collection WHERE user_id = %s AND collection_month = %s",
+            (data.user_id, collection_month),
+        )
+        encountered_ids = {row["yokai_id"] for row in cursor.fetchall()}
 
         # 4. 요괴 도감 조회
         cursor.execute("""
@@ -363,22 +369,18 @@ def submit_diary(data: DiaryInput):
 
             kw_hits = sum(1 for w in raw_words if w in story_text)
             score += min(kw_hits * 3.5, 8.0)
-            score += (hash(f"{y['id']}_{raw_text}") % 200) * 0.01
+            tie_breaker = hashlib.sha256(f"{y['id']}:{raw_text}".encode("utf-8")).digest()
+            score += int.from_bytes(tie_breaker[:2], "big") / 65535 * 0.01
 
             scored_yokai.append((score, y))
 
         scored_yokai.sort(key=lambda x: x[0], reverse=True)
 
-        fresh_candidates = [
-            (sc, y) for (sc, y) in scored_yokai if y["id"] not in encountered_ids
-        ]
         top_score = scored_yokai[0][0]
-        if fresh_candidates and (top_score - fresh_candidates[0][0] < 20.0):
-            matched_yokai = fresh_candidates[0][1]
-            final_score = fresh_candidates[0][0]
-        else:
-            matched_yokai = scored_yokai[0][1]
-            final_score = top_score
+        fresh = [(sc, y) for sc, y in scored_yokai if y["id"] not in encountered_ids]
+        same_emotion = [(sc, y) for sc, y in fresh if y["plutchik_dyad"] == target_dyad]
+        related = [(sc, y) for sc, y in fresh if sc >= top_score - 20]
+        final_score, matched_yokai = (same_emotion or related or scored_yokai)[0]
 
         match_rate = int(min(max(final_score, 75.0), 98.0))
 
@@ -429,6 +431,11 @@ def submit_diary(data: DiaryInput):
                 target_a,
                 matched_yokai["id"],
             ),
+        )
+        cursor.execute(
+            """INSERT INTO yokai_collection (user_id, collection_month, yokai_id, source)
+               VALUES (%s, %s, %s, 'diary') ON CONFLICT DO NOTHING""",
+            (data.user_id, collection_month, matched_yokai["id"]),
         )
         conn.commit()
 
@@ -504,7 +511,7 @@ def get_calendar(user_id: str, year: int, month: int):
 # ==============================================================================
 @app.get("/api/compendium")
 def get_compendium(user_id: str, year: int | None = None, month: int | None = None):
-    today = date.today()
+    today = datetime.now(ZoneInfo("Asia/Seoul")).date()
     year = year or today.year
     month = month or today.month
     if not 1 <= month <= 12:
@@ -516,17 +523,15 @@ def get_compendium(user_id: str, year: int | None = None, month: int | None = No
         sql = """
             SELECT y.id, y.name, y.country, y.plutchik_ko,
                    y.narrative_dialogue, y.micro_action, y.story,
-                   CASE WHEN d.matched_yokai_id IS NOT NULL THEN TRUE ELSE FALSE END AS is_unlocked
+                   CASE WHEN c.yokai_id IS NOT NULL THEN TRUE ELSE FALSE END AS is_unlocked
             FROM yokai_compendium y
             LEFT JOIN (
-                SELECT DISTINCT matched_yokai_id FROM emotion_diary
-                WHERE user_id = %s
-                  AND EXTRACT(YEAR FROM diary_date) = %s
-                  AND EXTRACT(MONTH FROM diary_date) = %s
-            ) d ON y.id = d.matched_yokai_id
+                SELECT yokai_id FROM yokai_collection
+                WHERE user_id = %s AND collection_month = %s
+            ) c ON y.id = c.yokai_id
             ORDER BY CAST(y.id AS INTEGER) ASC;
         """
-        cursor.execute(sql, (user_id, year, month))
+        cursor.execute(sql, (user_id, date(year, month, 1)))
         compendium = [dict(item) for item in cursor.fetchall()]
         for item in compendium:
             item["image_url"] = get_yokai_image_path(item["id"], item["name"])
@@ -571,7 +576,7 @@ def get_spook_of_feelings():
                 "intro": persona["intro"],
                 "yokai": yokai,
             })
-        return {"status": "success", "chat_mode": "ai" if os.getenv("GEMINI_API_KEY") else "rules", "cards": selected_cards}
+        return {"status": "success", "chat_mode": "ai" if os.getenv("GEMINI_API_KEY") else "unavailable", "cards": selected_cards}
     finally:
         cursor.close()
         conn.close()
@@ -586,7 +591,7 @@ class YokaiChatInput(BaseModel):
     user_id: str = Field(max_length=80)
     yokai_id: int
     message: str = Field(min_length=1, max_length=500)
-    history: list[ChatTurn] = Field(default_factory=list, max_length=8)
+    history: list[ChatTurn] = Field(default_factory=list, max_length=16)
 
 @app.post("/api/chat/yokai")
 def chat_with_yokai(data: YokaiChatInput):
@@ -649,7 +654,7 @@ def chat_with_yokai(data: YokaiChatInput):
             )
             raise HTTPException(status_code=503, detail=detail) from None
     else:
-        reply = rule_reply(persona, message, history)
+        raise HTTPException(status_code=503, detail="AI 대화가 준비되지 않았습니다. 잠시 후 다시 시도해 주세요.")
 
     return {
         "status": "success",

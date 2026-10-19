@@ -2,6 +2,7 @@
 
 import os
 import re
+from difflib import SequenceMatcher
 
 import requests
 
@@ -183,25 +184,33 @@ def gemini_reply(persona: dict, yokai: dict, message: str, history: list[dict]) 
     models = [primary_model]
     if fallback_model and fallback_model != primary_model:
         models.append(fallback_model)
-    for index, model in enumerate(models):
-        response = requests.post(
-            f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent",
-            headers={"x-goog-api-key": os.environ["GEMINI_API_KEY"], "Content-Type": "application/json"},
-            json=payload,
-            timeout=25,
+    previous_replies = [turn["content"] for turn in history if turn["role"] == "assistant"]
+    for attempt in range(2):
+        for index, model in enumerate(models):
+            response = requests.post(
+                f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent",
+                headers={"x-goog-api-key": os.environ["GEMINI_API_KEY"], "Content-Type": "application/json"},
+                json=payload,
+                timeout=25,
+            )
+            if response.status_code == 503 and index + 1 < len(models):
+                continue
+            break
+        response.raise_for_status()
+        result = response.json()
+        candidates = result.get("candidates") or []
+        candidate = candidates[0] if candidates else {}
+        reply = "\n".join(
+            part.get("text", "")
+            for part in candidate.get("content", {}).get("parts", [])
+            if isinstance(part.get("text"), str)
+        ).strip()
+        if not reply:
+            raise ValueError("Empty Gemini response")
+        if not any(SequenceMatcher(None, reply, old).ratio() > 0.82 for old in previous_replies[-3:]):
+            return reply
+        payload["system_instruction"]["parts"][0]["text"] += (
+            " 방금 생성한 답변은 앞선 답변과 너무 비슷했다."
+            " 마지막 사용자 말의 의미와 직전 맥락에 새로운 문장으로 구체적으로 답해라."
         )
-        if response.status_code == 503 and index + 1 < len(models):
-            continue
-        break
-    response.raise_for_status()
-    result = response.json()
-    candidates = result.get("candidates") or []
-    candidate = candidates[0] if candidates else {}
-    reply = "\n".join(
-        part.get("text", "")
-        for part in candidate.get("content", {}).get("parts", [])
-        if isinstance(part.get("text"), str)
-    ).strip()
-    if not reply:
-        raise ValueError("Empty Gemini response")
-    return reply
+    raise ValueError("Repeated Gemini response")
