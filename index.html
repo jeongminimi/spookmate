@@ -382,15 +382,15 @@
                     <div class="flex items-center justify-between pb-3 border-b border-gray-800 text-xs font-mono">
                         <span class="text-spook-gold font-bold flex items-center gap-2">
                             <i data-lucide="pen-tool" class="w-4 h-4"></i>
-                            <span>감정 야식 배달 주문서</span>
+                            <span>오늘 마음에 쌓인 것</span>
                         </span>
-                        <span class="text-gray-500">배달 일자: <b id="vent-today-date"
+                        <span class="text-gray-500">기록 날짜: <b id="vent-today-date"
                                 class="text-white">2026-09-22</b></span>
                     </div>
 
                     <div>
                         <label class="block text-xs font-mono uppercase text-gray-300 mb-2">
-                            오늘 속을 썩혀 문드러지게 한 사건 / 감정 찌꺼기
+                            오늘 마음에 남은 일이나 감정을 스푹이에게 편하게 털어놓아 주세요.
                         </label>
                         <textarea id="sin-entry-text" required rows="4"
                             placeholder="예: 오늘 기획서 열심히 써갔는데 팀장이 제대로 보지도 않고 트집만 잡았다. 억울해서 미칠 것 같고 손이 부들부들 떨린다."
@@ -453,7 +453,7 @@
                     </p>
 
                     <div class="pt-2 flex flex-wrap gap-3">
-                        <button onclick="openSpookCamModal('img/2.gif', 'CAM-01 [주방 냉장고 앞] : 유통기한 지난 우유 냄새 맡기')"
+                        <button onclick="openSpookCamModal(1)"
                             class="inline-flex items-center gap-2.5 px-6 py-3.5 bg-spook-red/20 border border-spook-red hover:bg-spook-red text-white text-xs font-mono uppercase tracking-wider rounded transition-all shadow-[0_0_20px_rgba(185,28,28,0.3)]">
                             <i data-lucide="cctv" class="w-4 h-4 text-spook-blood"></i>
                             <span>실시간 룸메캠 엿보기 (LIVE)</span>
@@ -462,9 +462,9 @@
                 </div>
 
                 <div class="lg:col-span-7 relative h-[420px] sm:h-[480px]">
-                    <div onclick="openSpookCamModal('img/2.gif', 'CAM-01 [현관] : 언제와? 그니까 언제몇시몇분에와?')"
+                    <div onclick="openSpookCamModal(1)"
                         class="cursor-pointer group absolute top-0 left-0 w-3/4 h-64 rounded-xl overflow-hidden border border-spook-border hover:border-spook-red transition-all duration-300 shadow-2xl">
-                        <img src="img/2.gif" onerror="this.src='img/web_2.png'" alt="Spook-Cam Kitchen GIF"
+                        <img data-cam-preview="1" src="img/1.gif" onerror="this.src='img/web_2.png'" alt="Spook-Cam Kitchen GIF"
                             class="w-full h-full object-cover filter brightness-90 group-hover:scale-105 transition-transform duration-500" />
                         <div class="absolute inset-0 bg-black/30 flex items-center justify-center">
                             <div
@@ -479,14 +479,14 @@
                         </div>
                         <div
                             class="absolute bottom-2 left-3 right-3 text-[10px] font-mono text-gray-200 bg-black/80 px-2.5 py-1 rounded flex justify-between">
-                            <span>REC ● 14:22:08 [냉장고 털기]</span>
+                            <span>REC ● 14:22:08 [커피 한 잔]</span>
                             <span class="text-amber-400">실시간 감시 중</span>
                         </div>
                     </div>
 
-                    <div onclick="openSpookCamModal('media/cam02-living-room.mp4', 'CAM-02 [LIVING ROOM] : 고양이와 춤추는 중', '고양이와 춤추는 중', 'dancing with the cat...')"
+                    <div onclick="openSpookCamModal(2)"
                         class="cursor-pointer group absolute top-12 right-0 w-1/2 h-44 rounded-xl overflow-hidden border border-spook-border hover:border-spook-red transition-all duration-300 shadow-2xl z-20">
-                        <video src="media/cam02-living-room.mp4" autoplay muted loop playsinline preload="metadata"
+                        <video data-cam-preview="2" src="media/cam02-living-room.mp4" autoplay muted loop playsinline preload="metadata"
                             aria-label="CAM 02 거실에서 고양이와 춤추는 요괴"
                             class="w-full h-full object-cover object-center filter brightness-85 group-hover:scale-105 transition-transform duration-500"></video>
                         <div class="absolute inset-0 bg-black/30 flex items-center justify-center">
@@ -501,11 +501,9 @@
                         </div>
                     </div>
 
-                    <div onclick="openSpookCamModal('img/1.gif', 'CAM-03 [부엌] : 나혼자 커피를 마시고~')"
+                    <div onclick="openSpookCamModal(3)"
                         class="cursor-pointer group absolute bottom-0 left-12 w-2/3 h-52 rounded-xl overflow-hidden border border-spook-border hover:border-spook-red transition-all duration-300 shadow-2xl z-30">
-                        <img src="img/1.gif"
-                            onerror="this.src='https://images.unsplash.com/photo-1509114397022-ed747cca3f65?auto=format&fit=crop&w=800&q=80'"
-                            alt="Spook-Cam Door GIF"
+                        <img data-cam-preview="3" src="img/2.gif" onerror="this.src='img/web_2.png'" alt="Spook-Cam Front Door GIF"
                             class="w-full h-full object-cover filter brightness-85 group-hover:scale-105 transition-transform duration-500" />
                         <div class="absolute inset-0 bg-black/30 flex items-center justify-center">
                             <div
@@ -626,6 +624,12 @@
                             class="text-xs sm:text-sm font-mono text-gray-200 leading-relaxed italic">
                             "대사 출력 영역"
                         </p>
+                        <div class="mt-3 pt-3 border-t border-red-900/50">
+                            <p class="text-[10px] font-mono text-spook-gold font-bold mb-1">마음을 다독이는 한마디</p>
+                            <p id="sin-yokai-alt" class="text-[11px] font-mono text-gray-300 leading-relaxed">
+                                생각 환기
+                            </p>
+                        </div>
                     </div>
 
                     <div class="bg-emerald-950/30 border border-emerald-500/40 rounded-xl p-4 space-y-2 shadow">
@@ -636,9 +640,6 @@
                         <p id="sin-yokai-action" class="text-xs font-mono text-emerald-200 leading-relaxed">
                             미션 출력 영역
                         </p>
-                        <div class="pt-2 border-t border-emerald-900/40 text-[11px] font-mono text-gray-400">
-                            <span class="text-spook-gold font-bold">[생각 세척]</span> <span id="sin-yokai-alt">생각 환기</span>
-                        </div>
                     </div>
 
                     <button onclick="closeSinEaterModal()"
@@ -773,7 +774,7 @@
                 class="bg-black px-5 py-3 flex items-center justify-between border-b border-spook-border font-mono text-xs">
                 <div class="flex items-center gap-2.5">
                     <span class="w-2.5 h-2.5 rounded-full bg-red-600 animate-ping"></span>
-                    <span id="cctv-cam-title" class="text-emerald-400 font-bold">CAM-01 [주방] : 유통기한 지난 우유 냄새 맡기</span>
+                    <span id="cctv-cam-title" class="text-emerald-400 font-bold">CAM-01 [KITCHEN] : 커피를 마시며 쉬는 중</span>
                 </div>
                 <div class="flex items-center gap-4 text-gray-400 text-[11px]">
                     <span id="cctv-timecode">2026-09-22 14:22:08</span>
@@ -792,12 +793,12 @@
                 <div
                     class="absolute top-4 left-4 font-mono text-[11px] text-white/80 space-y-1 bg-black/60 p-2.5 rounded border border-white/10 backdrop-blur-sm">
                     <div class="text-emerald-400 font-bold">● SPOOK-CAM LIVE FEED</div>
-                    <div id="cam-status-text">활동: <span class="text-amber-300">냉장고 문 열어두고 멍때리기</span></div>
+                    <div id="cam-status-text">활동: <span class="text-amber-300">커피를 마시며 쉬는 중</span></div>
                     <div>룸메 상태: <span class="text-red-400">배고픔 (감정 야식 필요)</span></div>
                 </div>
                 <div id="cam-graffiti"
                     class="absolute bottom-4 right-4 font-marker text-spook-blood text-2xl opacity-80 select-none">
-                    spookmate is snacking...
+                    coffee break...
                 </div>
             </div>
 
@@ -805,17 +806,17 @@
                 class="bg-black/90 p-4 border-t border-spook-border flex flex-wrap gap-2.5 items-center justify-between font-mono text-xs">
                 <div class="flex gap-1.5">
                     <button
-                        onclick="switchCamFeed('CAM-01 [주방] : 유통기한 지난 우유 냄새 맡기', 'img/1.gif', '냉장고 문 열어두고 멍때리기', 'spookmate is snacking...')"
+                        onclick="switchCamFeed(1)"
                         class="px-2.5 py-1.5 rounded bg-spook-dark border border-spook-border hover:border-emerald-500 text-gray-300 text-[10px]">
                         CAM 1 (주방)
                     </button>
                     <button
-                        onclick="switchCamFeed('CAM-02 [LIVING ROOM] : 고양이와 춤추는 중', 'media/cam02-living-room.mp4', '고양이와 춤추는 중', 'dancing with the cat...')"
+                        onclick="switchCamFeed(2)"
                         class="px-2.5 py-1.5 rounded bg-spook-dark border border-spook-border hover:border-emerald-500 text-gray-300 text-[10px]">
                         CAM 2 (LIVING ROOM)
                     </button>
                     <button
-                        onclick="switchCamFeed('CAM-03 [현관] : 도어락 소리 날까 봐 귀 쫑긋', 'img/3.gif', '문틈에서 주인 발소리 기다리는 중', 'when are you coming?')"
+                        onclick="switchCamFeed(3)"
                         class="px-2.5 py-1.5 rounded bg-spook-dark border border-spook-border hover:border-emerald-500 text-gray-300 text-[10px]">
                         CAM 3 (현관)
                     </button>
@@ -1471,6 +1472,16 @@
         const cctvFeedVideo = document.getElementById('cctv-feed-video');
         const camStatusText = document.getElementById('cam-status-text');
         const camGraffiti = document.getElementById('cam-graffiti');
+        const CAM_FEEDS = {
+            1: { src: 'img/1.gif', title: 'CAM-01 [KITCHEN] : 커피를 마시며 쉬는 중', status: '커피를 마시며 쉬는 중', graffiti: 'coffee break...' },
+            2: { src: 'media/cam02-living-room.mp4', title: 'CAM-02 [LIVING ROOM] : 고양이와 춤추는 중', status: '고양이와 춤추는 중', graffiti: 'dancing with the cat...' },
+            3: { src: 'img/2.gif', title: 'CAM-03 [FRONT DOOR] : 문틈에서 기다리는 중', status: '문틈에서 주인 발소리를 기다리는 중', graffiti: 'when are you coming?' }
+        };
+
+        document.querySelectorAll('[data-cam-preview]').forEach(preview => {
+            const feed = CAM_FEEDS[preview.dataset.camPreview];
+            if (feed) preview.src = feed.src;
+        });
 
         function setCctvFeed(src) {
             if (src.endsWith('.mp4')) {
@@ -1495,24 +1506,24 @@
             }, 180);
         }
 
-        function openSpookCamModal(imgSrc, title, statusDesc = '실시간 감시 중', graffitiText = 'spookmate is watching...') {
-            if (!title) {
-                title = imgSrc;
-                imgSrc = 'img/2.gif';
-            }
+        function showCamFeed(camId) {
+            const feed = CAM_FEEDS[camId] || CAM_FEEDS[1];
+            cctvCamTitle.textContent = feed.title;
+            setCctvFeed(feed.src);
+            if (camStatusText) camStatusText.querySelector('span').textContent = feed.status;
+            if (camGraffiti) camGraffiti.textContent = feed.graffiti;
+            flashCctvFeed();
+            return feed;
+        }
 
-            pushToDataLayer('cctv_view', { cam_title: title, cam_src: imgSrc });
-
-            cctvCamTitle.textContent = title;
-            setCctvFeed(imgSrc);
-            if (camStatusText) camStatusText.innerHTML = `활동: <span class="text-amber-300">${statusDesc}</span>`;
-            if (camGraffiti) camGraffiti.textContent = graffitiText;
+        function openSpookCamModal(camId) {
+            const feed = showCamFeed(camId);
+            pushToDataLayer('cctv_view', { cam_title: feed.title, cam_src: feed.src });
 
             cctvModal.classList.remove('hidden');
             cctvModal.classList.add('flex');
             document.body.style.overflow = 'hidden';
 
-            flashCctvFeed();
         }
 
         function closeCctvModal() {
@@ -1522,14 +1533,9 @@
             document.body.style.overflow = '';
         }
 
-        function switchCamFeed(title, imgSrc, statusDesc, graffitiText) {
-            pushToDataLayer('cctv_switch', { cam_title: title, cam_src: imgSrc });
-            cctvCamTitle.textContent = title;
-            setCctvFeed(imgSrc);
-            if (camStatusText) camStatusText.innerHTML = `활동: <span class="text-amber-300">${statusDesc}</span>`;
-            if (camGraffiti) camGraffiti.textContent = graffitiText;
-
-            flashCctvFeed();
+        function switchCamFeed(camId) {
+            const feed = showCamFeed(camId);
+            pushToDataLayer('cctv_switch', { cam_title: feed.title, cam_src: feed.src });
         }
 
         function yellAtYokai() {
