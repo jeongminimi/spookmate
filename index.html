@@ -311,12 +311,6 @@
             text-align: center;
         }
 
-        #zoom-image-description {
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
         #sin-yokai-quote,
         #sin-yokai-alt,
         #sin-yokai-action,
@@ -516,35 +510,75 @@
             }
 
             #yokai-chat-modal > div {
-                width: 100%;
-                max-width: 30rem;
+                box-sizing: border-box;
+                width: min(22rem, calc(100vw - 1.5rem));
+                max-width: calc(100vw - 1.5rem);
+                min-width: 0;
                 height: min(36rem, calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 1rem));
                 min-height: 0;
                 border-radius: 0.875rem;
+                overflow: hidden;
+            }
+
+            #yokai-chat-modal > div > * {
+                box-sizing: border-box;
+                min-width: 0;
+                max-width: 100%;
             }
 
             #yokai-chat-modal > div > div:first-child {
                 flex: none;
                 min-width: 0;
+                width: 100%;
+                gap: 0.5rem;
+                padding: 0.625rem 0.5rem;
             }
 
             #yokai-chat-modal > div > div:first-child > div:first-child {
+                flex: 1 1 0%;
                 min-width: 0;
+            }
+
+            #yokai-chat-modal > div > div:first-child > div:first-child > div:last-child {
+                flex: 1 1 0%;
+                min-width: 0;
+            }
+
+            #yokai-chat-modal > div > div:first-child > div:first-child > div:last-child > div:first-child {
+                min-width: 0;
+                flex-wrap: wrap;
+                gap: 0.25rem;
+            }
+
+            #chat-modal-pole {
+                max-width: 5rem;
+                white-space: normal;
+                overflow-wrap: anywhere;
+                text-align: center;
             }
 
             #chat-modal-title,
             #chat-modal-sub {
+                min-width: 0;
                 overflow-wrap: anywhere;
             }
 
             #chat-messages-container {
                 flex: 1 1 0%;
+                width: 100%;
                 min-height: 0;
                 overflow-y: auto;
                 overscroll-behavior: contain;
                 -webkit-overflow-scrolling: touch;
                 font-size: clamp(0.75rem, 3.5vw, 0.875rem);
                 line-height: 1.5;
+            }
+
+            #chat-messages-container > div {
+                box-sizing: border-box;
+                max-width: 88%;
+                min-width: 0;
+                overflow-wrap: anywhere;
             }
 
             #yokai-chat-modal > div > div:last-child {
@@ -554,13 +588,17 @@
                 flex: 0 0 auto;
                 padding-bottom: calc(0.625rem + env(safe-area-inset-bottom));
                 background: rgb(0 0 0 / 0.96);
+                width: 100%;
             }
 
             #chat-form {
+                display: flex;
+                width: 100%;
                 min-width: 0;
             }
 
             #chat-user-input {
+                flex: 1 1 0%;
                 min-width: 0;
                 padding-left: 0.7rem;
                 padding-right: 0.7rem;
@@ -568,9 +606,15 @@
             }
 
             #chat-submit-btn {
-                flex: none;
+                flex: 0 0 auto;
+                white-space: nowrap;
                 padding-left: 0.75rem;
                 padding-right: 0.75rem;
+            }
+
+            #chat-status {
+                max-width: 100%;
+                overflow-wrap: anywhere;
             }
 
             #cctv-modal {
@@ -1077,7 +1121,6 @@
                 class="max-w-full max-h-[85vh] object-contain rounded-2xl border-2 border-spook-gold shadow-[0_0_60px_rgba(212,163,89,0.5)]">
             <div id="zoom-image-caption" class="hidden mt-3 px-2">
                 <p id="zoom-image-name" class="text-white font-bold text-sm"></p>
-                <p id="zoom-image-description" class="mt-1 text-gray-300 text-xs"></p>
             </div>
             <span class="text-gray-400 font-mono text-xs mt-3 select-none flex items-center gap-1.5">
                 <i data-lucide="x" class="w-4 h-4"></i> 화면 아무 곳이나 누르면 닫힙니다.
@@ -1366,7 +1409,7 @@
                         card.classList.add('cursor-pointer', 'hover:-translate-y-1');
                         card.onclick = () => {
                             pushToDataLayer('compendium_card_click', { yokai_id: yokai.id, yokai_name: yokai.name });
-                            openZoomImage(yokai.image_url, yokai.name, yokai.micro_action || yokai.story || yokai.narrative_dialogue || '');
+                            openZoomImage(yokai.image_url, yokai.name);
                         };
                     } else {
                         art.textContent = unlocked ? '이미지 확인 중' : '🔒';
@@ -1538,14 +1581,12 @@
         const imageZoomModal = document.getElementById('image-zoom-modal');
         const zoomedImage = document.getElementById('zoomed-image');
 
-        function openZoomImage(imgSrc, yokaiName = '', yokaiDescription = '') {
+        function openZoomImage(imgSrc, yokaiName = '') {
             zoomedImage.src = imgSrc;
             const caption = document.getElementById('zoom-image-caption');
             const imageName = document.getElementById('zoom-image-name');
-            const imageDescription = document.getElementById('zoom-image-description');
             imageName.textContent = yokaiName;
-            imageDescription.textContent = String(yokaiDescription).replace(/\s+/g, ' ').trim();
-            caption.classList.toggle('hidden', !yokaiName && !yokaiDescription);
+            caption.classList.toggle('hidden', !yokaiName);
             imageZoomModal.classList.remove('hidden');
             imageZoomModal.classList.add('flex');
         }
