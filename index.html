@@ -306,6 +306,17 @@
             object-fit: contain;
         }
 
+        #zoom-image-caption {
+            width: min(90vw, 56rem);
+            text-align: center;
+        }
+
+        #zoom-image-description {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
         #sin-yokai-quote,
         #sin-yokai-alt,
         #sin-yokai-action,
@@ -527,13 +538,22 @@
             }
 
             #chat-messages-container {
+                flex: 1 1 0%;
                 min-height: 0;
+                overflow-y: auto;
+                overscroll-behavior: contain;
+                -webkit-overflow-scrolling: touch;
                 font-size: clamp(0.75rem, 3.5vw, 0.875rem);
                 line-height: 1.5;
             }
 
             #yokai-chat-modal > div > div:last-child {
-                flex: none;
+                position: sticky;
+                bottom: 0;
+                z-index: 2;
+                flex: 0 0 auto;
+                padding-bottom: calc(0.625rem + env(safe-area-inset-bottom));
+                background: rgb(0 0 0 / 0.96);
             }
 
             #chat-form {
@@ -593,10 +613,14 @@
             }
 
             #cctv-modal > div > div:nth-child(2) > div:first-of-type {
-                top: 0.5rem;
+                top: auto;
+                right: auto;
+                bottom: 0.5rem;
                 left: 0.5rem;
                 width: min(68%, 18rem);
                 max-width: calc(100% - 1rem);
+                max-height: 48%;
+                overflow-y: auto;
                 padding: 0.45rem 0.55rem;
                 font-size: clamp(0.55rem, 2.5vw, 0.7rem);
                 line-height: 1.35;
@@ -1051,6 +1075,10 @@
         <div class="relative max-w-4xl max-h-[90vh] flex flex-col items-center">
             <img id="zoomed-image" src="" alt="확대된 요괴 일러스트"
                 class="max-w-full max-h-[85vh] object-contain rounded-2xl border-2 border-spook-gold shadow-[0_0_60px_rgba(212,163,89,0.5)]">
+            <div id="zoom-image-caption" class="hidden mt-3 px-2">
+                <p id="zoom-image-name" class="text-white font-bold text-sm"></p>
+                <p id="zoom-image-description" class="mt-1 text-gray-300 text-xs"></p>
+            </div>
             <span class="text-gray-400 font-mono text-xs mt-3 select-none flex items-center gap-1.5">
                 <i data-lucide="x" class="w-4 h-4"></i> 화면 아무 곳이나 누르면 닫힙니다.
             </span>
@@ -1338,7 +1366,7 @@
                         card.classList.add('cursor-pointer', 'hover:-translate-y-1');
                         card.onclick = () => {
                             pushToDataLayer('compendium_card_click', { yokai_id: yokai.id, yokai_name: yokai.name });
-                            openZoomImage(yokai.image_url);
+                            openZoomImage(yokai.image_url, yokai.name, yokai.micro_action || yokai.story || yokai.narrative_dialogue || '');
                         };
                     } else {
                         art.textContent = unlocked ? '이미지 확인 중' : '🔒';
@@ -1510,8 +1538,14 @@
         const imageZoomModal = document.getElementById('image-zoom-modal');
         const zoomedImage = document.getElementById('zoomed-image');
 
-        function openZoomImage(imgSrc) {
+        function openZoomImage(imgSrc, yokaiName = '', yokaiDescription = '') {
             zoomedImage.src = imgSrc;
+            const caption = document.getElementById('zoom-image-caption');
+            const imageName = document.getElementById('zoom-image-name');
+            const imageDescription = document.getElementById('zoom-image-description');
+            imageName.textContent = yokaiName;
+            imageDescription.textContent = String(yokaiDescription).replace(/\s+/g, ' ').trim();
+            caption.classList.toggle('hidden', !yokaiName && !yokaiDescription);
             imageZoomModal.classList.remove('hidden');
             imageZoomModal.classList.add('flex');
         }
