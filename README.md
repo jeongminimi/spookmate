@@ -4,16 +4,10 @@
 > 
 > 로버트 플루치크(Robert Plutchik)의 24대 혼합정서 모델과 인지행동치료(CBT) 프레임워크를 결합한 **다크코미디 감정 외재화 & 73종 요괴 수집 웹 서비스**
 
-&lt;p align=&quot;center&quot;&gt;
-  &lt;img src=&quot;img/contract_modal.png&quot; width=&quot;80%&quot; alt=&quot;SpookMate Contract Modal&quot; /&gt;
-&lt;/p&gt;
-
-
-
-👻 SpookMate
-"Suffering in silence will eat you alive. Toss the mental junk that wore you down today as a late-night snack to your monster roommate."
-
-A dark-comedy mental care web app for emotional externalization and 73-Yokai collection, powered by Plutchik's 24-Dyad emotion model and CBT principles.
+>**"Suffering in silence will eat you alive. Toss the mental junk that wore you down today as a late-night snack to your monster roommate."
+>A dark-comedy mental care web app for emotional externalization and 73-Yokai collection, powered by Plutchik's 24-Dyad emotion model and CBT principles.**
+>
+>
 ---
 
 ## 📌 1. 프로젝트 개요 (Overview)
