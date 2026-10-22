@@ -4,6 +4,10 @@
 > 
 > 로버트 플루치크(Robert Plutchik)의 24대 혼합정서 모델과 인지행동치료(CBT) 프레임워크를 결합한 **다크코미디 감정 외재화 & 73종 요괴 수집 웹 서비스**
 
+&lt;p align=&quot;center&quot;&gt;
+  &lt;img src=&quot;docs/images/01_main_calendar.png&quot; width=&quot;100%&quot; alt=&quot;SpookMate Main View&quot; /&gt;
+&lt;/p&gt;
+
 ---
 
 ## 📌 1. 프로젝트 개요 (Overview)
@@ -44,17 +48,50 @@
 
 ---
 
-## ✨ 3. 핵심 기능 (Key Features)
+## ✨ 3. 핵심 기능 및 구현 화면 (Key Features & UI)
 
-| 기능 분류 | 세부 기능 및 인터랙션 |
-| :--- | :--- |
-| **감정 배출 & 먹방 연출** | • **WHO EATS YOUR SINS?**: 일기 텍스트 제출 시 삼각함수($\sin, \cos$) 기반의 궤적 연산을 통해 글자가 파편화되어 요괴 입속으로 빨려 들어가는 순수 CSS/JS 물리 연출 |
-| **3단계 요괴 소환 시퀀스** | • 중앙 글리치 진동(`animate-summon-glitch`) ➔ 1.3초 후 좌측 3:4 포스터 비율 이동 및 안착 ➔ 우측 츤데레 맞장구 대사 및 1분 신체 미션 표출<br>• 일러스트 클릭 시 전체 화면 라이트박스 줌 뷰어 지원 |
-| **방구석 룸메 페르소나 맞장구** | • 상시 4대 룸메이트(도깨비, 구미호, 어둑시니, 거구귀) 기반 Gemini API 실시간 연동<br>• 네트워크 지연이나 API 장애 시에도 로컬 공감 맞장구를 출력하는 Fallback 엔진 내장 |
-| **SPOOK OF FEELINGS** | • 플루치크 상극 정서 4대 축 요괴(화차-분노, 백목귀-공포, 금와도깨비-환희, 손각시-우울)와의 1:1 몰입형 티키타카 대화 모듈 |
-| **SPOOK-CAM (방구석 룸메 펫캠)** | • CAM 1(주방), CAM 2(침대), CAM 3(현관) 3채널 실시간 GIF 피드 스위칭<br>• 화면 색상 반전/대비 글리치 연출, 마이크 호통치기 및 위로 사탕 간식 주기 인터랙션 |
-| **73종 월간 요괴도감 (Compendium)** | • 아시아 8개국 73종 카드 그리드 렌더링 (해금 컬러 카드 vs 미해금 실루엣 자물쇠)<br>• 매월 1일 자정(00:00) 자동 리셋 로직(`spookmate_compendium_cycle`) 및 D-Day 카운트다운 |
-| **글로벌 UX & 동거 계약서** | • 배터리 방전 콘셉트의 손전등(후레쉬) 마우스 추적 래디얼 비네팅 (8초 자동 소등 타이머)<br>• 첫 진입 시 입주 계약 날짜 및 닉네임 설정 모달 (LocalStorage + Supabase DB 실시간 동기화) |
+### ① 룸메이트 동거 계약서 캘린더 팝업 & 메인 홈 대시보드
+* **동거 계약서 모달**: 최초 접속 시 입주자 닉네임을 설정하고 인터랙티브 캘린더 그리드를 통해 입주 기준 일자를 선택합니다. (LocalStorage + Supabase DB 실시간 동기화)
+* **글로벌 UX**: 마우스 좌표를 추적하는 손전등(후레쉬) 래디얼 비네팅 효과 (배터리 방전 콘셉트로 8초 후 자동 소등 타이머 작동)
+
+&lt;p align=&quot;center&quot;&gt;
+  &lt;img src=&quot;docs/images/01_contract_modal.png&quot; width=&quot;48%&quot; alt=&quot;동거 계약서 모달&quot; /&gt;
+  &lt;img src=&quot;docs/images/01_main_calendar.png&quot; width=&quot;48%&quot; alt=&quot;메인 캘린더 화면&quot; /&gt;
+&lt;/p&gt;
+
+### ② 감정 일기 작성 & 먹방 애니메이션 (WHO EATS SINS)
+* **감정 외재화 제출**: 오늘 겪은 일이나 억울함/불안 텍스트를 입력창에 자유롭게 작성합니다.
+* **텍스트 분쇄 물리 연출**: 제출 시 삼각함수($\sin, \cos$) 기반의 궤적 연산을 통해 글자가 파편화(Text Shards)되어 요괴 입속으로 빨려 들어가는 애니메이션을 순수 CSS/JS로 렌더링합니다.
+
+&lt;p align=&quot;center&quot;&gt;
+  &lt;img src=&quot;docs/images/02_diary_input.png&quot; width=&quot;80%&quot; alt=&quot;감정 일기 작성창&quot; /&gt;
+&lt;/p&gt;
+
+### ③ 3단계 요괴 소환 시퀀스 & CBT·신체 처방 모달
+* **글리치 소환 시퀀스**: 중앙 글리치 진동(`animate-summon-glitch`) ➔ 1.3초 후 좌측 3:4 포스터 비율 이동 및 안착 ➔ 우측 츤데레 맞장구 대사 및 1분 신체 미션 표출
+* **소매틱 처방**: 레몬짜기 PMR 이완법, 착지 호흡법 등 즉각 실행 가능한 `[SOMATIC MISSION]` 안내
+* **라이트박스 뷰어**: 고증 일러스트 클릭 시 전체 화면 확대 모달 제공
+
+&lt;p align=&quot;center&quot;&gt;
+  &lt;img src=&quot;docs/images/03_summon_result.png&quot; width=&quot;80%&quot; alt=&quot;요괴 소환 결과 및 처방&quot; /&gt;
+&lt;/p&gt;
+
+### ④ 73종 월간 요괴도감 (Monthly Spook Compendium)
+* **도감 수집 게이미피케이션**: 해금된 컬러 카드와 미해금 흑백 실루엣 자물쇠 카드가 격자형으로 배치된 그리드 뷰
+* **월간 리셋 엔진**: 상단 실시간 수집 진행도(%) 및 매월 1일 자정(00:00) 자동 리셋 로직(`spookmate_compendium_cycle`) 및 D-Day 카운트다운
+
+&lt;p align=&quot;center&quot;&gt;
+  &lt;img src=&quot;docs/images/04_compendium_archive.png&quot; width=&quot;80%&quot; alt=&quot;월간 요괴도감 아카이브&quot; /&gt;
+&lt;/p&gt;
+
+### ⑤ 실시간 룸메캠 SPOOK-CAM & SPOOK OF FEELINGS
+* **SPOOK-CAM**: CAM 1(주방), CAM 2(거실), CAM 3(현관) 3채널 실시간 GIF 피드 스위칭, 화면 색상 반전 글리치 연출, 마이크 호통치기 및 위로 사탕 간식 주기 인터랙션
+* **SPOOK OF FEELINGS**: 4대 상극 정서 요괴(호려정-분노, 유키온나-불안, 삼신할미-환희, 좌식와라시-안도)와의 1:1 몰입형 티키타카 대화 모듈
+
+&lt;p align=&quot;center&quot;&gt;
+  &lt;img src=&quot;docs/images/05_spook_cam.png&quot; width=&quot;48%&quot; alt=&quot;실시간 룸메캠&quot; /&gt;
+  &lt;img src=&quot;docs/images/06_spook_feelings.png&quot; width=&quot;48%&quot; alt=&quot;상극 요괴 대화&quot; /&gt;
+&lt;/p&gt;
 
 ---
 
@@ -112,6 +149,10 @@ $$Distance = \sqrt{(V_{user} - V_{yokai})^2 + (A_{user} - A_{yokai})^2}$$
 * **동적 중복 배제 (Deduplication)**: Google Sheets의 기존 적재 목록을 읽어 AI 프롬프트의 `[중복 제외 목록]`에 동적으로 주입하여 중복 수집 100% 방지
 * **고신뢰 출처 필터링**: Tavily Search 노드의 `Exclude Domains`에 `wikipedia.org`, `namu.wiki`를 등록하여 일반 백과사전을 배제하고, 전문 민담 도감·박물관 아카이브·신화 포털 URL만 수집
 * **무중단 파싱 엔진**: AI 응답에 서술형 텍스트가 혼입되더라도 정규식 추출 Code 노드를 거쳐 정형 JSON 배열만 안전하게 추출하여 파이프라인 중단 방지
+
+&lt;p align=&quot;center&quot;&gt;
+  &lt;img src=&quot;docs/images/07_n8n_pipeline.png&quot; width=&quot;85%&quot; alt=&quot;n8n 자동화 파이프라인 캔버스&quot; /&gt;
+&lt;/p&gt;
 
 ### ② 국가별 전통 화풍 고증 프롬프트 엔지니어링 (73종 에셋)
 원작 설화의 문화적 고증과 시각적 몰입감을 확보하기 위해 각 국가의 전통 예술 양식을 분석하고 전용 프롬프트를 직접 설계하여 73종 요괴 이미지를 생성했습니다.
@@ -179,6 +220,16 @@ $$Distance = \sqrt{(V_{user} - V_{yokai})^2 + (A_{user} - A_{yokai})^2}$$
 spookmate/
 ├── backend/
 │   └── requirements.txt            # 백엔드 의존성 패키지 명세
+├── docs/
+│   └── images/                     # README 삽입용 구현 화면 캡처 이미지
+│       ├── 01_contract_modal.png
+│       ├── 01_main_calendar.png
+│       ├── 02_diary_input.png
+│       ├── 03_summon_result.png
+│       ├── 04_compendium_archive.png
+│       ├── 05_spook_cam.png
+│       ├── 06_spook_feelings.png
+│       └── 07_n8n_pipeline.png
 ├── img/                            # 73종 요괴 고증 일러스트 및 UI 에셋
 ├── media/                          # 펫캠용 GIF (1.gif~3.gif) 및 동영상 에셋
 ├── migrations/                     # Supabase PostgreSQL 마이그레이션 SQL
