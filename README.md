@@ -55,8 +55,6 @@
 * **글로벌 UX**: 마우스 좌표를 추적하는 손전등(후레쉬) 래디얼 비네팅 효과 (배터리 방전 콘셉트로 8초 후 자동 소등 타이머 작동)
 
 <img width="501" height="758" alt="contract_modal" src="https://github.com/user-attachments/assets/16a222f0-b3c5-422f-ac11-6a548cfcf5b3" />
-<img width="942" height="759" alt="FIND MY SPOOKMATE" src="https://github.com/user-attachments/assets/e118c557-b73e-471a-a324-82eabbb8054e" /><img width="844" height="602" alt="spook_cam" src="https://github.com/user-attachments/assets/69946019-23fa-4f63-8090-fec054c1e13c" />
-
 
 
 ### ② 감정 일기 작성 & 먹방 애니메이션 (WHO EATS SINS)
@@ -79,7 +77,7 @@
 
 <img width="922" height="693" alt="spook_feelings" src="https://github.com/user-attachments/assets/58080c3a-f472-4898-abff-0da7a985006b" />
 
-  
+
 * **SPOOK-CAM**: CAM 1(주방), CAM 2(거실), CAM 3(현관) 3채널 실시간 GIF 피드 스위칭 및 인터랙션
 
 <img width="844" height="602" alt="spook_cam" src="https://github.com/user-attachments/assets/a930d74c-be15-4464-b759-fc983d0a3d03" />
@@ -90,7 +88,6 @@
 * **월간 리셋 엔진**: 상단 실시간 수집 진행도(%) 및 매월 1일 자정(00:00) 자동 리셋 로직(`spookmate_compendium_cycle`) 및 D-Day 카운트다운
 
 <img width="856" height="839" alt="compendium_archive" src="https://github.com/user-attachments/assets/123c4dac-77f7-4489-854d-04d7b84bf5f2" />
-
 
 
 ---
