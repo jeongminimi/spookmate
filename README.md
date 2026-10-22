@@ -54,39 +54,44 @@
 * **동거 계약서 모달**: 최초 접속 시 입주자 닉네임을 설정하고 인터랙티브 캘린더 그리드를 통해 입주 기준 일자를 선택합니다. (LocalStorage + Supabase DB 실시간 동기화)
 * **글로벌 UX**: 마우스 좌표를 추적하는 손전등(후레쉬) 래디얼 비네팅 효과 (배터리 방전 콘셉트로 8초 후 자동 소등 타이머 작동)
 
-&lt;p align=&quot;center&quot;&gt;
-  &lt;img src=&quot;img/contract_modal.png&quot; width=&quot;48%&quot; alt=&quot;동거 계약서 모달&quot; /&gt;
-  &lt;img src=&quot;img/FIND%20MY%20SPOOKMATE.png&quot; width=&quot;48%&quot; alt=&quot;FIND MY SPOOKMATE&quot; /&gt;
-&lt;/p&gt;
+<img width="501" height="758" alt="contract_modal" src="https://github.com/user-attachments/assets/16a222f0-b3c5-422f-ac11-6a548cfcf5b3" />
+<img width="942" height="759" alt="FIND MY SPOOKMATE" src="https://github.com/user-attachments/assets/e118c557-b73e-471a-a324-82eabbb8054e" /><img width="844" height="602" alt="spook_cam" src="https://github.com/user-attachments/assets/69946019-23fa-4f63-8090-fec054c1e13c" />
+
+
 
 ### ② 감정 일기 작성 & 먹방 애니메이션 (WHO EATS SINS)
 * **감정 외재화 제출**: 오늘 겪은 일이나 억울함/불안 텍스트를 입력창에 자유롭게 작성합니다.
 * **텍스트 분쇄 물리 연출**: 제출 시 삼각함수($\sin, \cos$) 기반의 궤적 연산을 통해 글자가 파편화(Text Shards)되어 요괴 입속으로 빨려 들어가는 애니메이션을 순수 CSS/JS로 렌더링합니다.
 
-&lt;p align=&quot;center&quot;&gt;
-  &lt;img src=&quot;img/diary_input.png&quot; width=&quot;80%&quot; alt=&quot;감정 일기 작성창&quot; /&gt;
-&lt;/p&gt;
+<img width="898" height="588" alt="diary_input" src="https://github.com/user-attachments/assets/491ed86a-91f3-498e-9af0-18cd7271e012" />
+
 
 ### ③ 3단계 요괴 소환 시퀀스 & CBT·신체 처방 모달
 * **글리치 소환 시퀀스**: 중앙 글리치 진동(`animate-summon-glitch`) ➔ 1.3초 후 좌측 3:4 포스터 비율 이동 및 안착 ➔ 우측 츤데레 맞장구 대사 및 1분 신체 미션 표출
 * **소매틱 처방**: 레몬짜기 PMR 이완법, 착지 호흡법 등 즉각 실행 가능한 `[SOMATIC MISSION]` 안내
 * **라이트박스 뷰어**: 고증 일러스트 클릭 시 전체 화면 확대 모달 제공
 
-&lt;p align=&quot;center&quot;&gt;
-  &lt;img src=&quot;img/summon_result.png&quot; width=&quot;80%&quot; alt=&quot;요괴 소환 결과 및 처방&quot; /&gt;
-&lt;/p&gt;
+<img width="872" height="572" alt="summon_result" src="https://github.com/user-attachments/assets/bdae041a-963b-4467-8c14-9dc5d4cd8036" />
+
 
 ### ④ SPOOK OF FEELINGS & 실시간 룸메캠
 * **SPOOK OF FEELINGS**: 4대 상극 정서 요괴(호려정-분노, 유키온나-불안, 삼신할미-환희, 좌식와라시-안도)와의 1:1 몰입형 티키타카 대화 모듈
+
+<img width="922" height="693" alt="spook_feelings" src="https://github.com/user-attachments/assets/58080c3a-f472-4898-abff-0da7a985006b" />
+
+  
 * **SPOOK-CAM**: CAM 1(주방), CAM 2(거실), CAM 3(현관) 3채널 실시간 GIF 피드 스위칭 및 인터랙션
 
-&lt;p align=&quot;center&quot;&gt;
-  &lt;img src=&quot;img/spook_feelings.png&quot; width=&quot;80%&quot; alt=&quot;상극 요괴 대화&quot; /&gt;
-&lt;/p&gt;
+<img width="844" height="602" alt="spook_cam" src="https://github.com/user-attachments/assets/a930d74c-be15-4464-b759-fc983d0a3d03" />
+
 
 ### ⑤ 73종 월간 요괴도감 (Monthly Spook Compendium)
 * **도감 수집 게이미피케이션**: 해금된 컬러 카드와 미해금 흑백 실루엣 자물쇠 카드가 격자형으로 배치된 그리드 뷰
 * **월간 리셋 엔진**: 상단 실시간 수집 진행도(%) 및 매월 1일 자정(00:00) 자동 리셋 로직(`spookmate_compendium_cycle`) 및 D-Day 카운트다운
+
+<img width="856" height="839" alt="compendium_archive" src="https://github.com/user-attachments/assets/123c4dac-77f7-4489-854d-04d7b84bf5f2" />
+
+
 
 ---
 
