@@ -54,7 +54,9 @@
 * **동거 계약서 모달**: 최초 접속 시 입주자 닉네임을 설정하고 인터랙티브 캘린더 그리드를 통해 입주 기준 일자를 선택합니다. (LocalStorage + Supabase DB 실시간 동기화)
   
 <img width="501" height="758" alt="contract_modal" src="https://github.com/user-attachments/assets/16a222f0-b3c5-422f-ac11-6a548cfcf5b3" />
-  
+
+
+
 * **글로벌 UX**: 마우스 좌표를 추적하는 손전등(후레쉬) 래디얼 비네팅 효과 (배터리 방전 콘셉트로 8초 후 자동 소등 타이머 작동)
 
 <img width="942" height="759" alt="FIND MY SPOOKMATE" src="https://github.com/user-attachments/assets/6f5400fe-3ffc-47e1-b4ec-ffcacfed9048" />
@@ -91,6 +93,8 @@
 * **월간 리셋 엔진**: 상단 실시간 수집 진행도(%) 및 매월 1일 자정(00:00) 자동 리셋 로직(`spookmate_compendium_cycle`) 및 D-Day 카운트다운
 
 <img width="856" height="839" alt="compendium_archive" src="https://github.com/user-attachments/assets/123c4dac-77f7-4489-854d-04d7b84bf5f2" />
+
+
 
 
 ---
